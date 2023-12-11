@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_ArmInit" Id="{2f1b91d8-ebd5-4b63-92d8-450fe3a94973}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK PUBLIC FB_ArmInit EXTENDS FB_MasterArmCtrlBase
+    <Declaration><![CDATA[// Brief: Master Arm Initialization
+FUNCTION_BLOCK PUBLIC FB_ArmInit EXTENDS FB_MasterArmCtrlBase
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
