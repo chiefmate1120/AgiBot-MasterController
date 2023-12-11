@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MasterStatus" Id="{3ac2ae6d-6666-445a-980a-7914313359ec}">
+    <Declaration><![CDATA[TYPE ST_MasterStatus :
+STRUCT
+	// state machine
+	m_armState:ARRAY[1..g_mArmNum] OF E_masterArmState;
+	
+	// index(0 to 4) of slave arm which is tele-linked to master arm
+	m_slaveArmIdx :ARRAY[1..g_mArmNum] OF INT;
+	
+	// grip angle
+	m_gripAngle:ARRAY[1..g_mArmNum] OF LREAL;
+	
+	// command arm pose in monitor
+	m_cmdArmPose :ARRAY[1..g_mArmNum] OF ST_Frame;
+	
+	// current arm pose in monitor
+	m_curArmPose:ARRAY[1..g_mArmNum] OF ST_Frame;
+	
+	// command arm twist[linear velocity; angular veloicty] in monitor
+	m_cmdArmTwist:ARRAY[1..g_mArmNum,1..6] OF LREAL;
+	
+	// current arm twist[linear velocity; angular veloicty] in monitor
+	m_curArmTwist:ARRAY[1..g_mArmNum,1..6] OF LREAL;
+	
+	// joint position compute with motor encoder
+	m_curMotorPos :ARRAY[1..g_mJntNum] OF LREAL;
+	
+	// joint position compute with link/abs encoder
+	m_curLinkPos :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// target joint position 
+	m_cmdJntPos :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// current joint position 
+	m_curJntPos :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// target joint velocity 
+	m_cmdJntVel :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// current joint position 
+	m_curJntVel :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// command joint torque 
+	m_cmdJntTrq :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+	// current joint torque 
+	m_curJntTrq :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

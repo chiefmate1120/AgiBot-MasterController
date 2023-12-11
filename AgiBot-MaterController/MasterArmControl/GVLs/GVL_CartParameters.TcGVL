@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_CartParameters" Id="{c84079e2-419b-45d5-aeb0-1f4f362f3cde}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	
+	
+	
+	//car
+(*	//tr_1:lreal:=deg2rad(0.556*0.001/360);  tr_2:lreal:=deg2rad(0.19*0.001/360);	
+	line_enconder_car:ARRAY[1..4] OF DINT:=[line_1,line_1,line_1,line_1];
+	transmission_ratio_car:ARRAY[1..4] OF LREAL:=[2*pi/0.0004682,3317.76,2*pi/0.0004682,1.5*138.0/5*2*pi/0.004];//2*pi/0.00014493];
+	line_enconder_car_sec:ARRAY[1..4] OF DINT:=[line_2,line_2,line_2,line_2];
+	transmission_ratio_car_sec:ARRAY[1..4] OF lreal:=[1,1,1,1];
+	Line_Resolution_car:LREAL:=0.001*2/(EXPT(2,13));
+	
+	rad_12:LREAL:=deg2rad(12);  rad_80:LREAL:=deg2rad(80);  	rad_20:LREAL:=deg2rad(20);   rad_7:LREAL:=deg2rad(7); 
+	rad_31:LREAL:=deg2rad(31.6483);rad_2:LREAL:=deg2rad(2.6183);
+	//vel_max_car:ARRAY[1..4] OF LREAL:=[0.048,rad_12,0.032,0.025];
+	vel_max_car:ARRAY[1..4] OF LREAL:=[0.048*0.3,rad_12*0.2,0.032*0.3,0.025*0.3];
+	
+	//acc_max_car:ARRAY[1..4] OF LREAL:=[0.3,rad_80,0.2,0.15];
+	acc_max_car:ARRAY[1..4] OF LREAL:=[0.048*2,rad_12*2,0.032*2,0.025*2];
+	//***MODIFY-2022***旋转监视器极限位置修改
+	distance_min_car:ARRAY[1..4] OF LREAL:=[0,-rad_31,0,0];//[0.0065,-rad_73,0.029,0.004];
+	distance_max_car:ARRAY[1..4] OF LREAL:=[0.38,rad_2,0.240,0.20];//[0.3565,0,0.164,0.184];
+	
+	torque_constant_car:ARRAY[1..4] OF lreal:=[0.0292,0.0292,0.0292,0.0292];
+	torque_max_car:ARRAY[1..4] OF lreal:=[1000,1000,1000,1000];
+	//current_peak_car:ARRAY[1..4] OF LREAL:=[41200,41200,41200,41200];
+	current_peak_car:ARRAY[1..4] OF LREAL:=[3800*2,3800*2,3800*2,3800*2];
+	
+	transmition_efficiency_car:ARRAY[1..4] OF LREAL:=[0.69,0.28,0.69,0.24];
+	current_related_car:ARRAY[1..4] OF lreal:=[3800,3800,3800,3800];
+	
+	Car_relative_encoder_Offset:ARRAY[1..4] OF lreal;	
+	Car_Motion_direction:ARRAY[1..4] OF lreal;
+	Car_Absolute_encoder_direction:ARRAY[1..4] OF LREAL;
+	
+	length_second_encoder_resolution_car:ARRAY[1..4] OF LREAL:=[Line_Resolution_car,6.71/16777216,Line_Resolution_car,Line_Resolution_car];	
+	//length_second_encoder_car:ARRAY[1..4] OF LREAL:=[6.71,6.71,6.71,6.71];	
+	Car_Target_position_error:ARRAY[1..4] OF LREAL:=[0.001,1.0/57,0.001,0.001];*)
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

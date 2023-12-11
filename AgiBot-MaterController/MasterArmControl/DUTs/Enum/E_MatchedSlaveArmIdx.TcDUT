@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_MatchedSlaveArmIdx" Id="{4bff68be-f9ee-4383-8597-63c0b5507430}">
+    <Declaration><![CDATA[TYPE E_MatchedSlaveArmIdx :
+(
+	MatchedSlaveArmIdx_NULL := 0,
+	MatchedSlaveArmIdx_1 := 1,
+	MatchedSlaveArmIdx_2 := 2,
+	MatchedSlaveArmIdx_3 := 3,
+	MatchedSlaveArmIdx_4 := 4
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

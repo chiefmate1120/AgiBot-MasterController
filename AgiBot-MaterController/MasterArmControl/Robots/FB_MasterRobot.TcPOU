@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// arm shoulders frame in monitor
+	m_shoulderPose :ARRAY[1..2] OF ST_Frame;
+	
+	// master arms, responsible for arm kinematic and control
+	m_masterArms :ARRAY[1..2] OF FB_MasterArm;
+	
+	// current and las arm state
+	m_masterArmState:ARRAY[1..2] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Init];
+	m_lastMasterArmState:ARRAY[1..2] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Init];
+	
+	// index(1 to 4) of slave arm which is tele-linked to master arm
+	m_slaveArmIdx:ARRAY[1..2] OF E_MatchedSlaveArmIdx:=[MatchedSlaveArmIdx_NULL, MatchedSlaveArmIdx_null];
+	
+	// arm controller
+	m_armCtrl :I_MasterArmCtrl;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+]]></ST>
+    </Implementation>
+    <Method Name="Init" Id="{610a17f3-34c5-4e3c-bbbc-19f9c2f46946}">
+      <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
+	m_masterArms[i].Init(i);
+	m_masterArmState[i]:=MasterArmState_Init;
+	m_lastMasterArmState[i]:=MasterArmState_Init;
+	m_slaveArmIdx[i]:=MatchedSlaveArmIdx_NULL;
+END_FOR
+
+m_shoulderPose[1].m_pos[1]:= g_armShoulderDistance/2.0;
+m_shoulderPose[2].m_pos[1]:= -g_armShoulderDistance/2.0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{ed6f787a-4dc0-4602-b386-92a3c3880a23}">
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartStatus :ST_CartStatus;
+	
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// state machine transition
+stateMachine(i_cartStatus,i_slaveStatus);
+
+// update shoulder pose (wrt monitor)
+m_shoulderPose[1].m_rot:=rotY(m_shoulderPose[1].m_rot,i_cartStatus.m_monitorAngle);
+m_shoulderPose[2].m_rot:=rotY(m_shoulderPose[2].m_rot,i_cartStatus.m_monitorAngle);
+
+// update master arm kinematics
+FOR i:=1 TO g_mArmNum DO
+	m_masterArms[i].updateStatus();
+END_FOR
+
+// run controller
+m_armCtrl.run(m_shoulderPose,i_slaveStatus, m_masterArms);
+
+// update commands to drivers
+FOR i:=1 TO g_mArmNum DO
+	m_masterArms[i].updateCmds();
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stateMachine" Id="{b9cc8560-9309-49e3-93b5-28cb02b4f5cc}">
+      <Declaration><![CDATA[// state machine check and transit 
+METHOD PROTECTED stateMachine : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartStatus :ST_CartStatus;
+	
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterRobot">
+      <LineId Id="9" Count="0" />
+      <LineId Id="33" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.Init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.run">
+      <LineId Id="19" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.stateMachine">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

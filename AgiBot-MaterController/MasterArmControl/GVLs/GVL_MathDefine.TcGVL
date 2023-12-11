@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_MathDefine" Id="{7eb77e09-e6c3-483f-ae23-6f0bf731cf6b}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	g_smallNum :LREAL := 1E-8;
+	g_deg2Rad :LREAL := pi/180.0;
+	g_rad2Deg :LREAL := 180.0/pi;
+	g_eye3d :Mat3d:=[1, 0, 0,
+					 0, 1, 0,
+					 0, 0, 1];
+	g_zeorMat3d :Mat3d:=[9(0)];
+	g_zeroVec3d :Vec3d:= [3(0)];
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

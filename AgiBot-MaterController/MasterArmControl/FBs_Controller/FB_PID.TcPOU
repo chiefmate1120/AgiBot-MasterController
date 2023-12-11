@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_PID" Id="{13af37a5-afde-4218-b603-df919a6bc51a}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_PID
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// control parameters
+	m_kp:LREAL :=0.0;
+	m_kd:LREAL :=0.0;
+	m_ki:LREAL :=0.0;
+	m_integral:LREAL :=0.0;
+	m_kiLimit:LREAL :=0.0;
+	m_ctrlLimit:LREAL :=0.0;
+	m_cycleTime:LREAL :=0.0;
+	m_outPut:LREAL:=0;
+	
+	// error
+	m_err:LREAL:=0;
+	m_dErr:LREAL:=0;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{968a1b5a-3ae1-4c3a-bd6e-2d6d6b895cc4}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	// control parameters
+	i_cycleTime:LREAL :=0.0;
+	i_kp:LREAL :=0.0;
+	i_kd:LREAL :=0.0;
+	i_ki:LREAL :=0.0;
+	i_kiLimit:LREAL :=0.0;
+	i_ctrlLimit:LREAL :=0.0;
+
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_kp:=i_kp;
+m_kd :=i_kd;
+m_ki :=i_ki;
+m_integral :=0.0;
+m_err:=0;
+m_dErr:=0;
+m_kiLimit :=i_kiLimit;
+m_ctrlLimit :=i_ctrlLimit;
+m_cycleTime :=i_cycleTime;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{bd185292-c48e-412e-bf2f-1d5fedfd4e8b}">
+      <Declaration><![CDATA[METHOD PUBLIC reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_integral :=0.0;
+m_err:=0;
+m_dErr:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{d11028b2-89ed-4fa7-ab22-b7ce0daeda7b}">
+      <Declaration><![CDATA[METHOD run : LREAL
+VAR_INPUT
+	// command value
+	i_cmdQ:LREAL:=0;
+	
+	// current value
+	i_curQ:LREAL:=0;
+	
+	// command derivate value
+	i_cmdDq:LREAL:=0;
+	
+	// current derivate value
+	i_curDq:LREAL:=0;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_err := i_cmdQ-i_curQ;
+m_dErr := i_cmdDQ-i_curDq;
+
+// integral
+m_integral := m_integral + m_ki * m_err * m_cycleTime;
+m_integral := LIMIT(-m_kiLimit, m_integral, m_kiLimit);
+
+// total output
+m_outPut :=m_kp*m_err+m_kd*m_dErr + m_integral;
+run:=LIMIT(-m_ctrlLimit, m_outPut, m_ctrlLimit);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_PID">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PID.init">
+      <LineId Id="6" Count="3" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PID.reset">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_PID.run">
+      <LineId Id="18" Count="10" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

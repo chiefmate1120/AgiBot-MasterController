@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MAIN" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	// flag to init robot
+	g_robotInit :BOOL :=FALSE;
+	
+	// master robot
+	g_masterRobot:FB_MasterRobot;
+	
+	// master robot information, export to other task or device
+	m_masterStatus AT %Q* :ST_MasterStatus;
+	
+	// cart information, import from other task
+	m_cartStatus AT %I*:ST_CartStatus;
+	
+	// slave robot information, import from other device
+	m_slaveStatus AT %I*:ST_SlaveStatus;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+IF g_robotInit =FALSE THEN
+	g_masterRobot.Init();
+	g_robotInit:=TRUE;
+END_IF
+
+g_masterRobot.run(m_cartStatus,m_slaveStatus);
+]]></ST>
+    </Implementation>
+    <LineIds Name="MAIN">
+      <LineId Id="30" Count="1" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

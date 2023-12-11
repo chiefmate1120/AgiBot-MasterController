@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="cot" Id="{b1447afa-f0f1-4b0a-b52c-db57e7ce69c7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION cot : lreal
+VAR_INPUT
+	i_angle:LREAL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[cot:=COS(i_angle)/SIN(i_angle);]]></ST>
+    </Implementation>
+    <LineIds Name="cot">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

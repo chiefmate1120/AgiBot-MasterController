@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MotorInputs" Id="{e44e69b4-1010-4dc2-83a5-4bfdea7e970d}">
+    <Declaration><![CDATA[TYPE ST_MotorInputs:
+STRUCT
+	m_driverError:UDINT;
+	m_statusWord:UINT;
+	
+	// motor/relative encoder from IO
+	m_motorEncoder :DINT;
+	
+	// link/absolute encoder form IO
+	m_linkEncoder :DINT;
+	
+	// motor current from IO
+	m_current : DINT;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

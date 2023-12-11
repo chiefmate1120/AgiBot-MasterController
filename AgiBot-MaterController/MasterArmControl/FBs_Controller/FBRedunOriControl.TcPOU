@@ -1,0 +1,360 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FBRedunOriControl" Id="{cb173423-0217-4a8c-9780-5fd490586ac5}" SpecialFunc="None">
+    <Declaration><![CDATA[// Author: Feijian Ni
+// Date: 2023.11.22
+FUNCTION_BLOCK FBRedunOriControl
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//TODO: move to GVLs 
+	// control paramters for redundant joint4 position control
+	m_redunJntKp: LREAL:=1;
+	m_redunJntKd:LREAL:=0.1;
+	m_redunJntKi:LREAL:=1;
+	m_redunJntKiLimit: LREAL:=500;
+	m_redunJntCtrlLimit:LREAL:=1000;
+	m_jntTargetPosLpfCutoffFreq:LREAL:=10;
+	m_curJntVelLpfCutoffFreq:LREAL:=30;
+
+	// max command joint velocity
+	m_maxJntVel:LREAL:= deg2rad(30);
+	
+	// filter for target joint position
+	m_cmdPosLpf:ARRAY[1..2] OF FB_LowPassFilter;
+	
+	// final target position of joint4 in motor (not DH , same for blow defination) 
+	m_targetJntPos:ARRAY[1..2] OF LREAL;
+	
+	// position tracking error
+	m_posErr:ARRAY[1..2] OF LREAL;
+	
+	// command joint4 position and veloicty in motor for next cycle
+	m_cmdJntPos:ARRAY[1..2] OF LREAL;
+	m_cmdJntVel:ARRAY[1..2] OF LREAL;
+
+	// current joint4 position and veloicty in motor
+	m_curJntPos:ARRAY[1..2] OF LREAL;
+	m_curJntVel:ARRAY[1..2] OF LREAL;
+	
+	// last joint4 position in motor
+	m_lastJntPos:ARRAY[1..2] OF LREAL;
+	
+	// filter for current joint velocity
+	m_curJntVelLpf:ARRAY[1..2] OF FB_LowPassFilter;
+	
+	// PID for joint position
+	m_jntPIDCtrl:ARRAY[1..2] OF FB_PID;
+	m_jntCtrlTrq:ARRAY[1..2] OF LREAL;
+	
+	// orientation joints control torque in redundance sapce
+	m_redunCtrlTrq:ARRAY[1..2,1..4] OF LREAL;
+	
+	// master jacobian solver
+	m_jacobianSolver:Robot_Jacobian_matrix_C0;
+	posOriJaco:ARRAY[1..6,1..7] OF LREAL;
+	Jt:ARRAY[1..7,1..6] OF LREAL;
+	JJt:ARRAY[1..6,1..6] OF LREAL;
+	invJJt:ARRAY[1..6,1..6] OF LREAL;
+	pinvJt:ARRAY[1..6,1..7] OF LREAL;
+	JtPinvJt:ARRAY[1..7,1..7] OF LREAL;
+	nullSpacePinvJt:ARRAY[1..7,1..7] OF LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="DH2MotorPos" Id="{399eab54-f414-4671-823a-bb86ab79be10}">
+      <Declaration><![CDATA[METHOD PROTECTED DH2MotorPos : BOOL
+VAR_INPUT
+	// target joint4 DH position
+	i_targetDHPos:ARRAY[1..2] OF LREAL;
+	
+	// current joint4 DH position
+	i_currentDHPos:ARRAY[1..2] OF LREAL;
+END_VAR
+
+VAR_OUTPUT
+	// target joint4 motor position
+	o_targetMotorPos:ARRAY[1..2] OF LREAL;
+	
+	// current joint4 motor position
+	o_currentMotorPos:ARRAY[1..2] OF LREAL;
+END_VAR
+
+VAR
+	// active joint3 position
+	q2,q3,q4,q8:LREAL;
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// left arm
+q2:=Robot_Status.robot_current_joint_position_v2[1,2];
+q3:=Robot_Status.robot_current_joint_position_v2[1,3];
+q4:=Robot_Status.robot_current_joint_position_v2[1,4];
+// q8 = q3+q2;
+q8:=q3+q2;
+// q4Jnt= q4motor+q8-q2-90;
+o_targetMotorPos[1]:=i_targetDHPos[1]-q8+q2+deg2rad(90);
+o_currentMotorPos[1]:=i_currentDHPos[1]-q8+q2+deg2rad(90);
+
+// right arm
+q2:=Robot_Status.robot_current_joint_position_v2[2,2];
+q3:=Robot_Status.robot_current_joint_position_v2[2,3];
+q4:=Robot_Status.robot_current_joint_position_v2[2,4];
+// q8 = q3+q2;
+q8:=q3+q2;
+// q4Jnt= q4motor+q8-q2-90;
+o_targetMotorPos[2]:=i_targetDHPos[2]-q8+q2+deg2rad(90);
+o_currentMotorPos[2]:=i_currentDHPos[2]-q8+q2+deg2rad(90);
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{9d915a05-cafb-49bf-956c-3cddf8a714b4}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR
+	i,j:INT;
+	currentRatioMotor2Jnt:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// reset joint position 
+m_curJntPos[1]:=Robot_Status.robot_current_joint_position_v2[1,4];
+m_curJntPos[2]:=Robot_Status.robot_current_joint_position_v2[2,4];
+m_targetJntPos:=m_curJntPos;
+DH2MotorPos(m_targetJntPos,m_curJntPos, o_targetMotorPos=>m_targetJntPos,o_currentMotorPos=>m_curJntPos);
+m_cmdJntPos:=m_curJntPos;
+m_lastJntPos:=m_curJntPos;
+
+FOR i:=1 TO 2  DO 
+	// init velocity
+	m_cmdJntVel[i]:=0;
+	m_curJntVel[i]:=0;
+	m_posErr[i]:=0;
+	
+	// init controller
+	currentRatioMotor2Jnt:=GVL_system_parameters.transmition_efficiency[i,4]*GVL_system_parameters.torque_constant[i,4]
+							*GVL_system_parameters.transmission_ratio[i, 4]/1000;
+	m_jntPIDCtrl[i].init(GVL_system_parameters.cycle_robot,m_redunJntKp,m_redunJntKd,m_redunJntKi,
+		m_redunJntKiLimit* currentRatioMotor2Jnt,	m_redunJntCtrlLimit*currentRatioMotor2Jnt);
+	
+	// init filter
+	m_cmdPosLpf[i].init(i_filterOrd:=1,i_cutoffFreq:=m_jntTargetPosLpfCutoffFreq,i_sampleFreq:=1000);
+	m_curJntVelLpf[i].init(i_filterOrd:=1,i_cutoffFreq:=m_curJntVelLpfCutoffFreq,i_sampleFreq:=1000);
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{7cc8bf87-411b-4267-8bfd-416ade3a1d73}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	// target position for left and right joint4
+	i_targetJntPos:ARRAY[1..2] OF LREAL;
+
+END_VAR
+
+VAR_OUTPUT
+	// control torque for last four orientation joints
+	o_cmdCtrlTrq:ARRAY[1..2, 1..4] OF LREAL :=[8(0.0)];
+END_VAR
+
+VAR
+	i,j,k: INT;
+	currentDHPos:ARRAY[1..2] OF LREAL;
+	jacoTransCalc : Jacobian_Matrix_Tr;
+	matrixInvCalc: matrix_fun_inv;
+	invFlag:BOOL;
+	scale:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// convert target and current joint position from DH to motor
+currentDHPos[1]:=Robot_Status.robot_current_joint_position_v2[1,4];
+currentDHPos[2]:=Robot_Status.robot_current_joint_position_v2[2,4];
+DH2MotorPos(i_targetJntPos,currentDHPos,o_targetMotorPos=>m_targetJntPos, o_currentMotorPos=>m_curJntPos);
+
+FOR i:=1 TO 2 DO
+	// fitl target joint position
+	m_targetJntPos[i]:=m_cmdPosLpf[i].run(m_targetJntPos[i]);
+
+	// get current joint velocity
+	m_curJntVel[i]:=(m_curJntPos[i]-m_lastJntPos[i])/GVL_system_parameters.cycle_robot;
+	m_curJntVel[i]:=m_curJntVelLpf[i].run(m_curJntVel[i]);
+	m_lastJntPos[i]:=m_curJntPos[i];
+
+	// interpolate command position
+	m_cmdJntVel[i]:=LIMIT(-m_maxJntVel,(m_targetJntPos[i]-m_cmdJntPos[i])/GVL_system_parameters.cycle_robot, m_maxJntVel);
+	m_cmdJntPos[i]:=m_cmdJntPos[i]+m_cmdJntVel[i]*GVL_system_parameters.cycle_robot;
+
+	// joint position control torque control
+	m_posErr[i]:=m_cmdJntPos[i]-m_curJntPos[i];
+	m_jntCtrlTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i], m_cmdJntVel[i], m_curJntVel[i]);
+END_FOR
+
+// control current
+o_cmdCtrlTrq[1,1]:=m_jntCtrlTrq[1];
+o_cmdCtrlTrq[2,1]:=m_jntCtrlTrq[2];
+
+// project control torque to nullspace
+m_jacobianSolver(arm_id:= 1, current_Joint_position:= Robot_Status.Robot_current_Joint_position[1], Jacobian_matrix_0=> posOriJaco);
+jacoTransCalc(Jacobian_matrix:=posOriJaco,Jacobian_matrix_tr=>Jt);
+// J*Jt
+FOR i:=1 TO 6 DO
+	FOR j:=1 TO 6 DO
+		JJt[i,j]:=0;
+		FOR k:=1 TO 7 DO
+			JJt[i,j]:=JJt[i,j]+posOriJaco[i,k]*Jt[k,j];
+		END_FOR
+	END_FOR
+END_FOR
+
+// inv(JJt)
+matrixInvCalc(input_matrix:=JJt,output_matrix=>invJJt, succeed=>invFlag);
+IF invFlag=FALSE THEN
+	run:=FALSE;
+	RETURN;
+END_IF
+
+// pinv(Jt)=inv(JJt)*J
+FOR i:=1 TO 6 DO
+	FOR j:=1 TO 7 DO
+		pinvJt[i,j]:=0;
+		FOR k:=1 TO 6 DO
+			pinvJt[i,j]:=pinvJt[i,j]+invJJt[i,k]*posOriJaco[k,j];
+		END_FOR
+	END_FOR
+END_FOR
+
+// Jt*Pinv(Jt)
+FOR i:=1 TO 7 DO
+	FOR j:=1 TO 7 DO
+		JtPinvJt[i,j]:=0;
+		FOR k:=1 TO 6 DO
+			JtPinvJt[i,j]:=JtPinvJt[i,j]+Jt[i,k]*pinvJt[k,j];
+		END_FOR
+	END_FOR
+END_FOR
+ 
+// nullspace of pinv(Jt): I-Jt*Pinv(Jt)
+FOR i:=1 TO 7 DO
+	FOR j:=1 TO 7 DO
+		IF i = j THEN
+			nullSpacePinvJt[i,j]:=1-JtPinvJt[i,j];
+		ELSE
+			nullSpacePinvJt[i,j]:=-JtPinvJt[i,j];
+		END_IF
+	END_FOR
+END_FOR
+
+IF ABS(nullSpacePinvJt[4,4])>0.001 THEN 
+	scale :=1/nullSpacePinvJt[4,4];
+	o_cmdCtrlTrq[1,2]:=scale*nullSpacePinvJt[5,4]*o_cmdCtrlTrq[1,1];
+	o_cmdCtrlTrq[1,3]:=scale*nullSpacePinvJt[6,4]*o_cmdCtrlTrq[1,1];
+	o_cmdCtrlTrq[1,4]:=scale*nullSpacePinvJt[7,4]*o_cmdCtrlTrq[1,1];
+ELSE
+	o_cmdCtrlTrq[1,2]:=0;
+	o_cmdCtrlTrq[1,3]:=0;
+	o_cmdCtrlTrq[1,4]:=0;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FBRedunOriControl">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FBRedunOriControl.DH2MotorPos">
+      <LineId Id="23" Count="0" />
+      <LineId Id="43" Count="2" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="9" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FBRedunOriControl.init">
+      <LineId Id="15" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="57" Count="2" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+    </LineIds>
+    <LineIds Name="FBRedunOriControl.run">
+      <LineId Id="95" Count="0" />
+      <LineId Id="99" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="41" Count="2" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="138" Count="2" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="154" Count="0" />
+      <LineId Id="157" Count="6" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="164" Count="7" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="146" Count="1" />
+      <LineId Id="174" Count="1" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="209" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="188" Count="1" />
+      <LineId Id="210" Count="1" />
+      <LineId Id="213" Count="1" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="125" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
