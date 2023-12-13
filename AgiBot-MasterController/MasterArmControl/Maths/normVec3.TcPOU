@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="normVec3" Id="{d0fad3b1-ac05-4e12-a6b2-2165ffa48218}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION normVec3 : LREAL
+VAR_IN_OUT CONSTANT
+	vec3 :Vec3d;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[normVec3:=SQRT(vec3[1]*vec3[1]+vec3[2]*vec3[2]+vec3[3]*vec3[3]);]]></ST>
+    </Implementation>
+    <LineIds Name="normVec3">
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

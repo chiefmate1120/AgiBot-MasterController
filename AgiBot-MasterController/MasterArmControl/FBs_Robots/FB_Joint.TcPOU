@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// motor IO
+	m_motorInputs AT%I*	:ST_MotorInputs;
+	m_motorOutputs AT%Q* :ST_MotorOutputs;
+	
+	// device paramters
+	m_incEncoderRes :DINT;
+	m_absEncoderRes :DINT;
+	m_motorReduction :LREAL;
+	m_absEncoderReduction :LREAL;
+	m_trqConst :LREAL;
+	m_maxCurrent :LREAL;
+	m_motorDir :INT;								
+	m_asbEncoderDir :INT;
+	m_minJntPos: LREAL;
+	m_maxJntPos: LREAL;
+	
+	// convertion paramters
+	m_trq2Current:LREAL;
+	m_current2Trq:LREAL;
+	
+	// joint data
+	m_curMotorPos :LREAL;
+	m_curLinkPos :LREAL;
+	m_curJntPos	:LREAL;
+	m_curJntVel :LREAL;
+	m_curJntTrq :	LREAL;
+	m_cmdJntPos :LREAL;
+	m_cmdJntVel :LREAL;
+	m_cmdJntTrq :LREAL;
+	m_lastJntPos :LREAL;
+	
+	// velocity filter
+	m_jntVelLpf :FB_LowPassFilter;
+	
+	// command torque filter
+	m_cmdTrqLpf :FB_LowPassFilter;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{cdcb62c8-2a8b-4700-ad38-db65527ef407}" />
+    <Method Name="disable" Id="{e31df8a7-8ce0-47c3-be01-feb458684c41}">
+      <Declaration><![CDATA[METHOD PUBLIC disable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
+disable:=true;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="enable" Id="{cf1e8549-8fbc-49c1-a41e-ead1f2db1255}">
+      <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF DriverStatusWord_INIT = m_motorInputs.m_statusWord THEN
+	m_motorOutputs.m_controlWord:=DriverCtrlWord_PREOP;
+	enable := FALSE;
+ELSIF DriverStatusWord_PREOP = m_motorInputs.m_statusWord THEN
+	m_motorOutputs.m_controlWord:=DriverCtrlWord_OP;
+	enable :=  FALSE;
+ELSIF DriverStatusWord_OP = m_motorInputs.m_statusWord THEN
+	enable :=  TRUE;
+ELSE
+	m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
+	enable :=  FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="encoder2Pos" Id="{ee202f01-7eae-4c96-9148-de033a227f8f}">
+      <Declaration><![CDATA[METHOD PROTECTED encoder2Pos : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_curMotorPos:=
+//m_curLinkPos:=
+
+// use motor pos as joint pos
+m_curJntPos:=m_curMotorPos;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{9b72c880-30e6-407f-a349-f349818eddee}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_INPUT
+	i_armIdx :INT;
+	i_jntIdx :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// hardware parameters
+m_incEncoderRes :=g_incEncoderRes[i_jntIdx];
+m_absEncoderRes :=g_absEncoderRes[i_jntIdx];
+m_motorReduction :=g_motorReduction[i_jntIdx];
+m_absEncoderReduction :=g_absEncoderReduction[i_jntIdx];
+m_trqConst :=g_motorTrqConst[i_jntIdx];
+m_maxCurrent :=g_motorMaxCurrent[i_jntIdx];
+m_motorDir :=g_motorDir[i_armIdx,i_jntIdx];								
+m_asbEncoderDir :=g_asbEncoderDir[i_armIdx,i_jntIdx];
+m_minJntPos	:=g_minJntPos[i_armIdx,i_jntIdx];
+m_maxJntPos	:=g_maxJntPos[i_armIdx,i_jntIdx];
+
+m_trq2Current:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
+m_current2Trq:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
+
+// motor data init
+encoder2Pos();
+m_curJntVel:=0;
+m_curJntTrq :=0;
+m_cmdJntPos :=m_curJntPos;
+m_cmdJntVel :=0.0;
+m_cmdJntTrq :=0.0;
+m_lastJntPos :=m_curJntPos;
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armControlFreq);
+m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armControlFreq);
+
+// driver init value
+m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
+m_motorOutputs.m_controlWord:=DriverOPMode_Pos;
+m_motorOutputs.m_cmdCurrent:=0;
+m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isEnabled" Id="{6575d317-fe99-4038-982b-c3651c898873}">
+      <Declaration><![CDATA[METHOD isEnabled : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[isEnabled :=(DriverStatusWord_OP = m_motorInputs.m_statusWord);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="jntPos" Id="{7c60c4ea-0665-427c-81ff-ecca027383e5}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntPos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{0999bfb4-2d73-48db-9f0b-eb60a7757215}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntPos := m_curJntPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="jntTrq" Id="{24f2edfa-7ea0-460c-b46c-37e80340999b}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntTrq : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a73a2159-96f0-4307-8408-692459f39004}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntTrq:=m_curJntTrq;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="jntVel" Id="{9f6c9647-33be-4e59-a761-fc40f97a604f}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntVel : LREAL]]></Declaration>
+      <Get Name="Get" Id="{dda73f9b-c1f5-4fa7-a73f-7b4550e82f69}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntVel := m_curJntVel;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="linkPos" Id="{e503da77-c373-4ba2-b314-228646ff52c0}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC linkPos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{057e650e-064f-4e5d-ae71-67363977daff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[linkPos:=m_curLinkPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="motorPos" Id="{257e5d05-bbd2-45b4-a27c-60112e2ac416}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC motorPos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{5c2a1542-7420-4542-ba4a-8202be5bc4e5}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[motorPos := m_curMotorPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="pos2Encoder" Id="{5927a17d-d8e9-40fc-9c34-e6793775a7fc}">
+      <Declaration><![CDATA[// TODO
+METHOD PROTECTED pos2Encoder : DINT
+VAR_INPUT
+	i_jntPos :LREAL;
+END_VAR
+
+VAR
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//m_motorOutputs.m_cmdMotorEncoder:=]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateCmds" Id="{a4f5fe94-40e9-4f77-a4d8-a2af848a52e6}">
+      <Declaration><![CDATA[METHOD PUBLIC updateCmds : BOOL
+VAR_INPUT
+	i_opMode : E_DriverOPMode;
+	i_cmdPos :LREAL;
+	i_cmdTrq :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_motorOutputs.m_opMode:=INT_TO_SINT( i_opMode);
+// pos mode
+IF i_opMode = DriverOPMode_Pos THEN
+	m_motorOutputs.m_cmdCurrent:=0;
+	m_motorOutputs.m_cmdMotorEncoder :=pos2Encoder(i_cmdPos);
+ELSIF i_opMode = DriverOPMode_Trq THEN
+	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(i_cmdTrq*m_trq2Current);
+	m_motorOutputs.m_cmdMotorEncoder :=m_motorInputs.m_motorEncoder; 
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateStatus" Id="{77cc6f91-59d3-42a9-8d8a-2f8d584653fb}">
+      <Declaration><![CDATA[METHOD PUBLIC updateStatus : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// get joint position
+encoder2Pos();
+
+// compute joint velocity
+m_curJntVel:= (m_curJntPos-m_lastJntPos)/g_armControlLoopInterval;
+m_curJntVel := m_jntVelLpf.run(m_curJntVel);
+
+m_curJntTrq := m_motorInputs.m_current * m_current2Trq;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_Joint">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.disable">
+      <LineId Id="5" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_Joint.enable">
+      <LineId Id="5" Count="1" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="10" Count="3" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.encoder2Pos">
+      <LineId Id="6" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.init">
+      <LineId Id="21" Count="0" />
+      <LineId Id="8" Count="8" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="8" />
+      <LineId Id="34" Count="5" />
+    </LineIds>
+    <LineIds Name="FB_Joint.isEnabled">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.jntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.jntTrq.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.jntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.linkPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.motorPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.pos2Encoder">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.updateCmds">
+      <LineId Id="31" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="32" Count="3" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.updateStatus">
+      <LineId Id="8" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="multiNumVec7" Id="{f67e6ccd-071a-4867-a8d3-1cc1b2dfa59d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION multiNumVec7 : Vec7d
+VAR_INPUT
+	i_num :LREAL;
+END_VAR
+VAR_IN_OUT CONSTANT
+	i_vec:Vec7d;
+END_VAR
+VAR
+	i: INT ;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[FOR i:=1 TO 7 DO 
+	multiNumVec7[i]:=i_vec[i]*i_num;
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="multiNumVec7">
+      <LineId Id="10" Count="1" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

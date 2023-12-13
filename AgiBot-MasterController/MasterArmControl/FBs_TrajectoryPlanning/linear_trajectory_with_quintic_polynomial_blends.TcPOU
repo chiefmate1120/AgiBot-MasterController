@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="linear_trajectory_with_quintic_polynomial_blends" Id="{6755b785-4d15-4568-ad5f-31f530015fcc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK linear_trajectory_with_quintic_polynomial_blends
+VAR_INPUT
+	t0,t1,q0,q1:lreal;
+	t:lreal;	
+END_VAR
+VAR_OUTPUT
+	pos:lreal;
+	vel:lreal;
+	acc:lreal;
+	finished:BOOL;
+END_VAR
+VAR
+	h,Tp,ratio,TS,TA:lreal;
+	k1,t_qa,t_qb,qa,qb:lreal;
+	
+	Quintic_spline_curve_factor_1:Quintic_spline_curve_factor;
+	Quintic_spline_curve_factor_2:Quintic_spline_curve_factor;
+	a0,a1,a2,a3,a4,a5:ARRAY[1..2] OF lreal;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+h:=q1-q0;
+Tp:=t1-t0;
+
+ratio:=0.15;
+Ts:=Tp*ratio;
+Ta:=2*Ts;
+
+k1:=h/(t1-t0-2*Ts);
+t_qa:=t0+Ta;  qa:=q0+k1*(t_qa-(t0+Ts));
+t_qb:=t1-Ta;  qb:=q0+k1*(t_qb-(t0+Ts));
+
+
+//%计算第1段轨迹,五次多项式，始末位置的速度、加速度都为零
+Quintic_spline_curve_factor_1(
+	t0:= t0, 
+	t1:= t_qa, 
+	q0:= q0, 
+	q1:= qa, 
+	v0:= 0, 
+	v1:= k1, 
+	acc0:= 0, 
+	acc1:= 0, 
+	a0=> a0[1], 
+	a1=> a1[1], 
+	a2=> a2[1], 
+	a3=> a3[1], 
+	a4=> a4[1], 
+	a5=> a5[1]);
+
+
+//%计算第2段轨迹，直线
+
+
+
+
+//%计算第3段轨迹，五次多项式，始末位置的速度、加速度都为零
+Quintic_spline_curve_factor_2(
+	t0:= t_qb, 
+	t1:= t1, 	
+	q0:= qb, 
+	q1:= q1, 
+	v0:= k1, 
+	v1:= 0, 
+	acc0:= 0, 
+	acc1:= 0, 
+	a0=> a0[2], 
+	a1=> a1[2], 
+	a2=> a2[2], 
+	a3=> a3[2], 
+	a4=> a4[2], 
+	a5=> a5[2]);
+
+
+	
+	
+	
+IF (t<=t_qa)THEN
+	t0:=t0;
+	pos:=a0[1]+a1[1]*(t-t0)+a2[1]*EXPT((t-t0),2)+a3[1]*EXPT((t-t0),3)+a4[1]*EXPT((t-t0),4)+a5[1]*EXPT((t-t0),5);
+	vel:=a1[1]+2*a2[1]*(t-t0)+3*a3[1]*EXPT((t-t0),2)+4*a4[1]*EXPT((t-t0),3)+5*a5[1]*EXPT((t-t0),4);
+    acc:=2*a2[1]+6*a3[1]*(t-t0)+12*a4[1]*EXPT((t-t0),2)+20*a5[1]*EXPT((t-t0),3);
+	
+ELSIF (t<=t_qb) THEN
+	t0:=t_qa;
+	pos:=qa+k1*(t-t0);
+	vel:=k1;
+	acc:=0;
+	
+ELSIF (t<=t1)THEN	
+	t0:=t_qb;
+	pos:=a0[2]+a1[2]*(t-t0)+a2[2]*EXPT((t-t0),2)+a3[2]*EXPT((t-t0),3)+a4[2]*EXPT((t-t0),4)+a5[2]*EXPT((t-t0),5);
+	vel:=a1[2]+2*a2[2]*(t-t0)+3*a3[2]*EXPT((t-t0),2)+4*a4[2]*EXPT((t-t0),3)+5*a5[2]*EXPT((t-t0),4);
+	acc:=2*a2[2]+6*a3[2]*(t-t0)+12*a4[2]*EXPT((t-t0),2)+20*a5[2]*EXPT((t-t0),3);
+END_IF
+
+
+IF (t>t1) THEN
+	finished:=TRUE;
+	pos:=q1;
+	vel:=0;
+	acc:=0;
+ELSE
+	finished:=FALSE;
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="linear_trajectory_with_quintic_polynomial_blends">
+      <LineId Id="34" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="49" Count="10" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="71" Count="2" />
+      <LineId Id="75" Count="10" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="138" Count="2" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

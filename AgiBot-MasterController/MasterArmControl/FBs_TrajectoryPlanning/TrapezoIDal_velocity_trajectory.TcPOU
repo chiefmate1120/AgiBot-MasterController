@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="TrapezoIDal_velocity_trajectory" Id="{40b394c2-ad7f-4060-aa1b-5902f6e4807c}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK TrapezoIDal_velocity_trajectory
+VAR_INPUT
+	t0,q0,q1:lreal;
+	a_max,v_max:lreal;
+	t:lreal;
+END_VAR
+VAR_OUTPUT
+	pos:lreal;
+	vel:lreal;
+	acc:lreal;
+	finished:BOOL;
+END_VAR
+VAR
+	h,V_v,A_a:lreal;
+	Tp,Ta:lreal;
+	t1:lreal;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+h:=q1-q0;
+
+V_v:=V_max;
+A_a:=A_max;
+IF(h<0) THEN
+    V_v:=-V_max;
+    A_a:=-A_max;
+END_IF
+
+
+//%step1,根据给定参数，计算加速时间、总时间
+IF(ABS(h)>=(V_v*V_v/ABS(A_a))) THEN
+    Tp:=(h*A_a+V_v*V_v)/(A_a*V_v);
+    Ta:=V_v/A_a; 
+	t1:=t0+Tp;
+	
+	IF (t>t0) AND (t<=t0+Ta) THEN
+		pos:=q0+0.5*A_a*EXPT(t-t0,2);
+        vel:=A_a*(t-t0);
+        acc:=A_a;	
+	ELSIF (t>t0+Ta) AND (t<=t1-Ta) THEN
+		pos:=q0+A_a*Ta*(t-t0-Ta/2);
+        vel:=A_a*Ta;
+        acc:=0;	
+	ELSIF (t<=t1) THEN
+		pos:=q1-0.5*A_a*EXPT(t1-t,2);
+        vel:=A_a*(t1-t);
+        acc:=-A_a;	
+	END_IF
+   
+	IF (t>t1) THEN
+		finished:=TRUE;
+		pos:=q1;
+		vel:=0;
+		acc:=0;
+	ELSE
+		finished:=FALSE;
+	END_IF
+	
+	
+ELSE	
+    //%step2,没有匀速阶段
+    Ta:=SQRT(h/A_a);
+    Tp:=2*Ta;
+	t1:=t0+Tp;
+	
+	IF (t>t0) AND (t<=(t0+Ta)) THEN
+		pos:=q0+0.5*A_a*EXPT((t-t0),2);
+        vel:=A_a*(t-t0);
+        acc:=A_a;
+	ELSIF (t<=t1) THEN
+		pos:=q1-0.5*A_a*EXPT(t1-t,2);
+        vel:=A_a*(t1-t);
+        acc:=-A_a;
+	END_IF
+		
+	IF (t>t1) THEN
+		finished:=TRUE;
+		pos:=q1;
+		vel:=0;
+		acc:=0;
+	ELSE
+		finished:=FALSE;
+	END_IF
+		
+END_IF
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="TrapezoIDal_velocity_trajectory">
+      <LineId Id="20" Count="0" />
+      <LineId Id="30" Count="6" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="40" Count="3" />
+      <LineId Id="54" Count="2" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="76" Count="1" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="159" Count="1" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="45" Count="3" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="139" Count="1" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="114" Count="1" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

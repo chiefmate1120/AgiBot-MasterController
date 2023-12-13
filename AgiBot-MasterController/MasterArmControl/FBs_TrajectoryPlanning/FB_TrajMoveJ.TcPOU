@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TrajMoveJ" Id="{02514d4f-2747-4c08-923c-ad3b27b8c50b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TrajMoveJ EXTENDS FB_TrajBase
+VAR_OUTPUT
+END_VAR
+VAR
+	// move vector in joint space
+	m_moveDir : Vec7d;
+	m_moveDistance :LREAL;
+	
+	// doubleS planning for move distance
+	m_doubleS :FB_BasicDoubleS;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="evaluate" Id="{87b67f15-ec4f-4ac3-937c-bcf7ce0e7ad6}">
+      <Declaration><![CDATA[METHOD evaluate : BOOL
+VAR_INPUT
+	t :LREAL;
+END_VAR
+
+VAR_IN_OUT
+	jntPos,jntVel, jntAcc :vec7d;
+END_VAR
+VAR
+	q,q_dot,q_ddot :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[evaluate:=m_doubleS.evaluate(t,q=>q,q_dot=>q_dot, q_ddot=>q_dot);
+IF evaluate =FALSE THEN
+	RETURN;
+END_IF
+
+jntPos := multiNumVec7(q, m_moveDir);
+jntVel := multiNumVec7(q_dot, m_moveDir);
+jntAcc := multiNumVec7(q_ddot, m_moveDir);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{c13d028d-f18d-482b-a054-8ada64dcb420}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_startJntPos :Vec7d;
+	i_targetJntPos :Vec7d;
+	i_maxJntVel : Vec7d;
+	i_maxJntAcc : Vec7d;
+	i_maxJntJerk :Vec7d;
+END_VAR
+VAR 
+	i:INT;
+	maxV, maxA, maxJ :LREAL;
+	q:ARRAY[1..2] OF LREAL;
+	v:ARRAY[1..2] OF LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_moveDir:=subVec7(i_targetJntPos, i_startJntPos);
+m_moveDistance := normVec7(m_moveDir);
+
+IF(m_moveDistance<g_smallNum) THEN
+	m_moveDir:=g_onesVec7d;
+ELSE
+	m_moveDir:=multiNumVec7(1/m_moveDistance, m_moveDir);
+END_IF
+
+// determian max vel/acc/jerk
+maxV:=g_largeNum;
+maxA:=g_largeNum;
+maxJ:=g_largeNum;
+FOR i :=1 TO 7 DO 
+	maxV := MIN (maxV, ABS(i_maxJntVel[i]/m_moveDir[i]));
+	maxA := MIN (maxA, ABS(i_maxJntAcc[i]/m_moveDir[i]));
+	maxJ := MIN (maxJ, ABS(i_maxJntJerk[i]/m_moveDir[i]));
+END_FOR
+
+// planning for moving distance
+q[1]:=0;
+q[2]:=m_moveDistance;
+v[1]:=0;
+v[2]:=0;
+m_doubleS.init(q,v, maxV, maxA, maxJ);
+m_duration:=m_doubleS.duration;
+m_isGenerated:=m_doubleS.isGene;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_TrajMoveJ">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_TrajMoveJ.evaluate">
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_TrajMoveJ.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="43" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

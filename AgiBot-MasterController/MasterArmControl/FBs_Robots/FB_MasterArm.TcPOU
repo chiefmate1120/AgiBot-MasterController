@@ -1,0 +1,921 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
+// NOTICE: all joints are the ture active joints, not DH ones!
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// arm index, 0 for left arm, 1 for right arm
+	m_armIdx: INT;
+	
+	// grip angle from hall sensor IO
+	m_gripHallSensorValue AT%I* :UDINT;
+	m_gripAngle :LREAL;
+	
+	// arm block
+	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
+	
+	// arm cartesian data, defined in each arm origin
+	m_curCartPose	:ST_Frame;
+	m_curCartTwist:ARRAY[1..g_cartDofs] OF LREAL;
+	
+	// arm joint data
+	m_curJntPos :Vec7d;
+	m_curJntVel :Vec7d;
+	m_curJntTrq :Vec7d;
+	m_cmdJntPos :Vec7d;
+	m_cmdJntVel :Vec7d;
+	m_cmdJntAcc :Vec7d;
+	m_cmdJntTrq :Vec7d;
+	m_jntOPMode :Vec7i;
+	m_jntEnableFlag :Vec7i;
+	
+	// arm daynamic data
+	m_jntGravity :ARRAY[1..g_mJntNum] OF LREAL;
+	
+	// arm jacobian 
+	m_jaco :ARRAY[1..g_cartDofs, 1..g_mJntNum] OF LREAL;
+	
+	// joint position controller
+	m_jntPIDCtrl :ARRAY[1..g_mJntNum] OF FB_PID;
+	
+	// grivity model
+	m_gravityModel : FB_MasterGravity;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{4aa1799c-1556-4bc1-a713-06f14faa00f1}" />
+    <Property Name="armIdx" Id="{1bcadfc3-0a4f-4bee-a1a7-b6d4d3a1eb58}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY armIdx : int]]></Declaration>
+      <Get Name="Get" Id="{198387ec-2e24-42e6-b0c2-2f769705d46f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[armIdx:=m_armIdx;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="calcGripAngle" Id="{1d10bbaa-14df-41ac-8838-f8438ee55415}">
+      <Declaration><![CDATA[// TODO
+METHOD PROTECTED calcGripAngle : LREAL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
+      <Declaration><![CDATA[METHOD PUBLIC calcJaco : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
+END_VAR
+VAR_IN_OUT
+	r_jaco :ARRAY[1..g_cartDofs, 1..g_mJntNum] OF LREAL;
+END_VAR
+VAR_INPUT
+END_VAR
+
+VAR
+	q1,q2, q3, q4, q5, q6, q7 :LREAL;
+	d1,d4,a3,a4 :LREAL;
+	j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// !Convert active joint position to DH model for kinematic calculation
+q1:=i_jntPos[1];  
+q2:=i_jntPos[2];  
+q3:=i_jntPos[3]-i_jntPos[2];  //q3=q8-q2
+q4:=i_jntPos[4]+i_jntPos[3]-i_jntPos[2]-pi/2;//q4DH=q4motor+q8-q2-90;  
+q5:=i_jntPos[5];  
+q6:=i_jntPos[6];  
+q7:=i_jntPos[7];  
+d1:=g_d1;
+d4:=g_d4;
+a3:=g_a3;
+a4:=g_a4;
+
+// jacobian with DH joints
+r_jaco[1,1]:=-SIN(q1)*(COS(q2)*(a3 + a4*COS(q3) - d4*SIN(q3)) - SIN(q2)*(d4*COS(q3) + a4*SIN(q3))) ;
+r_jaco[1,2]:=-COS(q1)*(SIN(q2)*(a3 + a4*COS(q3) - d4*SIN(q3)) + COS(q2)*(d4*COS(q3) + a4*SIN(q3))) ;
+r_jaco[1,3]:=-COS(q1)*(d4*COS(q2 + q3) + a4*SIN(q2 + q3)) ;
+r_jaco[1,4]:=0 ;
+r_jaco[1,5]:=0 ;
+r_jaco[1,6]:=0 ;
+r_jaco[1,7]:=0;
+ 
+r_jaco[2,1]:=COS(q1)*(COS(q2)*(a3 + a4*COS(q3) - d4*SIN(q3)) - SIN(q2)*(d4*COS(q3) + a4*SIN(q3))); 
+r_jaco[2,2]:=-SIN(q1)*(SIN(q2)*(a3 + a4*COS(q3) - d4*SIN(q3)) + COS(q2)*(d4*COS(q3) + a4*SIN(q3))); 
+r_jaco[2,3]:=-SIN(q1)*(d4*COS(q2 + q3) + a4*SIN(q2 + q3)); 
+r_jaco[2,4]:=0; 
+r_jaco[2,5]:=0; 
+r_jaco[2,6]:=0; 
+r_jaco[2,7]:=0;
+
+ 
+r_jaco[3,1]:=0 ;
+r_jaco[3,2]:=- COS(q1)*(COS(q1)*COS(q2)*(a3 + a4*COS(q3) - d4*SIN(q3)) - COS(q1)*SIN(q2)*(d4*COS(q3) + a4*SIN(q3))) - SIN(q1)*(COS(q2)*SIN(q1)*(a3 + a4*COS(q3) - d4*SIN(q3)) - SIN(q1)*SIN(q2)*(d4*COS(q3) + a4*SIN(q3)));
+r_jaco[3,3]:=- COS(q1)*(a4*COS(q2 + q3)*COS(q1) - d4*SIN(q2 + q3)*COS(q1)) - SIN(q1)*(a4*COS(q2 + q3)*SIN(q1) - d4*SIN(q2 + q3)*SIN(q1));
+r_jaco[3,4]:=0;
+r_jaco[3,5]:=0;
+r_jaco[3,6]:=0 ;
+r_jaco[3,7]:=0 ;
+
+r_jaco[4,1]:=0 ;
+r_jaco[4,2]:=-SIN(q1) ;
+r_jaco[4,3]:=-SIN(q1) ;
+r_jaco[4,4]:=-SIN(q2 + q3)*COS(q1) ;
+r_jaco[4,5]:=COS(q2 + q3)*COS(q1)*SIN(q4) - COS(q4)*SIN(q1) ;
+r_jaco[4,6]:=- SIN(q5)*(SIN(q1)*SIN(q4) + COS(q2 + q3)*COS(q1)*COS(q4)) - SIN(q2 + q3)*COS(q1)*COS(q5) ;
+r_jaco[4,7]:=SIN(q6)*(COS(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) - SIN(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2))) - COS(q6)*(COS(q4)*SIN(q1) - SIN(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3)));
+ 
+r_jaco[5,1]:=0; 
+r_jaco[5,2]:=COS(q1); 
+r_jaco[5,3]:=COS(q1); 
+r_jaco[5,4]:=-SIN(q2 + q3)*SIN(q1); 
+r_jaco[5,5]:=COS(q1)*COS(q4) + COS(q2 + q3)*SIN(q1)*SIN(q4); 
+r_jaco[5,6]:=SIN(q5)*(COS(q1)*SIN(q4) - COS(q2 + q3)*COS(q4)*SIN(q1)) - SIN(q2 + q3)*COS(q5)*SIN(q1); 
+r_jaco[5,7]:=COS(q6)*(COS(q1)*COS(q4) - SIN(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) - SIN(q6)*(COS(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + SIN(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2)));
+
+r_jaco[6,1]:=1 ;
+r_jaco[6,2]:=0 ;
+r_jaco[6,3]:=0 ;
+r_jaco[6,4]:=-COS(q2 + q3) ;
+r_jaco[6,5]:=-SIN(q2 + q3)*SIN(q4) ;
+r_jaco[6,6]:=SIN(q2 + q3)*COS(q4)*SIN(q5) - COS(q2 + q3)*COS(q5) ;
+r_jaco[6,7]:=- SIN(q6)*(COS(q2 + q3)*SIN(q5) + SIN(q2 + q3)*COS(q4)*COS(q5)) - SIN(q2 + q3)*COS(q6)*SIN(q4);
+
+// jacobian with active joints
+// jaco_DH*qdot_DH = jaco_DH * (A * qdot)= jaco * qdot
+// A =[ 1  0 0 0 0 0 0
+//		0  1 0 0 0 0 0
+//		0 -1 1 0 0 0 0
+//		0 -1 1 1 0 0 0
+//		0 0  0 0 1 0 0
+//      0 0  0 0 0 1 0
+// 		0 0  0 0 0 0 1]
+ FOR j:=1 TO 6 DO 
+	 r_jaco[j,2]:=r_jaco[j,2]-r_jaco[j,3]-r_jaco[j,4];
+	 r_jaco[j,3]:=r_jaco[j,3]+r_jaco[j,4];
+ END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="cmdJntAcc" Id="{1837d422-4a59-4649-8d13-caf5bcaf05f2}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntAcc : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{37a85dd4-10ac-438e-b9d6-a2b097aedf2b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntAcc:=m_cmdJntAcc;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{60315f4a-94c9-4ff7-9f3f-f341c8ec2a1b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cmdJntAcc:=cmdJntAcc;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="cmdJntPos" Id="{0324a98d-052a-47ce-9a9c-ae1c48c549ec}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntPos : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{3c5efd2b-3802-4a61-861f-5f41f7a02f4c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntPos:=m_cmdJntPos;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{85fbba47-03ba-47a6-89b2-49b5e542531d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cmdJntPos:=cmdJntPos;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="cmdJntTrq" Id="{2b924121-25d6-4321-b4bb-536a680ed393}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntTrq : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{16267b81-2d92-4d1c-9caf-1fc218d67651}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntTrq:=m_cmdJntTrq;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{7c7c916c-9610-447d-9724-268c1b918684}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cmdJntTrq:=cmdJntTrq;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="cmdJntVel" Id="{83d1c02f-eb57-420e-a663-9b09e8c9b8d0}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdJntVel : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{26d01bfe-7996-4bec-848c-5175a9a83688}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdJntVel :=m_cmdJntVel;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{7ac28242-5be2-4d1f-9d83-5580d1c58d57}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_cmdJntVel :=cmdJntVel;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="curCartPose" Id="{d18be23c-99e5-435e-8688-90e0fb3be9ca}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curCartPose : ST_Frame]]></Declaration>
+      <Get Name="Get" Id="{013b03f6-adb7-4855-b0fe-353f77f67094}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curCartPose :=m_curCartPose;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curCartTwist" Id="{e4b7010c-887c-41fa-8766-1a9192e9d06a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curCartTwist : Vec6d]]></Declaration>
+      <Get Name="Get" Id="{b7c89bf7-90fc-4841-be25-e467b1918b68}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curCartTwist :=m_curCartTwist;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="curJntPos" Id="{d72c054a-bae9-44cb-97ff-fe7c76c53cb8}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntPos : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{332d5297-fb56-44bd-a751-714464e0813c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntPos:=m_curJntPos;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{6b07d7bc-103c-44c5-8c67-7a87da44f991}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_curJntPos:=curJntPos;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="curJntTrq" Id="{8c78ba58-302c-4844-9d36-e487700a0e19}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntTrq : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{1767bffb-cddd-4133-ad6f-5125f86340af}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntTrq:=m_curJntTrq;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4191f74e-07a3-4b2a-ba64-1b4d42d6f79d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_curJntTrq:=curJntTrq;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="curJntVel" Id="{904c68d5-30c9-4ed3-b3c5-6bcd345bcd5a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curJntVel : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{0a508621-c577-4d50-8cc3-bd8133f79f72}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curJntVel:=m_curJntVel;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{57765f62-7f8a-4f7f-b40b-fc9105cacf45}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_curJntVel:=curJntVel;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="enable" Id="{596f2892-08b6-4851-84d5-1537c558264e}">
+      <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntIdx :Vec7i;
+END_VAR
+VAR
+	i :INT ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mJntNum DO
+	IF 1= i_jntIdx[i] THEN
+		m_joints[i].enable();
+	ELSE
+		m_joints[i].disable();
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="forwardKinematic" Id="{182b544f-f7c4-475e-8af7-8c07aa230234}">
+      <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
+METHOD PROTECTED forwardKinematic : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
+END_VAR
+VAR_IN_OUT
+	r_curCartPose :ST_Frame;
+END_VAR
+VAR
+	q1,q2, q3, q4, q5, q6, q7 :LREAL;
+	d1,d4,a3,a4 :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// !Convert active joint position to DH model for kinematic calculation
+q1:=i_jntPos[1];  
+q2:=i_jntPos[2];  
+q3:=i_jntPos[3]-i_jntPos[2];  //q3=q8-q2
+q4:=i_jntPos[4]+i_jntPos[3]-i_jntPos[2]-pi/2;//q4DH=q4motor+q8-q2-90;  
+q5:=i_jntPos[5];  
+q6:=i_jntPos[6];  
+q7:=i_jntPos[7];  
+d1:=g_d1;
+d4:=g_d4;
+a3:=g_a3;
+a4:=g_a4;
+
+// cartesian pose frame
+r_curCartPose.m_pos[1]:=COS(q1)*(a4*COS(q2 + q3) - d4*SIN(q2 + q3) + a3*COS(q2)); 
+r_curCartPose.m_pos[2]:=SIN(q1)*(a4*COS(q2 + q3) - d4*SIN(q2 + q3) + a3*COS(q2)); 
+r_curCartPose.m_pos[3]:=d1 - d4*COS(q2 + q3) - a4*SIN(q2 + q3) - a3*SIN(q2); 
+r_curCartPose.m_rot[1,1]:=COS(q7)*(SIN(q6)*(COS(q4)*SIN(q1) - SIN(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) + COS(q6)*(COS(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) - SIN(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2)))) - SIN(q7)*(SIN(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) + COS(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2)));
+r_curCartPose.m_rot[2,1]:=SIN(q7)*(SIN(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) - COS(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2))) - COS(q7)*(SIN(q6)*(COS(q1)*COS(q4) - SIN(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + COS(q6)*(COS(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + SIN(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2))));
+r_curCartPose.m_rot[3,1]:=- SIN(q7)*(COS(q2 + q3)*COS(q5) - SIN(q2 + q3)*COS(q4)*SIN(q5)) - COS(q7)*(COS(q2 + q3)*COS(q6)*SIN(q5) - SIN(q2 + q3)*SIN(q4)*SIN(q6) + SIN(q2 + q3)*COS(q4)*COS(q5)*COS(q6)); 
+r_curCartPose.m_rot[1,2]:=- SIN(q7)*(SIN(q6)*(COS(q4)*SIN(q1) - SIN(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) + COS(q6)*(COS(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) - SIN(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2)))) - COS(q7)*(SIN(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) + COS(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2))); 
+r_curCartPose.m_rot[2,2]:=SIN(q7)*(SIN(q6)*(COS(q1)*COS(q4) - SIN(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + COS(q6)*(COS(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + SIN(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2)))) + COS(q7)*(SIN(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) - COS(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2))); 
+r_curCartPose.m_rot[3,2]:=SIN(q7)*(COS(q2 + q3)*COS(q6)*SIN(q5) - SIN(q2 + q3)*SIN(q4)*SIN(q6) + SIN(q2 + q3)*COS(q4)*COS(q5)*COS(q6)) - COS(q7)*(COS(q2 + q3)*COS(q5) - SIN(q2 + q3)*COS(q4)*SIN(q5)); 
+r_curCartPose.m_rot[1,3]:=SIN(q6)*(COS(q5)*(SIN(q1)*SIN(q4) + COS(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))) - SIN(q5)*(COS(q1)*COS(q2)*SIN(q3) + COS(q1)*COS(q3)*SIN(q2))) - COS(q6)*(COS(q4)*SIN(q1) - SIN(q4)*(COS(q1)*COS(q2)*COS(q3) - COS(q1)*SIN(q2)*SIN(q3))); 
+r_curCartPose.m_rot[2,3]:=COS(q6)*(COS(q1)*COS(q4) - SIN(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) - SIN(q6)*(COS(q5)*(COS(q1)*SIN(q4) + COS(q4)*(SIN(q1)*SIN(q2)*SIN(q3) - COS(q2)*COS(q3)*SIN(q1))) + SIN(q5)*(COS(q2)*SIN(q1)*SIN(q3) + COS(q3)*SIN(q1)*SIN(q2)));
+r_curCartPose.m_rot[3,3]:=- SIN(q6)*(COS(q2 + q3)*SIN(q5) + SIN(q2 + q3)*COS(q4)*COS(q5)) - SIN(q2 + q3)*COS(q6)*SIN(q4);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="gripAngle" Id="{5187a911-df75-4b56-8b45-38142d9b24de}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY gripAngle : LREAL]]></Declaration>
+      <Get Name="Get" Id="{871729fd-1ba1-4906-aec3-7d572491feb2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[gripAngle:=m_gripAngle;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="init" Id="{d7bcc040-c32e-4455-ab43-70de0dc2919e}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_INPUT
+	i_armIdx:INT;
+END_VAR
+VAR 
+	i :INT ;
+	currentRatioMotor2Jnt: LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// arm statues init
+m_armIdx:=i_armIdx;
+m_gripAngle:=0;
+
+// joint init
+FOR i:=1 TO g_mJntNum DO
+	m_joints[i].init(m_armIdx, i);
+END_FOR
+
+// dynamic model init
+m_gravityModel.init(m_armIdx);
+
+// get joint data
+FOR i:=1 TO g_mJntNum DO
+	m_curJntPos[i] := m_joints[i].jntPos;
+	m_curJntVel[i] := m_joints[i].jntVel;
+	m_curJntTrq[i] := m_joints[i].jntTrq;
+	m_cmdJntPos[i] := m_curJntPos[i];
+	m_cmdJntVel[i] := 0.0;
+	m_cmdJntTrq[i] := 0.0;
+	m_jntOPMode[i] := DriverOPMode_Pos;
+END_FOR 
+
+// compute cartesion pose
+forwardKinematic(i_jntPos:=m_curJntPos,r_curCartPose:=m_curCartPose);
+FOR i:=1 TO g_cartDofs DO
+	m_curCartTwist[i]:=0;
+END_FOR
+
+// compute jacobian
+calcJaco(i_jntPos:=m_curJntPos,r_jaco:=m_jaco);
+
+// joint controller init
+FOR i:=1 TO g_mJntNum DO 
+	currentRatioMotor2Jnt:=g_motorTrqConst[i]*g_motorReduction[i]/1000;
+	m_jntPIDCtrl[i].init(g_armControlLoopInterval,g_posKp[i],g_posKd[i],g_posKi[i],
+		g_posKiLimit[i]* currentRatioMotor2Jnt,	g_posCtrlLimit[i]*currentRatioMotor2Jnt);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="inverseKinematic" Id="{a2d4ef4e-dcb4-4918-aceb-3d3fb8d74093}">
+      <Declaration><![CDATA[// from cartesian pose in arm origin to active joint position
+METHOD PUBLIC inverseKinematic : BOOL
+VAR_INPUT
+	q4:LREAL;
+	solution_ID:INT;
+END_VAR
+VAR_IN_OUT CONSTANT
+	i_curCartPose :ST_Frame;
+END_VAR
+VAR_IN_OUT
+	r_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
+END_VAR
+VAR
+	a3,a4,d1,d4:LREAL;
+	px,py,pz:lreal;
+	nx,ny,nz:lreal;
+	ox,oy,oz:lreal;
+	ax,ay,az:lreal;
+
+	q1,q2,q3,q5,q6,q7:LREAL;
+	
+	q11,q12:LREAL;
+	k1,A,B,C,fi,R0,q21,q22:lreal;
+	ins1,ins2:lreal;
+	
+	A11,A12,A21,A22,C1,C2:lreal;
+	SIN23,COS23,q23:lreal;
+	
+	T_74_left_23,q61,q62:lreal;
+	T_74_left_13,T_74_left_33:lreal;
+	T_74_left_21,T_74_left_22:LREAL;	
+	
+	succeed_1,succeed_2,succeed:BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+//***********************单臂逆向运动学**************************//
+d1:=g_d1;
+d4:=g_d4;
+a3:=g_a3;
+a4:=g_a4;
+
+nx:=i_curCartPose.m_rot[1,1];  ny:=i_curCartPose.m_rot[2,1];  nz:=i_curCartPose.m_rot[3,1];
+ox:=i_curCartPose.m_rot[1,2]; oy:=i_curCartPose.m_rot[2,2];  oz:=i_curCartPose.m_rot[3,2];
+ax:=i_curCartPose.m_rot[1,3];  ay:=i_curCartPose.m_rot[2,3];  az:=i_curCartPose.m_rot[3,3];
+px:=i_curCartPose.m_pos[1]; py:=i_curCartPose.m_pos[2]; pz:=i_curCartPose.m_pos[3];
+
+
+//求解q1
+q11:=atan2(y:= py, x:= px);
+q12:=-q11;
+IF (Solution_ID<=4) THEN
+	q1:=q11;
+ELSE
+	q1:=q12;
+END_IF
+
+
+
+//求解q2
+k1:=px*COS(q1) + py*SIN(q1);
+A:=2*a3*pz - 2*a3*d1;
+B:=2*a3*k1;
+C:=a3*a3 - a4*a4 + d1*d1 - 2*d1*pz - d4*d4 + k1*k1 + pz*pz;
+fi:=atan2(y:= B, x:= A);
+
+R0:=SQRT(A*A+B*B);
+
+//*************程序保护性处理，避免软件崩溃***************//
+IF ABS(C/R0)>1 THEN
+	succeed_1:=FALSE;
+	succeed:=FALSE;
+	RETURN;
+ELSE
+	succeed_1:=TRUE;
+END_IF
+
+ins1:=atan2(y:= C/R0, x:= SQRT(1-(C/R0)*(C/R0)));
+q21:=fi-ins1;
+ins2:=atan2(y:= C/R0, x:= -SQRT(1-(C/R0)*(C/R0)));
+q22:=fi-ins2;
+
+IF (Solution_ID=1) OR (Solution_ID=2) OR (Solution_ID=5) OR (Solution_ID=6) THEN
+	q2:=q21;
+ELSE
+	q2:=q22;
+END_IF
+
+
+
+
+//求解q3
+A11:=- d4;
+A12:=a4;
+A21:=- a4;
+A22:=-d4;
+C1:=k1- a3*COS(q2);
+C2:=pz - d1 + a3*SIN(q2);
+sin23:=(C1*A22-C2*A12)/(A11*A22-A21*A12);
+cos23:=(C2*A11-C1*A21)/(A11*A22-A21*A12);
+q23:=atan2(y:= sin23, x:= cos23);
+q3:=q23-q2;
+
+
+
+
+//求解q6
+T_74_left_23:=ax*(COS(q4)*SIN(q1) - COS(q1)*COS(q2)*COS(q3)*SIN(q4) + COS(q1)*SIN(q2)*SIN(q3)*SIN(q4)) - ay*(COS(q1)*COS(q4) + COS(q2)*COS(q3)*SIN(q1)*SIN(q4) - SIN(q1)*SIN(q2)*SIN(q3)*SIN(q4)) + az*SIN(q2 + q3)*SIN(q4);
+
+//*************程序保护性处理，避免软件崩溃***************//
+IF ABS(T_74_left_23>1) THEN
+	succeed_2:=FALSE;
+	succeed:=FALSE;
+	RETURN;
+ELSE
+	succeed_2:=TRUE;
+END_IF
+
+q61:=ACOS(-T_74_left_23);
+q62:=-ACOS(-T_74_left_23);
+IF (Solution_ID=1) OR (Solution_ID=3) OR (Solution_ID=5) OR (Solution_ID=7) THEN
+	q6:=q61;
+ELSE
+	q6:=q62;
+END_IF
+
+
+//求解q5
+T_74_left_13:=ax*(SIN(q1)*SIN(q4) + COS(q1)*COS(q2)*COS(q3)*COS(q4) - COS(q1)*COS(q4)*SIN(q2)*SIN(q3)) - ay*(COS(q1)*SIN(q4) - COS(q2)*COS(q3)*COS(q4)*SIN(q1) + COS(q4)*SIN(q1)*SIN(q2)*SIN(q3)) - az*SIN(q2 + q3)*COS(q4);
+T_74_left_33:=- az*COS(q2 + q3) - ax*SIN(q2 + q3)*COS(q1) - ay*SIN(q2 + q3)*SIN(q1);
+q5:=atan2(y:= T_74_left_33*SIN(q6), x:= T_74_left_13*SIN(q6));
+
+
+//求解q7
+T_74_left_21:=nx*(COS(q4)*SIN(q1) - COS(q1)*COS(q2)*COS(q3)*SIN(q4) + COS(q1)*SIN(q2)*SIN(q3)*SIN(q4)) - ny*(COS(q1)*COS(q4) + COS(q2)*COS(q3)*SIN(q1)*SIN(q4) - SIN(q1)*SIN(q2)*SIN(q3)*SIN(q4)) + nz*SIN(q2 + q3)*SIN(q4);
+T_74_left_22:=ox*(COS(q4)*SIN(q1) - COS(q1)*COS(q2)*COS(q3)*SIN(q4) + COS(q1)*SIN(q2)*SIN(q3)*SIN(q4)) - oy*(COS(q1)*COS(q4) + COS(q2)*COS(q3)*SIN(q1)*SIN(q4) - SIN(q1)*SIN(q2)*SIN(q3)*SIN(q4)) + oz*SIN(q2 + q3)*SIN(q4);
+q7:=atan2(y:= -T_74_left_22*SIN(q6), x:= T_74_left_21*SIN(q6));
+
+
+//! convert DH joint postion to active joint position
+r_jntPos[1]:=q1;
+r_jntPos[2]:=q2;
+r_jntPos[3]:=q3+q2; // q8 = q3+q2
+r_jntPos[4]:=q4+q2-r_jntPos[3]+pi/2;//q4DH=q4motor+q8-q2-90;  
+r_jntPos[5]:=q5;
+r_jntPos[6]:=q6;
+r_jntPos[7]:=q7;
+
+succeed:=TRUE;
+inverseKinematic:=succeed;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isEnabled" Id="{00a67cf8-62b1-4004-a2ca-9469bb0f3cab}">
+      <Declaration><![CDATA[METHOD PUBLIC isEnabled : BOOL
+VAR_IN_OUT CONSTANT
+	i_jntIdx :Vec7i;
+END_VAR
+VAR
+	i :INT ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[isEnabled := TRUE;
+FOR i:=1 TO g_mJntNum DO
+	IF 1= i_jntIdx[i] THEN
+		isEnabled :=  (m_joints[i].isEnabled() AND isEnabled);
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="jntGravity" Id="{72dbb3a4-f37f-4edd-afb1-2190cd1f62fc}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntGravity : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{5c8a2ae5-eaad-400d-b638-ec46a75b5ccb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntGravity:=m_jntGravity;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{64877e70-871f-4cf1-ba0c-28657dc77285}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_jntGravity:=jntGravity;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="jntOPMode" Id="{d4616337-b65c-43a5-b67d-4d2cac41c557}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntOPMode : Vec7i]]></Declaration>
+      <Get Name="Get" Id="{bc4de4a5-0921-4d94-91eb-29c8ac17443b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntOPMode:=m_jntOPMode;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{7ae429fa-2df8-4e3d-af66-42389d0d0787}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_jntOPMode:=jntOPMode;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
+      <Declaration><![CDATA[// update joints control command
+METHOD PUBLIC updateCmds : BOOL
+VAR_IN_OUT CONSTANT
+	i_armCtrlCmd : ST_ArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntEnableFlag :=i_armCtrlCmd.m_jntEnableFlag;
+m_jntOPMode:=i_armCtrlCmd.m_jntOPMode;
+m_cmdJntPos:=i_armCtrlCmd.m_cmdJntPos;
+m_cmdJntVel:=i_armCtrlCmd.m_cmdJntVel;
+m_cmdJntAcc:=i_armCtrlCmd.m_cmdJntAcc;
+m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
+
+enable(m_jntEnableFlag);
+
+FOR i:=1 TO g_mJntNum DO 
+	IF m_jntOPMode[i]=DriverOPMode_PosTrq THEN
+		// position controller and gravity feedforward
+		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i],m_cmdJntVel[i],m_curJntVel[i]);
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
+	ELSIF m_jntOPMode[i]=DriverOPMode_Trq THEN
+		// gravity feedforward
+		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
+		m_cmdJntPos[i] :=m_curJntPos[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
+	ELSE
+		m_jntPIDCtrl[i].reset();
+		m_cmdJntTrq[i]:=0;
+	END_IF
+	m_joints[i].updateCmds(m_jntOPMode[i],m_cmdJntPos[i],m_cmdJntTrq[i]);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateStatus" Id="{21b3fe9a-0eba-4313-bb9a-33b1f0038771}">
+      <Declaration><![CDATA[// update arm status, including kinematic and dynamic
+METHOD PUBLIC updateStatus : BOOL
+VAR_INPUT
+END_VAR
+VAR 
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// grip angle
+m_gripAngle :=calcGripAngle();
+
+// update joint data
+FOR i:=1 TO g_mArmNum DO
+	m_joints[i].updateStatus();
+END_FOR
+
+// get joint data
+FOR i:=1 TO g_mJntNum DO
+	m_curJntPos[i]:=m_joints[i].jntPos;
+	m_curJntVel[i]:=m_joints[i].jntVel;
+	m_curJntTrq[i]:=m_joints[i].jntTrq;
+END_FOR 
+
+// cartesion pose
+forwardKinematic(m_curJntPos,m_curCartPose);
+
+// jacobian
+calcJaco(m_curJntPos,m_jaco);
+
+// cartesian twist
+m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);
+
+// graivity compensation
+m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterArm">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.armIdx.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.calcGripAngle">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.calcJaco">
+      <LineId Id="81" Count="10" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="29" Count="50" />
+      <LineId Id="98" Count="8" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntAcc.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntAcc.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntPos.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntTrq.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntTrq.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntVel.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curCartPose.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curCartTwist.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntPos.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntTrq.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntTrq.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntVel.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curJntVel.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.enable">
+      <LineId Id="15" Count="2" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.forwardKinematic">
+      <LineId Id="65" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="66" Count="5" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="18" Count="11" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.gripAngle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.init">
+      <LineId Id="71" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="16" Count="7" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="31" Count="2" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="39" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.inverseKinematic">
+      <LineId Id="13" Count="2" />
+      <LineId Id="131" Count="2" />
+      <LineId Id="19" Count="5" />
+      <LineId Id="27" Count="91" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="119" Count="11" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.isEnabled">
+      <LineId Id="19" Count="0" />
+      <LineId Id="15" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jntGravity.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jntGravity.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jntOPMode.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jntOPMode.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.updateCmds">
+      <LineId Id="41" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="3" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="9" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.updateStatus">
+      <LineId Id="30" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="26" Count="3" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="56" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
