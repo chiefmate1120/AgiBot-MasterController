@@ -157,6 +157,7 @@ END_VAR
         <ST><![CDATA[getRegMat(m_armIdx,i_jntPos,regMat);
 
 FOR i:=2 TO 6 DO
+	r_gravity[i]:=0;
 	FOR j:=1 TO 16 DO
 		r_gravity[i]:=r_gravity[i]+regMat[i-1,j]*m_gravityParam[j];
 	END_FOR
@@ -357,7 +358,9 @@ END_IF
     </LineIds>
     <LineIds Name="FB_MasterGravity.run">
       <LineId Id="55" Count="0" />
-      <LineId Id="57" Count="3" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="59" Count="1" />
       <LineId Id="62" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>

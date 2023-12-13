@@ -17,6 +17,9 @@ STRUCT
 	// slave robot information, import from other device
 	m_slaveStatus AT %I*:ST_SlaveStatus;
 	
+	// master dynamic data
+	m_masterDynaData AT %I* : ST_MasterDynaData;
+	
 END_STRUCT
 END_TYPE
 ]]></Declaration>

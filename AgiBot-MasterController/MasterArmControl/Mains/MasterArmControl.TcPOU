@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="MAIN_ArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
-    <Declaration><![CDATA[PROGRAM MAIN_ArmControl
+  <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
 	// flag to init robot
-	g_robotInit :BOOL :=FALSE;
+	m_robotInit :BOOL :=FALSE;
 	
 	// master robot
-	g_masterRobot:FB_MasterRobot;
+	m_masterRobot:FB_MasterRobot;
 	
 	// master robot information, including arm status and cartesian data
 	m_masterStatus AT %Q* :ST_MasterStatus;
@@ -26,20 +26,20 @@ END_VAR
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
 
 // robot init
-IF g_robotInit =FALSE THEN
-	g_masterRobot.Init();
-	g_robotInit:=TRUE;
+IF m_robotInit =FALSE THEN
+	m_masterRobot.Init();
+	m_robotInit:=TRUE;
 END_IF
 
 // robot run
-g_masterRobot.run(m_masterInputDataPool);
+m_masterRobot.run(m_masterInputDataPool);
 
 // update data pool
-g_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
+m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
-    <LineIds Name="MAIN_ArmControl">
+    <LineIds Name="MasterArmControl">
       <LineId Id="85" Count="1" />
       <LineId Id="62" Count="0" />
       <LineId Id="2" Count="0" />

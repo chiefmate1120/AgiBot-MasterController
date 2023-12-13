@@ -226,7 +226,7 @@ IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
 	m_motorOutputs.m_cmdMotorEncoder :=pos2Encoder(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
-	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(i_cmdTrq*m_trq2Current);
+	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, i_cmdTrq*m_trq2Current,m_maxCurrent));
 	m_motorOutputs.m_cmdMotorEncoder :=m_motorInputs.m_motorEncoder; 
 END_IF]]></ST>
       </Implementation>

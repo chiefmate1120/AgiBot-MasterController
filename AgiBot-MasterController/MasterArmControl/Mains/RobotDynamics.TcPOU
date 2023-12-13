@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM RobotDynamics
+
+VAR
+	// master robot arms joint data
+	m_masterJointsData AT %I* :ST_MasterJointData;
+	
+	// dynamic output
+	m_masterDynaData AT %Q* : ST_MasterDynaData;
+	
+	// flag to init robot dynamic model
+	m_robotDynaInit :BOOL :=FALSE;
+	
+	// grivity model block
+	m_gravityModel :ARRAY[1..g_mArmNum] OF FB_MasterGravity;
+	
+	i: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// robot dynamic model init
+IF m_robotDynaInit =FALSE THEN
+	FOR i:=1 TO g_mArmNum DO
+		m_gravityModel[i].Init(i);
+	END_FOR
+
+	m_robotDynaInit:=TRUE;
+END_IF
+
+// run dynamic
+FOR i:=1 TO g_mArmNum DO
+	m_gravityModel[i].run(m_masterJointsData.m_curJntPos[i], m_masterDynaData.m_gravity[i]);
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="RobotDynamics">
+      <LineId Id="15" Count="1" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="28" Count="2" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

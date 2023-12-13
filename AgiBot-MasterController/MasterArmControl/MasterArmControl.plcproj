@@ -19,6 +19,9 @@
     <Released>false</Released>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DUTs\Structure\Communication\ST_MasterDynaData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\Communication\ST_UIData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -46,10 +49,13 @@
     <Compile Include="DUTs\Structure\Communication\ST_SafetyData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MasterInputDataPool.TcDUT">
+    <Compile Include="DUTs\Structure\ST_ArmCtrlCmds.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\ST_ArmCtrlCmds.TcDUT">
+    <Compile Include="DUTs\Structure\ST_MasterInputDataPool.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Mat7d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FBRedunOriControl.TcPOU">
@@ -148,25 +154,25 @@
     <Compile Include="FBs_TrajectoryPlanning\TrapezoIDal_velocity_trajectory.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\addVec7.TcPOU">
+    <Compile Include="AgiMaths\addVec7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\multiNumVec3.TcPOU">
+    <Compile Include="AgiMaths\multiNumVec3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\multiNumVec7.TcPOU">
+    <Compile Include="AgiMaths\multiNumVec7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\normVec3.TcPOU">
+    <Compile Include="AgiMaths\normVec3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\normVec7.TcPOU">
+    <Compile Include="AgiMaths\normVec7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\subVec7.TcPOU">
+    <Compile Include="AgiMaths\subVec7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\subVec3.TcPOU">
+    <Compile Include="AgiMaths\subVec3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_MasterGravity.TcPOU">
@@ -206,40 +212,34 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="MAIN_ArmControl.TcPOU">
+    <Compile Include="AgiMaths\addVec3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\addVec3.TcPOU">
+    <Compile Include="AgiMaths\atan2.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\atan2.TcPOU">
+    <Compile Include="AgiMaths\cot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\cot.TcPOU">
+    <Compile Include="AgiMaths\mat3Mat3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\mat3Mat3.TcPOU">
+    <Compile Include="AgiMaths\mat3Vec3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\mat3Vec3.TcPOU">
+    <Compile Include="AgiMaths\mat67Vec7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\mat67Vec7.TcPOU">
+    <Compile Include="AgiMaths\rotZ.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\rotZ.TcPOU">
+    <Compile Include="AgiMaths\rotY.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\rotY.TcPOU">
+    <Compile Include="AgiMaths\rotX.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Maths\rotX.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Maths\transform.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="PlcTask.TcTTO">
+    <Compile Include="AgiMaths\transform.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Robots\FB_Joint.TcPOU">
@@ -263,6 +263,18 @@
     <Compile Include="FBs_StateControllers\I_MasterArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mains\MasterArmControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mains\RobotDynamics.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskDynamic.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DUTs" />
@@ -275,11 +287,11 @@
     <Folder Include="FBs_Filters" />
     <Folder Include="GVLs" />
     <Folder Include="FBs_BasicControllers" />
-    <Folder Include="Maths" />
+    <Folder Include="AgiMaths" />
     <Folder Include="FBs_StateControllers" />
     <Folder Include="FBs_Robots" />
     <Folder Include="VISUs" />
-    <Folder Include="POUs" />
+    <Folder Include="Mains" />
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="Tc2_Math">

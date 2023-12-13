@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="Mat7d" Id="{d7487be2-fc82-4961-b87e-2055e0658ce4}">
+    <Declaration><![CDATA[TYPE Mat7d : ARRAY[1..7, 1..7] OF LREAL; END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

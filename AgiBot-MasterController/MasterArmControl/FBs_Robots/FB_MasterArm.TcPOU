@@ -22,7 +22,7 @@ VAR
 	m_cmdCartPose : ST_Frame;
 	m_cmdCartTwist : Vec6d;
 	m_curCartPose	:ST_Frame;
-	m_curCartTwist:ARRAY[1..g_cartDofs] OF LREAL;
+	m_curCartTwist: Vec6d;
 	
 	// arm joint data
 	m_curMotorPos :Vec7d;
@@ -38,16 +38,14 @@ VAR
 	m_jntEnableFlag :Vec7i;
 	
 	// arm daynamic data
-	m_jntGravity :ARRAY[1..g_mJntNum] OF LREAL;
+	m_jntGravity : Vec7d;
+	m_jntMassMat : Mat7d;
 	
 	// arm jacobian 
 	m_jaco :ARRAY[1..g_cartDofs, 1..g_mJntNum] OF LREAL;
 	
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_mJntNum] OF FB_PID;
-	
-	// grivity model
-	m_gravityModel : FB_MasterGravity;
 	
 END_VAR
 ]]></Declaration>
@@ -407,9 +405,6 @@ FOR i:=1 TO g_mJntNum DO
 	m_joints[i].init(m_armIdx, i);
 END_FOR
 
-// dynamic model init
-m_gravityModel.init(m_armIdx);
-
 // get joint data
 FOR i:=1 TO g_mJntNum DO
 	m_curJntPos[i] := m_joints[i].jntPos;
@@ -672,9 +667,22 @@ FOR i:=1 TO g_mJntNum DO
 	ELSE
 		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=0;
+		m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
 	END_IF
-	m_joints[i].updateCmds(m_jntOPMode[i],m_cmdJntPos[i],m_cmdJntTrq[i]);
+	
 END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateDyna" Id="{02de28e3-c8a7-46cf-834a-5bf048b5e039}">
+      <Declaration><![CDATA[METHOD PUBLIC updateDyna : BOOL
+VAR_IN_out constant
+	i_massMat :Mat7d;
+	i_gravity :Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_jntMassMat:=i_massMat;
+m_jntGravity:=i_gravity;]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{21b3fe9a-0eba-4313-bb9a-33b1f0038771}">
@@ -710,10 +718,7 @@ forwardKinematic(m_curJntPos,m_curCartPose);
 calcJaco(m_curJntPos,m_jaco);
 
 // cartesian twist
-m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);
-
-// graivity compensation
-m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
+m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_MasterArm">
@@ -801,9 +806,6 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="1" />
       <LineId Id="69" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="56" Count="0" />
       <LineId Id="16" Count="7" />
       <LineId Id="46" Count="0" />
       <LineId Id="14" Count="0" />
@@ -864,8 +866,13 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
       <LineId Id="21" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="64" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="9" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.updateDyna">
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateStatus">
       <LineId Id="30" Count="2" />
@@ -884,9 +891,6 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="47" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="56" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

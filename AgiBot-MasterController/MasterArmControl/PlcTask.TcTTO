@@ -5,7 +5,7 @@
     <CycleTime>250</CycleTime>
     <Priority>20</Priority>
     <PouCall>
-      <Name>MAIN_ArmControl</Name>
+      <Name>MasterArmControl</Name>
     </PouCall>
     <TaskFBGuid>{80323439-0210-458a-af54-d2d3abd64ffe}</TaskFBGuid>
     <Fb_init>{3f7c4b99-e358-47ad-811d-5bc5a962bb7b}</Fb_init>
