@@ -19,6 +19,8 @@ VAR
 	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
 	
 	// arm cartesian data, defined in each arm origin
+	m_cmdCartPose : ST_Frame;
+	m_cmdCartTwist : Vec6d;
 	m_curCartPose	:ST_Frame;
 	m_curCartTwist:ARRAY[1..g_cartDofs] OF LREAL;
 	
@@ -34,8 +36,6 @@ VAR
 	m_cmdJntTrq :Vec7d;
 	m_jntOPMode :Vec7i;
 	m_jntEnableFlag :Vec7i;
-	m_cmdCartPose : ST_Frame;
-	m_cmdCartTwist : Vec6d;
 	
 	// arm daynamic data
 	m_jntGravity :ARRAY[1..g_mJntNum] OF LREAL;

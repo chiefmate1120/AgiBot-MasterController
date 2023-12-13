@@ -15,13 +15,17 @@ VAR
 	// master robot joint data
 	m_masterJointsData AT %Q* :ST_MasterJointData;
 	
-	// 
+	// all data from other tasks and controller 
 	m_masterInputDataPool : ST_MasterInputDataPool;
 	
+	// code execute time measure
+	m_codeTime : Profiler;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// robot init
+      <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+// robot init
 IF g_robotInit =FALSE THEN
 	g_masterRobot.Init();
 	g_robotInit:=TRUE;
@@ -31,9 +35,12 @@ END_IF
 g_masterRobot.run(m_masterInputDataPool);
 
 // update data pool
-]]></ST>
+g_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
+
+m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <LineIds Name="MAIN_ArmControl">
+      <LineId Id="85" Count="1" />
       <LineId Id="62" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="8" Count="0" />
@@ -45,6 +52,8 @@ g_masterRobot.run(m_masterInputDataPool);
       <LineId Id="63" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="64" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="87" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
