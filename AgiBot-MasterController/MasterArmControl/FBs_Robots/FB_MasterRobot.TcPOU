@@ -7,6 +7,9 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// master-slave motion scale
+	m_motionScale :LREAL;
+	
 	// monitor angle
 	m_monitorAngle :LREAL;
 	
@@ -21,11 +24,23 @@ VAR
 	// index(1 to 4) of slave arm which is tele-linked to master arm
 	m_teleSlaveArmIdx:ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx:=[MatchedSlaveArmIdx_NULL, MatchedSlaveArmIdx_null];
 	
-	// arm controller interface and all the real controllers
-	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
+	// all arm controller instance 
+	m_armCtrlFactory :ARRAY[1..g_mArmNum,1..MasterArmState_totalNum] OF I_MasterArmCtrl;
+	m_armError :ARRAY[1..g_mArmNum] OF FB_ArmError;
 	m_armInit :ARRAY[1..g_mArmNum] OF FB_ArmInit;
 	m_armHome :ARRAY[1..g_mArmNum] OF FB_ArmHome;
 	m_armStandBy :ARRAY[1..g_mArmNum] OF FB_ArmStandBy;
+	m_armMatching :ARRAY[1..g_mArmNum] OF FB_ArmMatching;
+	m_armReady :ARRAY[1..g_mArmNum] OF FB_ArmReady;
+	m_armMasterSlave :ARRAY[1..g_mArmNum] OF FB_ArmMasterSlave;
+	m_armClutch :ARRAY[1..g_mArmNum] OF FB_ArmClutch;
+	m_armEndoscope :ARRAY[1..g_mArmNum] OF FB_ArmEndoscope;
+	m_armCart :ARRAY[1..g_mArmNum] OF FB_ArmCart;
+	
+	// arm controller interface
+	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
+	m_armCtrlCmds :ARRAY[1..g_mArmNum] OF ST_ArmCtrlCmds;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -33,6 +48,45 @@ END_VAR
 
 ]]></ST>
     </Implementation>
+    <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
+      <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
+VAR_IN_OUT
+	// master robot information, including arm status and cartesian data
+	r_masterStatus :ST_MasterStatus;
+	
+	// master robot joint data
+	r_masterJointsData :ST_MasterJointData;
+	
+END_VAR
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_masterStatus.m_motionScale := m_motionScale;
+r_masterStatus.m_armState:=m_masterArmState;
+r_masterStatus.m_teleSlaveArmIdx := m_teleSlaveArmIdx;
+FOR i:=1 TO g_mArmNum DO
+	// cartesion info
+	r_masterStatus.m_gripAngle[i]:=m_masterArms[i].gripAngle;
+	r_masterStatus.m_cmdArmPose[i]:=m_masterArms[i].cmdCartPose;
+	r_masterStatus.m_curArmPose[i]:=m_masterArms[i].curCartPose;
+	r_masterStatus.m_cmdArmTwist[i]:=m_masterArms[i].cmdCartTwist;
+	r_masterStatus.m_curArmTwist[i]:=m_masterArms[i].curCartTwist;
+	
+	// joint info
+	r_masterJointsData.m_curMotorPos[i]:=m_masterArms[i].curMotorPos;
+	r_masterJointsData.m_curLinkPos[i]:=m_masterArms[i].curLinkPos;
+	r_masterJointsData.m_cmdJntPos[i]:=m_masterArms[i].cmdJntPos;
+	r_masterJointsData.m_curJntPos[i]:=m_masterArms[i].curJntPos;
+	r_masterJointsData.m_cmdJntVel[i]:=m_masterArms[i].curJntVel;
+	r_masterJointsData.m_curJntVel[i]:=m_masterArms[i].curJntVel;
+	r_masterJointsData.m_cmdJntTrq[i]:=m_masterArms[i].cmdJntTrq;
+	r_masterJointsData.m_curJntTrq[i]:=m_masterArms[i].curJntTrq;
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Init" Id="{610a17f3-34c5-4e3c-bbbc-19f9c2f46946}">
       <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
 VAR_INPUT
@@ -43,39 +97,62 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
+	// arm init
 	m_masterArms[i].Init(i);
 	m_masterArmState[i]:=MasterArmState_Init;
 	m_lastMasterArmState[i]:=MasterArmState_Init;
 	m_nextMasterArmState[i]:=MasterArmState_Init;
 	m_teleSlaveArmIdx[i]:=MatchedSlaveArmIdx_NULL;
-	m_armCtrl[i]:=m_armInit[i];
-END_FOR]]></ST>
+	
+	// generate controller factory
+	m_armCtrlFactory[i,MasterArmState_Error] := m_armError[i];
+	m_armCtrlFactory[i,MasterArmState_Init] := m_armInit[i];
+	m_armCtrlFactory[i,MasterArmState_Home] := m_armHome[i];
+	m_armCtrlFactory[i,MasterArmState_Standby] := m_armStandBy[i];
+	m_armCtrlFactory[i,MasterArmState_Matching] := m_armMatching[i];
+	m_armCtrlFactory[i,MasterArmState_Ready] := m_armReady[i];
+	m_armCtrlFactory[i,MasterArmState_MasterSlave] := m_armMasterSlave[i];
+	m_armCtrlFactory[i,MasterArmState_Clutch] := m_armClutch[i];
+	m_armCtrlFactory[i,MasterArmState_Endoscope] := m_armEndoscope[i];
+	m_armCtrlFactory[i,MasterArmState_Cart] := m_armCart[i];
+
+	// assign controller
+	m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
+END_FOR
+	]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{ed6f787a-4dc0-4602-b386-92a3c3880a23}">
       <Declaration><![CDATA[METHOD PUBLIC run : BOOL
 VAR_IN_OUT CONSTANT
-	i_cartStatus :ST_CartStatus;
-	
-	i_slaveStatus :ST_SlaveStatus;
+	i_masterInputDataPool:ST_MasterInputDataPool;
 END_VAR
 VAR
 	i:INT;
-	armCtrlCmds :ST_ArmCtrlCmds;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// state machine transition
-stateMachine(i_cartStatus,i_slaveStatus);
+        <ST><![CDATA[m_motionScale := i_masterInputDataPool.m_UIData.m_motionScale;
+m_monitorAngle := i_masterInputDataPool.m_cartStatus.m_monitorAngle;
+
+// state machine transition
+stateMachine(i_masterInputDataPool);
 
 FOR i:=1 TO g_mArmNum DO
 	// update master arm kinematics
 	m_masterArms[i].updateStatus();
 	
+	// null ptr check
+	IF 0 = m_armCtrl[i] THEN
+		EXIT;
+	END_IF
+	
 	// run controller
-	m_armCtrl[i].run(i_cartStatus.m_monitorAngle, m_teleSlaveArmIdx[i],m_masterArms[i],i_slaveStatus,armCtrlCmds);
+	m_armCtrl[i].run(m_monitorAngle, m_teleSlaveArmIdx[i], m_masterArms[i],
+						i_masterInputDataPool.m_slaveStatus,m_armCtrlCmds[i]);
 
 	// update commands to drivers
-	m_masterArms[i].updateCmds(armCtrlCmds);
+	m_masterArms[i].updateCmds(m_armCtrlCmds[i]);
+
 END_FOR
 
 ]]></ST>
@@ -85,15 +162,14 @@ END_FOR
       <Declaration><![CDATA[// state machine check and transit 
 METHOD PROTECTED stateMachine : BOOL
 VAR_IN_OUT CONSTANT
-	i_cartStatus :ST_CartStatus;
-	
-	i_slaveStatus :ST_SlaveStatus;
+		i_masterInputDataPool:ST_MasterInputDataPool;
 END_VAR
 VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
+	// State machine transit 
 	CASE m_masterArmState[i] OF
 		// init
 		MasterArmState_Init:
@@ -104,9 +180,20 @@ END_VAR]]></Declaration>
 		//home
 		MasterArmState_Home:
 			IF m_armCtrl[i].isFinished  THEN
-				m_nextMasterArmState[i]:=MasterArmState_Home;
+	//			m_nextMasterArmState[i]:=MasterArmState_Standby;
 			END_IF
 	END_CASE
+	
+	// Controller transit
+	IF m_nextMasterArmState[i]<> m_masterArmState[i] THEN
+		// reset current controller
+		m_armCtrl[i].reset();
+		
+		// transit to new one
+		m_lastMasterArmState[i]:=m_masterArmState[i];
+		m_masterArmState[i]:=m_nextMasterArmState[i];
+		m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
+	END_IF
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -115,27 +202,53 @@ END_FOR]]></ST>
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterRobot.getStatus">
+      <LineId Id="29" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="25" Count="3" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="33" Count="7" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
       <LineId Id="5" Count="0" />
+      <LineId Id="60" Count="0" />
       <LineId Id="47" Count="4" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="62" Count="9" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="72" Count="0" />
       <LineId Id="12" Count="1" />
+      <LineId Id="61" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.run">
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="79" Count="0" />
       <LineId Id="19" Count="2" />
       <LineId Id="11" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="5" Count="0" />
-      <LineId Id="54" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="73" Count="2" />
+      <LineId Id="71" Count="0" />
       <LineId Id="56" Count="1" />
+      <LineId Id="81" Count="0" />
       <LineId Id="59" Count="0" />
       <LineId Id="58" Count="0" />
       <LineId Id="55" Count="0" />
+      <LineId Id="69" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="22" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.stateMachine">
       <LineId Id="5" Count="0" />
+      <LineId Id="67" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
@@ -145,6 +258,12 @@ END_FOR]]></ST>
       <LineId Id="45" Count="1" />
       <LineId Id="44" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="56" Count="3" />
+      <LineId Id="61" Count="2" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="60" Count="0" />
       <LineId Id="16" Count="0" />
     </LineIds>
   </POU>

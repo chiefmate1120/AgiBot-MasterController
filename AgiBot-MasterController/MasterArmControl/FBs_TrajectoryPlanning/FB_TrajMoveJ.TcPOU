@@ -59,7 +59,7 @@ END_VAR]]></Declaration>
 m_moveDistance := normVec7(m_moveDir);
 
 IF(m_moveDistance<g_smallNum) THEN
-	m_moveDir:=g_onesVec7d;
+	m_moveDir:=multiNumVec7(1/7, g_onesVec7d);;
 ELSE
 	m_moveDir:=multiNumVec7(1/m_moveDistance, m_moveDir);
 END_IF
@@ -69,9 +69,11 @@ maxV:=g_largeNum;
 maxA:=g_largeNum;
 maxJ:=g_largeNum;
 FOR i :=1 TO 7 DO 
-	maxV := MIN (maxV, ABS(i_maxJntVel[i]/m_moveDir[i]));
-	maxA := MIN (maxA, ABS(i_maxJntAcc[i]/m_moveDir[i]));
-	maxJ := MIN (maxJ, ABS(i_maxJntJerk[i]/m_moveDir[i]));
+	IF ABS(m_moveDir[i])>g_smallNum THEN
+		maxV := MIN (maxV, ABS(i_maxJntVel[i]/m_moveDir[i]));
+		maxA := MIN (maxA, ABS(i_maxJntAcc[i]/m_moveDir[i]));
+		maxJ := MIN (maxJ, ABS(i_maxJntJerk[i]/m_moveDir[i]));
+	END_IF
 END_FOR
 
 // planning for moving distance
@@ -108,8 +110,11 @@ m_isGenerated:=m_doubleS.isGene;
       <LineId Id="28" Count="0" />
       <LineId Id="27" Count="0" />
       <LineId Id="35" Count="2" />
-      <LineId Id="30" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="31" Count="0" />
       <LineId Id="33" Count="1" />
+      <LineId Id="64" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="38" Count="0" />

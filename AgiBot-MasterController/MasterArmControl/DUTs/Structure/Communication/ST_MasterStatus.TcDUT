@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MasterStatus" Id="{3ac2ae6d-6666-445a-980a-7914313359ec}">
+    <Declaration><![CDATA[// Output from master arm control task, including arm status and cartesian data
+// Input to safety task and Slave controller
+TYPE ST_MasterStatus :
+STRUCT
+	// linear motion scale
+	m_motionScale : LREAL;
+	
+	// state machine
+	m_armState:ARRAY[1..g_mArmNum] OF E_masterArmState;
+	
+	// index(0 to 4) of slave arm which is tele-linked to master arm
+	m_teleSlaveArmIdx :ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx;
+	
+	// grip angle
+	m_gripAngle:ARRAY[1..g_mArmNum] OF LREAL;
+	
+	// command arm pose in monitor
+	m_cmdArmPose :ARRAY[1..g_mArmNum] OF ST_Frame;
+	
+	// current arm pose in monitor
+	m_curArmPose:ARRAY[1..g_mArmNum] OF ST_Frame;
+	
+	// command arm twist[linear velocity; angular veloicty] in monitor
+	m_cmdArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
+	
+	// current arm twist[linear velocity; angular veloicty] in monitor
+	m_curArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

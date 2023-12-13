@@ -3,8 +3,7 @@
   <DUT Name="E_SlaveArmState" Id="{1989848d-a357-4300-a3bc-ded8b39d8e17}">
     <Declaration><![CDATA[TYPE E_SlaveArmState :
 (
-	SlaveArmState_Errot := 0,
-	SlaveArmState_Cart := 1,
+	SlaveArmState_Error := 1,
 	SlaveArmState_Init :=2,
 	SlaveArmState_Standby :=3,
 	SlaveArmState_InstallPanel:=4,
@@ -14,7 +13,8 @@
 	SlaveArmState_MasterSlave :=8,
 	SlaveArmState_InstallScope :=9,
 	SlaveArmState_ScopeReady :=10,
-	SlaveArmState_EndoScope :=11
+	SlaveArmState_EndoScope :=11,
+	SlaveArmState_Cart := 12
 );
 END_TYPE
 ]]></Declaration>

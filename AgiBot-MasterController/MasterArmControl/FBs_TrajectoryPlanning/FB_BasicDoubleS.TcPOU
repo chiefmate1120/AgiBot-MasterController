@@ -53,7 +53,7 @@ VAR
 	q0,q1,v0,v1:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF m_isGenerated := FALSE THEN
+        <ST><![CDATA[IF FALSE = m_isGenerated THEN
 	evaluate := FALSE;
 	RETURN;
 END_IF
@@ -107,7 +107,7 @@ END_IF
 q:=m_sign*q;
 q_dot:=m_sign*q_dot;
 q_ddot:=m_sign*q_dot;
-]]></ST>
+evaluate := TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{24529a50-c281-455f-b66e-18f1a7d82660}">
@@ -133,10 +133,10 @@ IF q[2]=q[1] THEN
 else
 	m_sign:=(q[2]-q[1])/ABS(q[2]-q[1]);
 END_IF
-m_q[1]:=m_sign*m_q[1];
-m_q[2]:=m_sign*m_q[2];
-m_v[1]:=m_sign*m_v[1];
-m_v[2]:=m_sign*m_v[2];
+m_q[1]:=m_sign*q[1];
+m_q[2]:=m_sign*q[2];
+m_v[1]:=m_sign*v[1];
+m_v[2]:=m_sign*v[2];
 m_maxV:=maxV;
 m_maxA:=maxA;
 m_maxJ:=maxJ;
@@ -232,7 +232,8 @@ else
 END_IF
 
 // total duration
-m_duration:=m_Ta+m_Tv+m_Td;]]></ST>
+m_duration:=m_Ta+m_Tv+m_Td;
+m_isGenerated:=TRUE;]]></ST>
       </Implementation>
     </Method>
     <Method Name="trajCheck" Id="{84bd9883-7e5f-46ba-94ef-c11efe5fa6a2}">
@@ -295,6 +296,7 @@ END_IF]]></ST>
       <LineId Id="65" Count="6" />
       <LineId Id="73" Count="35" />
       <LineId Id="5" Count="0" />
+      <LineId Id="135" Count="0" />
     </LineIds>
     <LineIds Name="FB_BasicDoubleS.trajCheck">
       <LineId Id="7" Count="0" />

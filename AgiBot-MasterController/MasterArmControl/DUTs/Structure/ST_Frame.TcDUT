@@ -3,8 +3,8 @@
   <DUT Name="ST_Frame" Id="{0c0aabb6-6c60-4edd-80ca-fa032ce1cbfa}">
     <Declaration><![CDATA[TYPE ST_Frame :
 STRUCT
-	m_pos :ARRAY [1..3] OF LREAL:=[0, 0, 0];
-	m_rot :ARRAY[1..3,1..3] OF LREAL:=[1, 0, 0, 0, 1, 0, 0, 0, 1];
+	m_pos :Vec3d :=g_zeroVec3d;
+	m_rot :Mat3d :=g_eye3d;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

@@ -10,6 +10,8 @@ STRUCT
 	m_cmdJntVel : VEC7d;
 	m_cmdJntAcc : VEC7d;
 	m_cmdJntTrq : VEC7d;
+	m_cmdCartPose : ST_Frame;
+	m_cmdCartTwist : Vec6d;
 	
 END_STRUCT
 END_TYPE

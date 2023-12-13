@@ -23,6 +23,8 @@ VAR
 	m_cmdJntTrq : VEC7d;
 	m_jntOPMode : Vec7i;
 	m_jntEnableFlag :Vec7i;
+	m_cmdCartPose : ST_Frame;
+	m_cmdCartTwist : Vec6d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -88,6 +90,8 @@ END_VAR
         <ST><![CDATA[m_timePeriod:=0;
 m_jntEnableFlag :=g_onesVec7i;
 m_jntOPMode:=g_allPosMode;
+m_cmdCartPose:=i_masterArm.curCartPose;
+m_cmdCartTwist:=g_zeroVec6d;
 m_cmdJntPos:=i_masterArm.curJntPos;
 m_cmdJntVel:=g_zeroVec7d;
 m_cmdJntAcc:=g_zeroVec7d;
@@ -140,8 +144,14 @@ END_VAR]]></Declaration>
 	m_firstIn:=FALSE;
 END_IF
 
+
 // set the joint drive control word and operation mode
 driverCtrl(i_masterArm);
+
+// check if arm enabled
+IF FALSE = i_masterArm.isEnabled(m_jntEnableFlag) THEN
+//	RETURN;
+END_IF
 
 // calculate command joint position--Motion control
 calcCmdJntPos(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
@@ -150,6 +160,8 @@ calcCmdJntPos(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
 calcCmdJntTrq(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
 
 // update commands to arm
+r_masterArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
+r_masterArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
 r_masterArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
 r_masterArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
 r_masterArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
@@ -177,6 +189,7 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="49" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="60" Count="0" />
+      <LineId Id="71" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
@@ -194,8 +207,12 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="7" Count="1" />
       <LineId Id="43" Count="0" />
       <LineId Id="9" Count="0" />
+      <LineId Id="83" Count="0" />
       <LineId Id="44" Count="1" />
       <LineId Id="13" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="88" Count="2" />
       <LineId Id="46" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="1" />
@@ -203,13 +220,13 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="11" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="91" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="25" Count="0" />
       <LineId Id="62" Count="0" />
       <LineId Id="26" Count="1" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="59" Count="0" />
       <LineId Id="61" Count="0" />
+      <LineId Id="84" Count="1" />
       <LineId Id="10" Count="0" />
     </LineIds>
   </POU>

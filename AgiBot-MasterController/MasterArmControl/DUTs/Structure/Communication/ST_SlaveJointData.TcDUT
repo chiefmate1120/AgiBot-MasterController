@@ -1,26 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <DUT Name="ST_SlaveStatus" Id="{8673ecde-c145-4df2-8157-2e6da5d46538}">
-    <Declaration><![CDATA[TYPE ST_SlaveStatus :
+  <DUT Name="ST_SlaveJointData" Id="{775e1618-4069-46ed-920d-0e7ed2d13e2f}">
+    <Declaration><![CDATA[TYPE ST_SlaveJointData :
 STRUCT
-	
-	// state machine
-	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState;
-	
-	// instrument info
-	m_instruStauts :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
-	
-	// command arm pose in endoscope view
-	m_cmdArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
-	
-	// current arm pose in endoscope view
-	m_curArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
-	
-	// command arm twist[linear velocity; angular veloicty] in endoscope view
-	m_cmdArmTwist:ARRAY[1..g_sArmNum,1..6] OF LREAL;
-	
-	// current arm twist[linear velocity; angular veloicty] in endoscope view
-	m_curdArmTwist:ARRAY[1..g_sArmNum,1..6] OF LREAL;
 	
 	// joint position compute with motor encoder
 	m_curMotorPos :ARRAY[1..g_sArmNum, 1..g_sJntNum] OF LREAL;

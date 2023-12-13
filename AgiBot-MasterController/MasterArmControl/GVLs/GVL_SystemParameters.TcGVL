@@ -6,7 +6,7 @@
 	g_mArmNum :INT := 2;	
 	g_mJntNum :INT := 7;	
 	g_sArmNum :INT := 4;	
-	g_sJntNum :INT := 7;
+	g_sJntNum :INT := 11;
 	g_cartDofs :INT :=6;
 	
 	

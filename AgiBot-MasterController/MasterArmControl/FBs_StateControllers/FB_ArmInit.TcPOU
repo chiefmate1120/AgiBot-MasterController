@@ -11,7 +11,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[]]></ST>
+      <ST><![CDATA[
+]]></ST>
     </Implementation>
     <Method Name="driverCtrl" Id="{3c0d3c75-d2c1-4fba-8adc-8dcd06c0025a}">
       <Declaration><![CDATA[METHOD PUBLIC driverCtrl : BOOL
@@ -32,6 +33,7 @@ m_isFinished := i_masterArm.isEnabled(m_jntEnableFlag) ;
       </Implementation>
     </Method>
     <LineIds Name="FB_ArmInit">
+      <LineId Id="18" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_ArmInit.driverCtrl">

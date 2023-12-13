@@ -23,6 +23,8 @@ VAR
 	m_curCartTwist:ARRAY[1..g_cartDofs] OF LREAL;
 	
 	// arm joint data
+	m_curMotorPos :Vec7d;
+	m_curLinkPos :Vec7d;
 	m_curJntPos :Vec7d;
 	m_curJntVel :Vec7d;
 	m_curJntTrq :Vec7d;
@@ -32,6 +34,8 @@ VAR
 	m_cmdJntTrq :Vec7d;
 	m_jntOPMode :Vec7i;
 	m_jntEnableFlag :Vec7i;
+	m_cmdCartPose : ST_Frame;
+	m_cmdCartTwist : Vec6d;
 	
 	// arm daynamic data
 	m_jntGravity :ARRAY[1..g_mJntNum] OF LREAL;
@@ -169,6 +173,28 @@ r_jaco[6,7]:=- SIN(q6)*(COS(q2 + q3)*SIN(q5) + SIN(q2 + q3)*COS(q4)*COS(q5)) - S
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="cmdCartPose" Id="{c3997364-e579-41fe-ac85-7fc2152dd582}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdCartPose : ST_Frame]]></Declaration>
+      <Get Name="Get" Id="{9b1fe5dd-6a99-42a3-8f2a-61988d928f2e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdCartPose:=m_cmdCartPose;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="cmdCartTwist" Id="{cf5145b3-0c22-4550-8e6d-4822d33296a7}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY cmdCartTwist : Vec6d]]></Declaration>
+      <Get Name="Get" Id="{e3e54dbd-1db3-49e1-8c11-7b4f57220fcd}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[cmdCartTwist:=m_cmdCartTwist;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="cmdJntAcc" Id="{1837d422-4a59-4649-8d13-caf5bcaf05f2}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdJntAcc : Vec7d]]></Declaration>
       <Get Name="Get" Id="{37a85dd4-10ac-438e-b9d6-a2b097aedf2b}">
@@ -179,14 +205,6 @@ END_VAR
           <ST><![CDATA[cmdJntAcc:=m_cmdJntAcc;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{60315f4a-94c9-4ff7-9f3f-f341c8ec2a1b}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_cmdJntAcc:=cmdJntAcc;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="cmdJntPos" Id="{0324a98d-052a-47ce-9a9c-ae1c48c549ec}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdJntPos : Vec7d]]></Declaration>
@@ -198,14 +216,6 @@ END_VAR
           <ST><![CDATA[cmdJntPos:=m_cmdJntPos;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{85fbba47-03ba-47a6-89b2-49b5e542531d}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_cmdJntPos:=cmdJntPos;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="cmdJntTrq" Id="{2b924121-25d6-4321-b4bb-536a680ed393}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdJntTrq : Vec7d]]></Declaration>
@@ -217,14 +227,6 @@ END_VAR
           <ST><![CDATA[cmdJntTrq:=m_cmdJntTrq;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{7c7c916c-9610-447d-9724-268c1b918684}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_cmdJntTrq:=cmdJntTrq;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="cmdJntVel" Id="{83d1c02f-eb57-420e-a663-9b09e8c9b8d0}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdJntVel : Vec7d]]></Declaration>
@@ -236,14 +238,6 @@ END_VAR
           <ST><![CDATA[cmdJntVel :=m_cmdJntVel;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{7ac28242-5be2-4d1f-9d83-5580d1c58d57}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_cmdJntVel :=cmdJntVel;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="curCartPose" Id="{d18be23c-99e5-435e-8688-90e0fb3be9ca}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY curCartPose : ST_Frame]]></Declaration>
@@ -277,14 +271,6 @@ END_VAR
           <ST><![CDATA[curJntPos:=m_curJntPos;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{6b07d7bc-103c-44c5-8c67-7a87da44f991}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_curJntPos:=curJntPos;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="curJntTrq" Id="{8c78ba58-302c-4844-9d36-e487700a0e19}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY curJntTrq : Vec7d]]></Declaration>
@@ -296,14 +282,6 @@ END_VAR
           <ST><![CDATA[curJntTrq:=m_curJntTrq;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{4191f74e-07a3-4b2a-ba64-1b4d42d6f79d}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_curJntTrq:=curJntTrq;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="curJntVel" Id="{904c68d5-30c9-4ed3-b3c5-6bcd345bcd5a}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY curJntVel : Vec7d]]></Declaration>
@@ -315,14 +293,28 @@ END_VAR
           <ST><![CDATA[curJntVel:=m_curJntVel;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{57765f62-7f8a-4f7f-b40b-fc9105cacf45}">
+    </Property>
+    <Property Name="curLinkPos" Id="{3725bf51-2c50-4574-b2a7-e2af9fd4da29}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curLinkPos : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{cff7c92f-5276-4a58-b7ca-f6248868b409}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
         <Implementation>
-          <ST><![CDATA[m_curJntVel:=curJntVel;]]></ST>
+          <ST><![CDATA[curLinkPos:=m_curLinkPos;]]></ST>
         </Implementation>
-      </Set>
+      </Get>
+    </Property>
+    <Property Name="curMotorPos" Id="{ad9d9e24-10f4-4dc4-b0d2-86517dead53b}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY curMotorPos : Vec7d]]></Declaration>
+      <Get Name="Get" Id="{bc557e46-3cdd-47ba-9e7f-cf7525f3969d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[curMotorPos:=m_curMotorPos;]]></ST>
+        </Implementation>
+      </Get>
     </Property>
     <Method Name="enable" Id="{596f2892-08b6-4851-84d5-1537c558264e}">
       <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
@@ -630,14 +622,6 @@ END_VAR
           <ST><![CDATA[jntGravity:=m_jntGravity;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{64877e70-871f-4cf1-ba0c-28657dc77285}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_jntGravity:=jntGravity;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Property Name="jntOPMode" Id="{d4616337-b65c-43a5-b67d-4d2cac41c557}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntOPMode : Vec7i]]></Declaration>
@@ -649,14 +633,6 @@ END_VAR
           <ST><![CDATA[jntOPMode:=m_jntOPMode;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{7ae429fa-2df8-4e3d-af66-42389d0d0787}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[m_jntOPMode:=jntOPMode;]]></ST>
-        </Implementation>
-      </Set>
     </Property>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
@@ -675,9 +651,13 @@ m_cmdJntPos:=i_armCtrlCmd.m_cmdJntPos;
 m_cmdJntVel:=i_armCtrlCmd.m_cmdJntVel;
 m_cmdJntAcc:=i_armCtrlCmd.m_cmdJntAcc;
 m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
+m_cmdCartPose:=i_armCtrlCmd.m_cmdCartPose;
+m_cmdCartTwist:=i_armCtrlCmd.m_cmdCartTwist;
 
+// enable/disable joints
 enable(m_jntEnableFlag);
 
+// position/torque control
 FOR i:=1 TO g_mJntNum DO 
 	IF m_jntOPMode[i]=DriverOPMode_PosTrq THEN
 		// position controller and gravity feedforward
@@ -716,6 +696,8 @@ END_FOR
 
 // get joint data
 FOR i:=1 TO g_mJntNum DO
+	m_curMotorPos[i]:=m_joints[i].motorPos;
+	m_curLinkPos[i]:=m_joints[i].linkPos;
 	m_curJntPos[i]:=m_joints[i].jntPos;
 	m_curJntVel[i]:=m_joints[i].jntVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
@@ -755,28 +737,22 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntAcc.Get">
+    <LineIds Name="FB_MasterArm.cmdCartPose.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntAcc.Set">
+    <LineIds Name="FB_MasterArm.cmdCartTwist.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.cmdJntAcc.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.cmdJntPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntPos.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterArm.cmdJntTrq.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntTrq.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterArm.cmdJntVel.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntVel.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.curCartPose.Get">
@@ -788,19 +764,16 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
     <LineIds Name="FB_MasterArm.curJntPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.curJntPos.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterArm.curJntTrq.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.curJntTrq.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.curJntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.curJntVel.Set">
+    <LineIds Name="FB_MasterArm.curLinkPos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.curMotorPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.enable">
@@ -864,21 +837,18 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
     <LineIds Name="FB_MasterArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.jntGravity.Set">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterArm.jntOPMode.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.jntOPMode.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateCmds">
       <LineId Id="41" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="3" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="52" Count="0" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
+      <LineId Id="53" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
@@ -903,6 +873,7 @@ m_gravityModel.run(m_curJntPos, m_jntGravity);]]></ST>
       <LineId Id="26" Count="3" />
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="0" />
+      <LineId Id="63" Count="1" />
       <LineId Id="13" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="12" Count="0" />

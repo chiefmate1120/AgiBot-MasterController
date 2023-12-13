@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ArmMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Master Arm Initialization
+FUNCTION_BLOCK PUBLIC FB_ArmMasterSlave EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <LineIds Name="FB_ArmMasterSlave">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
