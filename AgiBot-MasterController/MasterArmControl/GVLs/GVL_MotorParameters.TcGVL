@@ -30,18 +30,6 @@ VAR_GLOBAL CONSTANT
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..7] OF LREAL :=[7(2*pi)];
 	
-
-	(*
-	//绝对值编码器的单圈读数范围---note，机械臂ID:1-2，台车ID:3
-	enc_abs_start:ARRAY[1..3,1..7] OF LREAL;
-	enc_abs_end:ARRAY[1..3,1..7] OF LREAL;
-	cross_zero:ARRAY[1..3,1..7] OF BOOL;
-	enc_safe_limit:LREAL:=0.2;
-	
-	Absolute_Encoder_Start:ARRAY[1..3,1..7] OF LREAL;
-	Absolute_Encoder_End:ARRAY[1..3,1..7] OF LREAL;*)
-	
-	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

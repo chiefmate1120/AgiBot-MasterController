@@ -95,8 +95,7 @@ m_cmdCartTwist:=g_zeroVec6d;
 m_cmdJntPos:=i_masterArm.curJntPos;
 m_cmdJntVel:=g_zeroVec7d;
 m_cmdJntAcc:=g_zeroVec7d;
-m_cmdJntTrq:=g_zeroVec7d;
-]]></ST>
+m_cmdJntTrq:=g_zeroVec7d;]]></ST>
       </Implementation>
     </Method>
     <Property Name="isFinished" Id="{d6db4485-2c6d-406e-9b85-5a477e39dd21}">
@@ -193,7 +192,7 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="23" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
-      <LineId Id="38" Count="1" />
+      <LineId Id="38" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.isFinished.Get">
       <LineId Id="2" Count="0" />

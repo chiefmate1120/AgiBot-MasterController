@@ -10,6 +10,11 @@ VAR_GLOBAL CONSTANT
 	g_posKiLimit :ARRAY[1..7] OF LREAL :=[500,500,500,500,100,100,100];// define in current
 	g_posCtrlLimit :ARRAY[1..7] OF LREAL :=[1000,1000,1000,1000,200,200,200];// define in current
 	
+	// control tolerance
+	g_jntCtrlPosTol :LREAL :=0.2*g_deg2Rad;
+	g_cartCtrlPosTol :LREAL :=0.0002;
+	g_cartCtrlOriTol :LREAL :=0.2*g_deg2Rad;
+	
 	// filter cut-off frequency for velocity and torque
 	g_curJntVelLpfCutoffFreq :LREAL := 30;
 	g_cmdJntPosLpfCutoffFreq :LREAL := 30;

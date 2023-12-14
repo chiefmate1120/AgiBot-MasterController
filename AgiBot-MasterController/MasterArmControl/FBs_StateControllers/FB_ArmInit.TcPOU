@@ -8,26 +8,80 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	m_jnt7SelfCheckVel : LREAL :=30*g_deg2Rad;
+	m_jnt7HalfMotionRange : LREAL := 3*PI;
+	m_jnt7LimitErr :LREAL := 5*g_deg2Rad;
+	m_jnt7CenterPos :LREAL;
+	// 0: driver on; 1: joint 7 move to upper limit, 2: joint 7 mvoe to center
+	m_initState :INT :=0;
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[
 ]]></ST>
     </Implementation>
-    <Method Name="driverCtrl" Id="{3c0d3c75-d2c1-4fba-8adc-8dcd06c0025a}">
-      <Declaration><![CDATA[METHOD PUBLIC driverCtrl : BOOL
+    <Method Name="calcCmdJntPos" Id="{b37c9272-afc7-4cb0-8e50-360f85145053}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_INPUT
+	monitorAngle :LREAL;
+	slaveIdx :INT;
+END_VAR
+
 VAR_IN_OUT CONSTANT
 	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR
+	centerVel:LREAL;
+	curJntPos:Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_isFinished THEN
+	RETURN;
+END_IF
+
+curJntPos :=i_masterArm.curJntPos;
+CASE m_initState OF
+	0:
+		m_cmdJntPos := i_masterArm.curJntPos;
+		IF i_masterArm.isEnabled(m_jntEnableFlag) = TRUE THEN
+			m_initState :=1;
+		END_IF
+	1: 
+		m_cmdJntPos[7] := m_cmdJntPos[7] + m_jnt7SelfCheckVel * g_armControlLoopInterval;
+		IF m_cmdJntPos[7]-curJntPos[7] > m_jnt7LimitErr THEN
+			m_cmdJntPos[7]:=curJntPos[7];
+			m_jnt7CenterPos :=m_cmdJntPos[7]-m_jnt7HalfMotionRange;
+			m_initState :=2;
+		END_IF
+	2:
+		centerVel :=LIMIT(-m_jnt7SelfCheckVel,(m_jnt7CenterPos-m_cmdJntPos[7])/g_armControlLoopInterval,m_jnt7SelfCheckVel);
+		m_cmdJntPos[7] := m_cmdJntPos[7] + centerVel * g_armControlLoopInterval;
+		IF ABS(m_jnt7CenterPos-curJntPos[7]) < g_jntCtrlPosTol THEN
+			m_isFinished :=TRUE;
+		END_IF
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Init" Id="{0eca198b-2030-4cc0-a250-a6bdc9d0e230}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PROTECTED Init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
 END_VAR
 VAR
-END_VAR]]></Declaration>
+	i:INT;
+END_VAR
+]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_jntEnableFlag :=g_onesVec7i;
-
-// controller finished if both arm is all enabled
-m_isFinished := i_masterArm.isEnabled(m_jntEnableFlag) ;
-
-
+        <ST><![CDATA[SUPER^.Init(i_masterArm);
+m_initState :=0;
 
 ]]></ST>
       </Implementation>
@@ -36,15 +90,36 @@ m_isFinished := i_masterArm.isEnabled(m_jntEnableFlag) ;
       <LineId Id="18" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_ArmInit.driverCtrl">
-      <LineId Id="31" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="28" Count="0" />
+    <LineIds Name="FB_ArmInit.calcCmdJntPos">
+      <LineId Id="43" Count="2" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="46" Count="0" />
       <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
       <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ArmInit.Init">
+      <LineId Id="11" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

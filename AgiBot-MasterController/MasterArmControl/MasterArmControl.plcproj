@@ -196,6 +196,10 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\GVL_JointEncoderCaliData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\GVL_MathDefine.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
