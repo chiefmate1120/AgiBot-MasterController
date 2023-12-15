@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_ControlParameters" Id="{a18ea7d5-0bf1-4d07-b60e-bcda0f9a3000}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
@@ -9,6 +9,11 @@ VAR_GLOBAL CONSTANT
 	g_posKi :ARRAY[1..7] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 	g_posKiLimit :ARRAY[1..7] OF LREAL :=[500,500,500,500,100,100,100];// define in current
 	g_posCtrlLimit :ARRAY[1..7] OF LREAL :=[1000,1000,1000,1000,200,200,200];// define in current
+	
+	// control tolerance
+	g_jntCtrlPosTol :LREAL :=0.2*g_deg2Rad;
+	g_cartCtrlPosTol :LREAL :=0.0002;
+	g_cartCtrlOriTol :LREAL :=0.2*g_deg2Rad;
 	
 	// filter cut-off frequency for velocity and torque
 	g_curJntVelLpfCutoffFreq :LREAL := 30;
@@ -25,7 +30,7 @@ VAR_GLOBAL CONSTANT
 	// home motion parameters
 	g_homePosture:ARRAY [1..2, 1..7] OF LREAL:=[0.0, -PI/2, 0, -PI, PI, -PI/2, 0,
 							 			  			0.0, -PI/2, 0, 0, PI, PI/2, 0];
-	g_homeMaxjntVel:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
+	g_homeMaxjntVel:Vec7d:=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 	g_homeMaxjntAcc:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
 	g_homeMaxjntJerk:Vec7d:=[7(4.0)];
 END_VAR]]></Declaration>

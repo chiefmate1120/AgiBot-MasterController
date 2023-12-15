@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_ArmHome" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Initialization
 FUNCTION_BLOCK PUBLIC FB_ArmHome EXTENDS FB_MasterArmCtrlBase
@@ -68,7 +68,12 @@ FOR j:=1 TO 7 DO
 endJntPos[j]:=g_homePosture[i_masterArm.armIdx,j];
 END_FOR
 m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeMaxjntJerk);
-]]></ST>
+
+// disable all joints
+m_jntEnableFlag :=g_zeroVec7i;
+m_jntEnableFlag[5]:=1;
+m_jntEnableFlag[6]:=1;
+m_jntEnableFlag[7]:=1;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_ArmHome">
@@ -96,6 +101,7 @@ m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeM
       <LineId Id="86" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="74" Count="0" />
+      <LineId Id="112" Count="4" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
 VAR_INPUT
@@ -11,21 +11,38 @@ VAR
 	m_motorInputs AT%I*	:ST_MotorInputs;
 	m_motorOutputs AT%Q* :ST_MotorOutputs;
 	
+	// calibrated link encoder data
+	m_minLinkEncoder :DINT;
+	m_maxLinkEncoder :DINT;
+	m_caliLinkEncoder :DINT;
+	m_linkEncCaliJntPos :LREAL;
+	m_linkEncZeroCross :INT;
+	m_initMotorEnc : DINT;
+	
+	// joint position from link encoder after power on
+	m_initLinkPos :LREAL;
+	
+	// data for link encoder multiple cycles
+	m_lastLinkEncoder :DINT;
+	m_linkEncCycles:INT;
+	
 	// device paramters
-	m_incEncoderRes :DINT;
-	m_absEncoderRes :DINT;
+	m_motorEncoderRes :DINT;
+	m_linkEncoderRes :DINT;
 	m_motorReduction :LREAL;
-	m_absEncoderReduction :LREAL;
+	m_linkEncoderReduction :LREAL;
 	m_trqConst :LREAL;
 	m_maxCurrent :LREAL;
 	m_motorDir :INT;								
-	m_asbEncoderDir :INT;
+	m_linkEncoderDir :INT;
 	m_minJntPos: LREAL;
 	m_maxJntPos: LREAL;
 	
-	// convertion paramters
-	m_trq2Current:LREAL;
-	m_current2Trq:LREAL;
+	// macro defined data for quick calculation
+	m_trq2CurrentRatio:LREAL;
+	m_current2TrqRatio:LREAL;
+	m_linkEnc2PosRatio :LREAL;
+	m_motorEnc2PosRatio :LREAL;
 	
 	// joint data
 	m_curMotorPos :LREAL;
@@ -74,23 +91,10 @@ ELSIF DriverStatusWord_PREOP = m_motorInputs.m_statusWord THEN
 	enable :=  FALSE;
 ELSIF DriverStatusWord_OP = m_motorInputs.m_statusWord THEN
 	enable :=  TRUE;
-ELSE
-	m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
-	enable :=  FALSE;
+//ELSE
+//	m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
+//	enable :=  FALSE;
 END_IF]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="encoder2Pos" Id="{ee202f01-7eae-4c96-9148-de033a227f8f}">
-      <Declaration><![CDATA[METHOD PROTECTED encoder2Pos : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//m_curMotorPos:=
-//m_curLinkPos:=
-
-// use motor pos as joint pos
-m_curJntPos:=m_curMotorPos;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{9b72c880-30e6-407f-a349-f349818eddee}">
@@ -102,22 +106,50 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// hardware parameters
-m_incEncoderRes :=g_incEncoderRes[i_jntIdx];
-m_absEncoderRes :=g_absEncoderRes[i_jntIdx];
+m_motorEncoderRes :=g_incEncoderRes[i_jntIdx];
+m_linkEncoderRes :=g_absEncoderRes[i_jntIdx];
 m_motorReduction :=g_motorReduction[i_jntIdx];
-m_absEncoderReduction :=g_absEncoderReduction[i_jntIdx];
+m_linkEncoderReduction :=g_absEncoderReduction[i_jntIdx];
 m_trqConst :=g_motorTrqConst[i_jntIdx];
 m_maxCurrent :=g_motorMaxCurrent[i_jntIdx];
 m_motorDir :=g_motorDir[i_armIdx,i_jntIdx];								
-m_asbEncoderDir :=g_asbEncoderDir[i_armIdx,i_jntIdx];
+m_linkEncoderDir :=g_asbEncoderDir[i_armIdx,i_jntIdx];
 m_minJntPos	:=g_minJntPos[i_armIdx,i_jntIdx];
 m_maxJntPos	:=g_maxJntPos[i_armIdx,i_jntIdx];
 
-m_trq2Current:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
-m_current2Trq:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
+//link encoder calibartion data
+m_minLinkEncoder :=g_minLinkEncoder[i_armIdx, i_jntIdx];
+m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx];
+m_caliLinkEncoder :=g_caliLinkEncoder[i_armIdx, i_jntIdx];
+m_linkEncCaliJntPos :=g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
+m_linkEncZeroCross :=g_linkEncZeroCross[i_armIdx, i_jntIdx];
+
+// convert cali link encoder if joint cross zero
+IF 1=m_linkEncZeroCross THEN
+	IF 1=m_linkEncoderDir AND m_caliLinkEncoder < m_minLinkEncoder THEN
+		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
+	ELSIF -1=m_linkEncoderDir AND m_caliLinkEncoder < m_maxLinkEncoder THEN
+		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
+	END_IF
+END_IF
+
+// compute link and motor pos
+//!NOTICE: Need to be reset after joint back to center for multiple cycle joints
+m_lastLinkEncoder :=m_motorInputs.m_linkEncoder;
+m_linkEncCycles:=0;
+m_curLinkPos :=linkEnc2Pos();
+m_initLinkPos:=m_curLinkPos;
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curMotorPos :=motorEnc2Pos();	
+
+// macro data
+m_trq2CurrentRatio:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
+m_current2TrqRatio:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
+m_linkEnc2PosRatio := 2*PI*m_linkEncoderDir/(m_linkEncoderReduction*m_linkEncoderRes);
+m_motorEnc2PosRatio := 2*PI * m_motorDir/(m_motorReduction * m_motorEncoderRes);
 
 // motor data init
-encoder2Pos();
+m_curJntPos := m_curMotorPos;
 m_curJntVel:=0;
 m_curJntTrq :=0;
 m_cmdJntPos :=m_curJntPos;
@@ -129,7 +161,7 @@ m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armControlFreq);
 
 // driver init value
 m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
-m_motorOutputs.m_controlWord:=DriverOPMode_Pos;
+m_motorOutputs.m_opMode:=INT_TO_SINT(DriverOPMode_Pos);
 m_motorOutputs.m_cmdCurrent:=0;
 m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       </Implementation>
@@ -176,6 +208,40 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="linkEnc2Pos" Id="{ee202f01-7eae-4c96-9148-de033a227f8f}">
+      <Declaration><![CDATA[METHOD PROTECTED linkEnc2Pos : LREAL
+VAR_INPUT
+END_VAR
+VAR
+	incLinkPos :LREAL;
+	newLinkEnc :DINT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// cycle check
+IF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir < -m_linkEncoderRes/2 THEN
+	m_linkEncCycles :=m_linkEncCycles+1;
+ELSIF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir > m_linkEncoderRes/2 THEN
+	m_linkEncCycles :=m_linkEncCycles-1;
+END_IF
+m_lastLinkEncoder:=m_motorInputs.m_linkEncoder;
+
+// convert link encoder if joint cross zero
+newLinkEnc := m_motorInputs.m_linkEncoder;
+IF 1=m_linkEncZeroCross THEN
+	IF 1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
+		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
+	ELSIF -1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_maxLinkEncoder THEN
+		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
+	END_IF
+END_IF
+
+// motion from calibrated points
+incLinkPos := (newLinkEnc-m_caliLinkEncoder)*m_linkEnc2PosRatio;
+
+// absolute joint position
+linkEnc2Pos := incLinkPos + m_linkEncCaliJntPos + 2*PI* m_linkEncCycles;]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="linkPos" Id="{e503da77-c373-4ba2-b314-228646ff52c0}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY PUBLIC linkPos : LREAL]]></Declaration>
       <Get Name="Get" Id="{057e650e-064f-4e5d-ae71-67363977daff}">
@@ -187,6 +253,16 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="motorEnc2Pos" Id="{5111dbab-73a3-4041-b0b2-3d1b70394152}">
+      <Declaration><![CDATA[METHOD PROTECTED motorEnc2Pos : LREAL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[motorEnc2Pos:= (m_motorInputs.m_motorEncoder-m_initMotorEnc)* m_motorEnc2PosRatio +m_initLinkPos;
+]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="motorPos" Id="{257e5d05-bbd2-45b4-a27c-60112e2ac416}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY PUBLIC motorPos : LREAL]]></Declaration>
       <Get Name="Get" Id="{5c2a1542-7420-4542-ba4a-8202be5bc4e5}">
@@ -198,9 +274,9 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="pos2Encoder" Id="{5927a17d-d8e9-40fc-9c34-e6793775a7fc}">
+    <Method Name="motorPos2Enc" Id="{5927a17d-d8e9-40fc-9c34-e6793775a7fc}">
       <Declaration><![CDATA[// TODO
-METHOD PROTECTED pos2Encoder : DINT
+METHOD PROTECTED motorPos2Enc : DINT
 VAR_INPUT
 	i_jntPos :LREAL;
 END_VAR
@@ -208,7 +284,22 @@ END_VAR
 VAR
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//m_motorOutputs.m_cmdMotorEncoder:=]]></ST>
+        <ST><![CDATA[motorPos2Enc := LREAL_TO_DINT((i_jntPos-m_initLinkPos)/m_motorEnc2PosRatio + m_initMotorEnc);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="resetEncoder" Id="{c1110436-e250-45fb-8008-63b89ff1e4a3}">
+      <Declaration><![CDATA[METHOD resetEncoder : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_lastLinkEncoder :=m_motorInputs.m_linkEncoder;
+m_linkEncCycles:=0;
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curLinkPos :=linkEnc2Pos();
+m_curMotorPos :=motorEnc2Pos();	
+m_initLinkPos:=m_curLinkPos;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateCmds" Id="{a4f5fe94-40e9-4f77-a4d8-a2af848a52e6}">
@@ -224,9 +315,9 @@ END_VAR
 // pos mode
 IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
-	m_motorOutputs.m_cmdMotorEncoder :=pos2Encoder(i_cmdPos);
+	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
-	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, i_cmdTrq*m_trq2Current,m_maxCurrent));
+	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, i_cmdTrq*m_trq2CurrentRatio,m_maxCurrent));
 	m_motorOutputs.m_cmdMotorEncoder :=m_motorInputs.m_motorEncoder; 
 END_IF]]></ST>
       </Implementation>
@@ -237,14 +328,16 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// get joint position
-encoder2Pos();
+        <ST><![CDATA[// compute joint position
+m_curLinkPos:= linkEnc2Pos();
+m_curMotorPos:=motorEnc2Pos();
+m_curJntPos := m_curMotorPos;
 
 // compute joint velocity
 m_curJntVel:= (m_curJntPos-m_lastJntPos)/g_armControlLoopInterval;
 m_curJntVel := m_jntVelLpf.run(m_curJntVel);
 
-m_curJntTrq := m_motorInputs.m_current * m_current2Trq;]]></ST>
+m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_Joint">
@@ -262,17 +355,31 @@ m_curJntTrq := m_motorInputs.m_current * m_current2Trq;]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.encoder2Pos">
-      <LineId Id="6" Count="3" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_Joint.init">
       <LineId Id="21" Count="0" />
       <LineId Id="8" Count="8" />
       <LineId Id="5" Count="0" />
+      <LineId Id="46" Count="6" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="64" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="69" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="19" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="23" Count="8" />
@@ -290,13 +397,43 @@ m_curJntTrq := m_motorInputs.m_current * m_current2Trq;]]></ST>
     <LineIds Name="FB_Joint.jntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_Joint.linkEnc2Pos">
+      <LineId Id="6" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="26" Count="5" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
     <LineIds Name="FB_Joint.linkPos.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.motorEnc2Pos">
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.motorPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.pos2Encoder">
+    <LineIds Name="FB_Joint.motorPos2Enc">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_Joint.resetEncoder">
+      <LineId Id="11" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.updateCmds">
@@ -307,8 +444,9 @@ m_curJntTrq := m_motorInputs.m_current * m_current2Trq;]]></ST>
       <LineId Id="30" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.updateStatus">
-      <LineId Id="8" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="1" />
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="9" Count="1" />

@@ -17,30 +17,18 @@ VAR_GLOBAL CONSTANT
 	
 	// motor and absEncoder direction
 	g_motorDir :ARRAY[1..2, 1..7] OF INT :=[1, 1, -1, 1, 1, -1, -1,	
-															1, 1, -1, 1, 1, -1, -1];
+											1, 1, -1, 1, 1, -1, -1];
 	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, -1, -1, 1, -1, -1,
-																 -1, -1, -1, -1, 1, -1, -1];
+												 -1, -1, -1, -1, 1, -1, -1];
 																 
 	// joint position limit
 	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-2*pi,-135*g_deg2Rad+pi,-45*g_deg2Rad-pi/2,-340*g_deg2Rad,
-														     -60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-pi,-135*g_deg2Rad+pi,-45*g_deg2Rad+pi/2,-340*g_deg2Rad];
+											 -60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-pi,-135*g_deg2Rad+pi,-45*g_deg2Rad+pi/2,-340*g_deg2Rad];
 	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,60*g_deg2Rad-pi/2,135*g_deg2Rad,0,135*g_deg2Rad+pi,45*g_deg2Rad-pi/2,340*g_deg2Rad,
-								                           60*g_deg2Rad,60*g_deg2Rad-pi/2,135*g_deg2Rad,pi,135*g_deg2Rad+pi,45*g_deg2Rad+pi/2,340*g_deg2Rad];
+								             60*g_deg2Rad,60*g_deg2Rad-pi/2,135*g_deg2Rad,pi,135*g_deg2Rad+pi,45*g_deg2Rad+pi/2,340*g_deg2Rad];
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..7] OF LREAL :=[7(2*pi)];
-	
-
-	(*
-	//绝对值编码器的单圈读数范围---note，机械臂ID:1-2，台车ID:3
-	enc_abs_start:ARRAY[1..3,1..7] OF LREAL;
-	enc_abs_end:ARRAY[1..3,1..7] OF LREAL;
-	cross_zero:ARRAY[1..3,1..7] OF BOOL;
-	enc_safe_limit:LREAL:=0.2;
-	
-	Absolute_Encoder_Start:ARRAY[1..3,1..7] OF LREAL;
-	Absolute_Encoder_End:ARRAY[1..3,1..7] OF LREAL;*)
-	
 	
 END_VAR]]></Declaration>
   </GVL>

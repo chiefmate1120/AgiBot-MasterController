@@ -1,11 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_TrajMoveJ" Id="{02514d4f-2747-4c08-923c-ad3b27b8c50b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_TrajMoveJ EXTENDS FB_TrajBase
 VAR_OUTPUT
 END_VAR
 VAR
 	// move vector in joint space
+	m_startPos:Vec7d;
+	m_targetPos:Vec7d;
 	m_moveDir : Vec7d;
 	m_moveDistance :LREAL;
 	
@@ -35,6 +37,7 @@ IF evaluate =FALSE THEN
 END_IF
 
 jntPos := multiNumVec7(q, m_moveDir);
+jntPos:=addVec7(jntPos, m_startPos);
 jntVel := multiNumVec7(q_dot, m_moveDir);
 jntAcc := multiNumVec7(q_ddot, m_moveDir);]]></ST>
       </Implementation>
@@ -55,7 +58,9 @@ VAR
 	v:ARRAY[1..2] OF LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_moveDir:=subVec7(i_targetJntPos, i_startJntPos);
+        <ST><![CDATA[m_startPos:=i_startJntPos;
+m_targetPos:=i_targetJntPos;
+m_moveDir:=subVec7(i_targetJntPos, i_startJntPos);
 m_moveDistance := normVec7(m_moveDir);
 
 IF(m_moveDistance<g_smallNum) THEN
@@ -96,9 +101,11 @@ m_isGenerated:=m_doubleS.isGene;
       <LineId Id="15" Count="2" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="32" Count="0" />
       <LineId Id="20" Count="1" />
     </LineIds>
     <LineIds Name="FB_TrajMoveJ.init">
+      <LineId Id="78" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="14" Count="0" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCtrlBase IMPLEMENTS I_MasterArmCtrl
 VAR_INPUT
@@ -95,8 +95,7 @@ m_cmdCartTwist:=g_zeroVec6d;
 m_cmdJntPos:=i_masterArm.curJntPos;
 m_cmdJntVel:=g_zeroVec7d;
 m_cmdJntAcc:=g_zeroVec7d;
-m_cmdJntTrq:=g_zeroVec7d;
-]]></ST>
+m_cmdJntTrq:=g_zeroVec7d;]]></ST>
       </Implementation>
     </Method>
     <Property Name="isFinished" Id="{d6db4485-2c6d-406e-9b85-5a477e39dd21}">
@@ -160,6 +159,7 @@ calcCmdJntPos(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
 calcCmdJntTrq(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
 
 // update commands to arm
+r_masterArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
 r_masterArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
 r_masterArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
 r_masterArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
@@ -193,7 +193,7 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="23" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
-      <LineId Id="38" Count="1" />
+      <LineId Id="38" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.isFinished.Get">
       <LineId Id="2" Count="0" />
@@ -220,6 +220,7 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="11" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
+      <LineId Id="109" Count="0" />
       <LineId Id="91" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="25" Count="0" />

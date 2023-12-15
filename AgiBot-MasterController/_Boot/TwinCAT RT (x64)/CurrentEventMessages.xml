@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<TcEventSources Version="2">
+	<Source>
+		<GUID>{28111931-0002-0000-5230-B61700001300}</GUID>
+		<Name LcId="1031">EL6070 1K. Lizenzierungs-Klemme</Name>
+		<Name LcId="1033">EL6070 1Ch. Licensing-Terminal</Name>
+		<Event>
+			<Id>4736</Id>
+			<Message LcId="1031">File {0} erased successfully</Message>
+			<Message LcId="1033">File {0} erased successfully</Message>
+		</Event>
+		<Event>
+			<Id>17037</Id>
+			<Message LcId="1033">Challenge is not Random</Message>
+		</Event>
+		<Event>
+			<Id>33409</Id>
+			<Message LcId="1033">Ownership failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33410</Id>
+			<Message LcId="1031">Too many Keys founded</Message>
+			<Message LcId="1033">Too many Keys founded</Message>
+		</Event>
+		<Event>
+			<Id>33411</Id>
+			<Message LcId="1031">Key Creation failed: {0,X}</Message>
+			<Message LcId="1033">Key Creation failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33412</Id>
+			<Message LcId="1031">Key loading failed: {0,X}</Message>
+			<Message LcId="1033">Key loading failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33413</Id>
+			<Message LcId="1031">Reading Public Key failed: {0,X}</Message>
+			<Message LcId="1033">Reading Public Key failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33414</Id>
+			<Message LcId="1031">Reading Public EK failed: {0,X}</Message>
+			<Message LcId="1033">Reading Public EK failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33415</Id>
+			<Message LcId="1033">Reading PCR Value failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33416</Id>
+			<Message LcId="1033">Reading Certificate EK failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33417</Id>
+			<Message LcId="1031">Challenge could not be hashed: {0,X}</Message>
+			<Message LcId="1033">Challenge could not be hashed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33418</Id>
+			<Message LcId="1031">Tickstamp Process failed: {0,X}</Message>
+			<Message LcId="1033">Tickstamp Process failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33419</Id>
+			<Message LcId="1031">PCR Process failed: {0,X}</Message>
+			<Message LcId="1033">PCR Process failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33420</Id>
+			<Message LcId="1033">Quote Process failed: {0,X}</Message>
+		</Event>
+		<Event>
+			<Id>33535</Id>
+			<Message LcId="1031">No Boot Mode</Message>
+			<Message LcId="1033">No Boot Mode</Message>
+		</Event>
+		<Event>
+			<Id>34561</Id>
+			<Message LcId="1031">Operatingtime was manipulated</Message>
+			<Message LcId="1033">Operatingtime was manipulated</Message>
+		</Event>
+		<Property>
+			<Name>DisplayTxtId</Name>
+			<Value>true</Value>
+		</Property>
+	</Source>
+</TcEventSources>
