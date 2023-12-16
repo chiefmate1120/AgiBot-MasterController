@@ -44,7 +44,10 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[// set all command to current value in default
+m_cmdJntAcc :=g_zeroVec7d;
+m_cmdJntVel :=i_masterArm.curJntVel;
+m_cmdJntPos := i_masterArm.curJntPos;]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{31ee0fe6-80c4-42e7-bd18-5b745e895642}">
@@ -61,7 +64,8 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[// set joint torque to zero in default
+m_cmdJntTrq := g_zeroVec7d;]]></ST>
       </Implementation>
     </Method>
     <Method Name="driverCtrl" Id="{3948af2b-e841-4242-bc3c-781098471e79}">
@@ -179,9 +183,11 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.calcCmdJntPos">
       <LineId Id="13" Count="0" />
+      <LineId Id="25" Count="2" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.calcCmdJntTrq">
       <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.driverCtrl">
       <LineId Id="5" Count="0" />
