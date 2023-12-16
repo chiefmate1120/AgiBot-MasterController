@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
 VAR_INPUT
@@ -18,6 +18,7 @@ VAR
 	m_linkEncCaliJntPos :LREAL;
 	m_linkEncZeroCross :INT;
 	m_initMotorEnc : DINT;
+	m_multiCycles :INT;
 	
 	// joint position from link encoder after power on
 	m_initLinkPos :LREAL;
@@ -123,6 +124,7 @@ m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx];
 m_caliLinkEncoder :=g_caliLinkEncoder[i_armIdx, i_jntIdx];
 m_linkEncCaliJntPos :=g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
 m_linkEncZeroCross :=g_linkEncZeroCross[i_armIdx, i_jntIdx];
+m_multiCycles :=g_multipleCyclesJoint[i_armIdx,i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
@@ -135,12 +137,7 @@ END_IF
 
 // compute link and motor pos
 //!NOTICE: Need to be reset after joint back to center for multiple cycle joints
-m_lastLinkEncoder :=m_motorInputs.m_linkEncoder;
-m_linkEncCycles:=0;
-m_curLinkPos :=linkEnc2Pos();
-m_initLinkPos:=m_curLinkPos;
-m_initMotorEnc :=m_motorInputs.m_motorEncoder;
-m_curMotorPos :=motorEnc2Pos();	
+resetEncoder();
 
 // macro data
 m_trq2CurrentRatio:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
@@ -218,16 +215,18 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// cycle check
-IF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir < -m_linkEncoderRes/2 THEN
-	m_linkEncCycles :=m_linkEncCycles+1;
-ELSIF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir > m_linkEncoderRes/2 THEN
-	m_linkEncCycles :=m_linkEncCycles-1;
+IF 1=m_multiCycles THEN
+	IF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir < -m_linkEncoderRes/2 THEN
+		m_linkEncCycles :=m_linkEncCycles+1;
+	ELSIF (m_motorInputs.m_linkEncoder - m_lastLinkEncoder)*m_linkEncoderDir > m_linkEncoderRes/2 THEN
+		m_linkEncCycles :=m_linkEncCycles-1;
+	END_IF
 END_IF
 m_lastLinkEncoder:=m_motorInputs.m_linkEncoder;
 
 // convert link encoder if joint cross zero
 newLinkEnc := m_motorInputs.m_linkEncoder;
-IF 1=m_linkEncZeroCross THEN
+IF 1=m_linkEncZeroCross AND 0 = m_multiCycles THEN
 	IF 1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_minLinkEncoder THEN
 		newLinkEnc := m_motorInputs.m_linkEncoder + m_linkEncoderRes;
 	ELSIF -1=m_linkEncoderDir AND m_motorInputs.m_linkEncoder < m_maxLinkEncoder THEN
@@ -295,11 +294,10 @@ END_VAR
       <Implementation>
         <ST><![CDATA[m_lastLinkEncoder :=m_motorInputs.m_linkEncoder;
 m_linkEncCycles:=0;
-m_initMotorEnc :=m_motorInputs.m_motorEncoder;
 m_curLinkPos :=linkEnc2Pos();
-m_curMotorPos :=motorEnc2Pos();	
 m_initLinkPos:=m_curLinkPos;
-]]></ST>
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curMotorPos :=motorEnc2Pos();	]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateCmds" Id="{a4f5fe94-40e9-4f77-a4d8-a2af848a52e6}">
@@ -360,6 +358,7 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       <LineId Id="8" Count="8" />
       <LineId Id="5" Count="0" />
       <LineId Id="46" Count="6" />
+      <LineId Id="83" Count="0" />
       <LineId Id="62" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="55" Count="1" />
@@ -369,11 +368,7 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       <LineId Id="57" Count="0" />
       <LineId Id="64" Count="1" />
       <LineId Id="77" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="63" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="75" Count="1" />
+      <LineId Id="76" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="17" Count="0" />
@@ -399,9 +394,11 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
     </LineIds>
     <LineIds Name="FB_Joint.linkEnc2Pos">
       <LineId Id="6" Count="0" />
+      <LineId Id="46" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="19" Count="2" />
       <LineId Id="18" Count="0" />
+      <LineId Id="47" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="25" Count="0" />
@@ -429,11 +426,7 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.resetEncoder">
-      <LineId Id="11" Count="1" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="18" Count="0" />
+      <LineId Id="23" Count="4" />
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.updateCmds">

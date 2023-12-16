@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_ArmHome" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Initialization
 FUNCTION_BLOCK PUBLIC FB_ArmHome EXTENDS FB_MasterArmCtrlBase
@@ -52,6 +52,7 @@ m_isFinished :=m_timePeriod > m_homePlanner.duration  AND normVec7(curJntVel)<7*
 METHOD PROTECTED Init : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterArm :FB_MasterArm;
+	i_masterArmCtrlCmd :ST_ArmCtrlCmds;
 END_VAR
 VAR
 	i,j :INT;
@@ -60,7 +61,7 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.Init(i_masterArm);
+        <ST><![CDATA[SUPER^.Init(i_masterArm,i_masterArmCtrlCmd);
 
 // traj plan
 startJntPos:=i_masterArm.curJntPos;

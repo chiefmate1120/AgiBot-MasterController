@@ -6,6 +6,9 @@ VAR
 	// flag to init robot
 	m_robotInit :BOOL :=FALSE;
 	
+	// wait time before robot init  for ethercat to be statble 
+	m_robotInitWaitTime : LREAL:=0;
+	
 	// master robot
 	m_masterRobot:FB_MasterRobot;
 	
@@ -25,6 +28,12 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
 
+// wait communication to be stable
+m_robotInitWaitTime := m_robotInitWaitTime+g_armControlLoopInterval;
+IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
+	RETURN;
+END_IF
+
 // robot init
 IF m_robotInit =FALSE THEN
 	m_masterRobot.Init();
@@ -40,7 +49,11 @@ m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <LineIds Name="MasterArmControl">
-      <LineId Id="85" Count="1" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="113" Count="3" />
       <LineId Id="62" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="8" Count="0" />

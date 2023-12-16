@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCtrlBase IMPLEMENTS I_MasterArmCtrl
 VAR_INPUT
@@ -81,6 +81,7 @@ END_VAR
 METHOD PROTECTED Init : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterArm	:FB_MasterArm;
+	i_masterArmCtrlCmd :ST_ArmCtrlCmds;
 END_VAR
 VAR
 	i:INT;
@@ -139,7 +140,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF m_firstIn THEN
-	Init(i_masterArm);
+	Init(i_masterArm,r_masterArmCtrlCmd);
 	m_firstIn:=FALSE;
 END_IF
 

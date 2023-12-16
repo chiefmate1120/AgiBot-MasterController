@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -19,8 +19,6 @@ VAR
 	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
 	
 	// arm cartesian data, defined in each arm origin
-	m_cmdCartPose : ST_Frame;
-	m_cmdCartTwist : Vec6d;
 	m_curCartPose	:ST_Frame;
 	m_curCartTwist: Vec6d;
 	
@@ -30,12 +28,7 @@ VAR
 	m_curJntPos :Vec7d;
 	m_curJntVel :Vec7d;
 	m_curJntTrq :Vec7d;
-	m_cmdJntPos :Vec7d;
-	m_cmdJntVel :Vec7d;
-	m_cmdJntAcc :Vec7d;
-	m_cmdJntTrq :Vec7d;
-	m_jntOPMode :Vec7i;
-	m_jntEnableFlag :Vec7i;
+	m_jntCtrlTrq :Vec7d;
 	
 	// arm daynamic data
 	m_jntGravity : Vec7d;
@@ -171,72 +164,6 @@ r_jaco[6,7]:=- SIN(q6)*(COS(q2 + q3)*SIN(q5) + SIN(q2 + q3)*COS(q4)*COS(q5)) - S
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="cmdCartPose" Id="{c3997364-e579-41fe-ac85-7fc2152dd582}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdCartPose : ST_Frame]]></Declaration>
-      <Get Name="Get" Id="{9b1fe5dd-6a99-42a3-8f2a-61988d928f2e}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdCartPose:=m_cmdCartPose;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="cmdCartTwist" Id="{cf5145b3-0c22-4550-8e6d-4822d33296a7}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdCartTwist : Vec6d]]></Declaration>
-      <Get Name="Get" Id="{e3e54dbd-1db3-49e1-8c11-7b4f57220fcd}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdCartTwist:=m_cmdCartTwist;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="cmdJntAcc" Id="{1837d422-4a59-4649-8d13-caf5bcaf05f2}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdJntAcc : Vec7d]]></Declaration>
-      <Get Name="Get" Id="{37a85dd4-10ac-438e-b9d6-a2b097aedf2b}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdJntAcc:=m_cmdJntAcc;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="cmdJntPos" Id="{0324a98d-052a-47ce-9a9c-ae1c48c549ec}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdJntPos : Vec7d]]></Declaration>
-      <Get Name="Get" Id="{3c5efd2b-3802-4a61-861f-5f41f7a02f4c}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdJntPos:=m_cmdJntPos;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="cmdJntTrq" Id="{2b924121-25d6-4321-b4bb-536a680ed393}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdJntTrq : Vec7d]]></Declaration>
-      <Get Name="Get" Id="{16267b81-2d92-4d1c-9caf-1fc218d67651}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdJntTrq:=m_cmdJntTrq;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
-    <Property Name="cmdJntVel" Id="{83d1c02f-eb57-420e-a663-9b09e8c9b8d0}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY cmdJntVel : Vec7d]]></Declaration>
-      <Get Name="Get" Id="{26d01bfe-7996-4bec-848c-5175a9a83688}">
-        <Declaration><![CDATA[VAR
-END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[cmdJntVel :=m_cmdJntVel;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
     <Property Name="curCartPose" Id="{d18be23c-99e5-435e-8688-90e0fb3be9ca}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY curCartPose : ST_Frame]]></Declaration>
       <Get Name="Get" Id="{013b03f6-adb7-4855-b0fe-353f77f67094}">
@@ -405,32 +332,15 @@ FOR i:=1 TO g_mJntNum DO
 	m_joints[i].init(m_armIdx, i);
 END_FOR
 
-// get joint data
-FOR i:=1 TO g_mJntNum DO
-	m_curJntPos[i] := m_joints[i].jntPos;
-	m_curJntVel[i] := m_joints[i].jntVel;
-	m_curJntTrq[i] := m_joints[i].jntTrq;
-	m_cmdJntPos[i] := m_curJntPos[i];
-	m_cmdJntVel[i] := 0.0;
-	m_cmdJntTrq[i] := 0.0;
-	m_jntOPMode[i] := DriverOPMode_Pos;
-END_FOR 
-
-// compute cartesion pose
-forwardKinematic(i_jntPos:=m_curJntPos,r_curCartPose:=m_curCartPose);
-FOR i:=1 TO g_cartDofs DO
-	m_curCartTwist[i]:=0;
-END_FOR
-
-// compute jacobian
-calcJaco(i_jntPos:=m_curJntPos,r_jaco:=m_jaco);
-
 // joint controller init
 FOR i:=1 TO g_mJntNum DO 
 	currentRatioMotor2Jnt:=g_motorTrqConst[i]*g_motorReduction[i]/1000;
 	m_jntPIDCtrl[i].init(g_armControlLoopInterval,g_posKp[i],g_posKd[i],g_posKi[i],
 		g_posKiLimit[i]* currentRatioMotor2Jnt,	g_posCtrlLimit[i]*currentRatioMotor2Jnt);
-END_FOR]]></ST>
+END_FOR
+
+// compute current status
+updateStatus();]]></ST>
       </Implementation>
     </Method>
     <Method Name="inverseKinematic" Id="{a2d4ef4e-dcb4-4918-aceb-3d3fb8d74093}">
@@ -618,17 +528,21 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="jntOPMode" Id="{d4616337-b65c-43a5-b67d-4d2cac41c557}" FolderPath="property\">
-      <Declaration><![CDATA[PROPERTY jntOPMode : Vec7i]]></Declaration>
-      <Get Name="Get" Id="{bc4de4a5-0921-4d94-91eb-29c8ac17443b}">
-        <Declaration><![CDATA[VAR
+    <Method Name="resetEncoder" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
+      <Declaration><![CDATA[METHOD resetEncoder : BOOL
+VAR_INPUT
 END_VAR
-]]></Declaration>
-        <Implementation>
-          <ST><![CDATA[jntOPMode:=m_jntOPMode;]]></ST>
-        </Implementation>
-      </Get>
-    </Property>
+VAR
+	i:INT ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint init
+FOR i:=1 TO g_mJntNum DO
+	m_joints[i].resetEncoder();
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -640,34 +554,26 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_jntEnableFlag :=i_armCtrlCmd.m_jntEnableFlag;
-m_jntOPMode:=i_armCtrlCmd.m_jntOPMode;
-m_cmdJntPos:=i_armCtrlCmd.m_cmdJntPos;
-m_cmdJntVel:=i_armCtrlCmd.m_cmdJntVel;
-m_cmdJntAcc:=i_armCtrlCmd.m_cmdJntAcc;
-m_cmdJntTrq:=i_armCtrlCmd.m_cmdJntTrq;
-m_cmdCartPose:=i_armCtrlCmd.m_cmdCartPose;
-m_cmdCartTwist:=i_armCtrlCmd.m_cmdCartTwist;
+        <ST><![CDATA[m_jntCtrlTrq:=i_armCtrlCmd.m_cmdJntTrq;
 
 // enable/disable joints
-enable(m_jntEnableFlag);
+enable(i_armCtrlCmd.m_jntEnableFlag);
 
 // position/torque control
 FOR i:=1 TO g_mJntNum DO 
-	IF m_jntOPMode[i]=DriverOPMode_PosTrq THEN
+	IF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_PosTrq THEN
 		// position controller and gravity feedforward
-		m_cmdJntTrq[i]:=m_jntPIDCtrl[i].run(m_cmdJntPos[i],m_curJntPos[i],m_cmdJntVel[i],m_curJntVel[i]);
-		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
-	ELSIF m_jntOPMode[i]=DriverOPMode_Trq THEN
+		m_jntCtrlTrq[i]:=m_jntPIDCtrl[i].run(i_armCtrlCmd.m_cmdJntPos[i],m_curJntPos[i],i_armCtrlCmd.m_cmdJntVel[i],m_curJntVel[i]);
+		m_jntCtrlTrq[i]:=m_jntCtrlTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
+	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
-		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
-		m_cmdJntPos[i] :=m_curJntPos[i];
-		m_joints[i].updateCmds(DriverOPMode_Trq,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		m_jntCtrlTrq[i]:=m_jntCtrlTrq[i]+m_jntGravity[i];
+		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
 	ELSE
 		m_jntPIDCtrl[i].reset();
-		m_cmdJntTrq[i]:=0;
-		m_joints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+		m_jntCtrlTrq[i]:=0;
+		m_joints[i].updateCmds(DriverOPMode_Pos,i_armCtrlCmd.m_cmdJntPos[i],m_jntCtrlTrq[i]);
 	END_IF
 	
 END_FOR]]></ST>
@@ -742,24 +648,6 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.cmdCartPose.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdCartTwist.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntAcc.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntPos.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntTrq.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.cmdJntVel.Get">
-      <LineId Id="2" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterArm.curCartPose.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -806,21 +694,13 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="1" />
       <LineId Id="69" Count="0" />
-      <LineId Id="16" Count="7" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="31" Count="2" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="38" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="40" Count="1" />
       <LineId Id="43" Count="1" />
       <LineId Id="39" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.inverseKinematic">
       <LineId Id="13" Count="2" />
@@ -839,14 +719,12 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
     <LineIds Name="FB_MasterArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterArm.jntOPMode.Get">
-      <LineId Id="2" Count="0" />
+    <LineIds Name="FB_MasterArm.resetEncoder">
+      <LineId Id="7" Count="3" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateCmds">
-      <LineId Id="41" Count="0" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="37" Count="3" />
-      <LineId Id="54" Count="1" />
+      <LineId Id="40" Count="0" />
       <LineId Id="52" Count="0" />
       <LineId Id="43" Count="0" />
       <LineId Id="42" Count="0" />
@@ -861,7 +739,6 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
-      <LineId Id="24" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="20" Count="0" />

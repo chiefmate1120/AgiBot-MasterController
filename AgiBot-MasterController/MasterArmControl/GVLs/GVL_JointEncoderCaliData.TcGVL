@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_JointEncoderCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
     <Declaration><![CDATA[VAR_GLOBAL
 	// absolute encoder value at minimal joint positon
@@ -22,6 +22,11 @@
 	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
 		[0, 1, 1, 1, 1, 1, 0,
 		 1, 0, 1, 1, 0, 0, 0];
+	
+	// flag if joint can rotate multiple cycles
+	g_multipleCyclesJoint :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
+		[0, 0, 0, 0, 0, 0, 1,
+		 0, 0, 0, 0, 0, 0, 1];
 		 
 	// joint position at link encoder calibrated point
 	g_linkEncCaliJntPos :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL :=
