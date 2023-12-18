@@ -332,6 +332,9 @@ FOR i:=1 TO g_mJntNum DO
 	m_joints[i].init(m_armIdx, i);
 END_FOR
 
+// init joint encoder and position calculation
+initJntPos();
+
 // joint controller init
 FOR i:=1 TO g_mJntNum DO 
 	currentRatioMotor2Jnt:=g_motorTrqConst[i]*g_motorReduction[i]/1000;
@@ -341,6 +344,25 @@ END_FOR
 
 // compute current status
 updateStatus();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="initJntPos" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
+      <Declaration><![CDATA[METHOD initJntPos : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT ;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint init
+FOR i:=1 TO g_mJntNum DO
+	m_joints[i].initJntPos();
+END_FOR
+
+// link position of joint4 is influenced by joint2 and joint3, need to handle seperately
+//q4DH=q4motor+q8-q2-90;  
+m_joints[4].initLinkPos:= m_joints[4].initLinkPos-m_joints[3].initLinkPos+m_joints[2].initLinkPos+PI/2;
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="inverseKinematic" Id="{a2d4ef4e-dcb4-4918-aceb-3d3fb8d74093}">
@@ -528,21 +550,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="resetEncoder" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
-      <Declaration><![CDATA[METHOD resetEncoder : BOOL
-VAR_INPUT
-END_VAR
-VAR
-	i:INT ;
-END_VAR]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// joint init
-FOR i:=1 TO g_mJntNum DO
-	m_joints[i].resetEncoder();
-END_FOR
-]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -616,6 +623,8 @@ FOR i:=1 TO g_mJntNum DO
 	m_curJntVel[i]:=m_joints[i].jntVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
 END_FOR 
+//q4DH=q4motor+q8-q2-90;  
+m_curLinkPos[4]:=m_curLinkPos[4]-m_curLinkPos[3]+m_curLinkPos[2]+PI/2;
 
 // cartesion pose
 forwardKinematic(m_curJntPos,m_curCartPose);
@@ -693,6 +702,9 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="68" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="93" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="40" Count="1" />
@@ -701,6 +713,14 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="82" Count="0" />
       <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.initJntPos">
+      <LineId Id="7" Count="3" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.inverseKinematic">
       <LineId Id="13" Count="2" />
@@ -718,10 +738,6 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
     </LineIds>
     <LineIds Name="FB_MasterArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.resetEncoder">
-      <LineId Id="7" Count="3" />
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateCmds">
       <LineId Id="40" Count="0" />
@@ -761,6 +777,8 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
       <LineId Id="13" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="12" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="71" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="36" Count="1" />
       <LineId Id="43" Count="1" />

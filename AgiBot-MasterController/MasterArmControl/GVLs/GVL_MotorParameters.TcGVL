@@ -18,8 +18,8 @@ VAR_GLOBAL CONSTANT
 	// motor and absEncoder direction
 	g_motorDir :ARRAY[1..2, 1..7] OF INT :=[1, 1, -1, 1, 1, -1, -1,	
 											1, 1, -1, 1, 1, -1, -1];
-	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, -1, -1, 1, -1, -1,
-												 -1, -1, -1, -1, 1, -1, -1];
+	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, 1, -1, 1, 1, 1,
+												 -1, -1, 1, -1, 1, 1, 1];
 																 
 	// joint position limit
 	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-2*pi,-135*g_deg2Rad+pi,-45*g_deg2Rad-pi/2,-340*g_deg2Rad,

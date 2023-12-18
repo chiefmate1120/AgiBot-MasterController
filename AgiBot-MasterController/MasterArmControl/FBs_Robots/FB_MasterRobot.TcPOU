@@ -195,7 +195,7 @@ END_VAR]]></Declaration>
 			IF m_armCtrl[i].isFinished  THEN
 				// NOTICE: multiple cycles joints back to center during initialization
 				// 			need to reset joints encoder data again
-				m_masterArms[i].resetEncoder();
+				m_masterArms[i].initJntPos();
 				
 				m_nextMasterArmState[i]:=MasterArmState_Home;
 			END_IF

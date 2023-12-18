@@ -68,13 +68,7 @@ startJntPos:=i_masterArm.curJntPos;
 FOR j:=1 TO 7 DO 
 endJntPos[j]:=g_homePosture[i_masterArm.armIdx,j];
 END_FOR
-m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeMaxjntJerk);
-
-// disable all joints
-m_jntEnableFlag :=g_zeroVec7i;
-m_jntEnableFlag[5]:=1;
-m_jntEnableFlag[6]:=1;
-m_jntEnableFlag[7]:=1;]]></ST>
+m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeMaxjntJerk);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_ArmHome">
@@ -102,8 +96,6 @@ m_jntEnableFlag[7]:=1;]]></ST>
       <LineId Id="86" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="74" Count="0" />
-      <LineId Id="112" Count="4" />
-      <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

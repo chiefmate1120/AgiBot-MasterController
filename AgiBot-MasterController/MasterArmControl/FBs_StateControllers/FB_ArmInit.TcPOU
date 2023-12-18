@@ -83,14 +83,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_masterArm,i_masterArmCtrlCmd);
 m_initState :=0;
-
-
-// disable all joints
-m_jntEnableFlag :=g_zeroVec7i;
-m_jntEnableFlag[5]:=1;
-m_jntEnableFlag[6]:=1;
-m_jntEnableFlag[7]:=1;
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -126,10 +118,6 @@ m_jntEnableFlag[7]:=1;
     <LineIds Name="FB_ArmInit.Init">
       <LineId Id="11" Count="0" />
       <LineId Id="14" Count="0" />
-      <LineId Id="29" Count="3" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="33" Count="1" />
-      <LineId Id="13" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
