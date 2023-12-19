@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_ArmParameters" Id="{fa1bdebf-5188-4d48-a57d-03bec0a3a2f4}">
     <Declaration><![CDATA[// use slot attribute larger than 49990, which is the default one, if it depends on variable in other file
 {attribute 'global_init_slot' := '49991'} 
@@ -61,10 +61,10 @@ g_armShoulderDistance :LREAL := 0.5;
 			mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
 			preF2,   k2,   preF3,    k3,    preF5   k5]*)
 g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
-	[ 	4.22377, -0.000238508, 3.4348, 0.523733, -0.0377839, 0.0220708, 0.0000375, 0.0000351, 0.00001, -0.0147457, 
-		12.4552, 2044.8, 12.4552, 2044.8, 2.13504, 403.2,
-	 	3.95717, -0.000238508, 3.22352, 0.823427, -0.0371339, 0.0238336, 0.0000375, 0.0000117, -0.00001, -0.0145314, 
-		13.7318, 1841.41, 12.4552, 2044.8, 2.13504, 403.2];
+	[ 6.33924, -0.000238508, 3.15698, 0.793245, -0.0339737, 0.0267042, 0.0000375, 0.0000117, 0.00001, -0.016609,
+	  7.7845, 3186.78, 7.81103, 1947.5, 1.112, 574.868,
+	  5.59321, -0.000715522, 3.88803, 0.768, -0.0420242, 0.0273043, 0.0000375, 0.0000351, -0.00001, -0.016609, 
+	  13.1714, 2691.03, 23.3531, 2300.16, 3.336, 504.019];
 // spring parameters
 // spring2 [L0, b1, b2, l1, r0]
 g_spring2Param :ARRAY[1..5] OF LREAL :=[101.6E-3, 14.5E-3, 15E-3, 172E-3, 31E-3];

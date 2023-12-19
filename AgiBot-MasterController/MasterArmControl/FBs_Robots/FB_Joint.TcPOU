@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
 VAR_INPUT
@@ -119,8 +119,8 @@ m_minJntPos	:=g_minJntPos[i_armIdx,i_jntIdx];
 m_maxJntPos	:=g_maxJntPos[i_armIdx,i_jntIdx];
 
 //link encoder calibartion data
-m_minLinkEncoder :=g_minLinkEncoder[i_armIdx, i_jntIdx];
-m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx];
+m_minLinkEncoder :=g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
+m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
 m_caliLinkEncoder :=g_caliLinkEncoder[i_armIdx, i_jntIdx];
 m_linkEncCaliJntPos :=g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
 m_linkEncZeroCross :=g_linkEncZeroCross[i_armIdx, i_jntIdx];
@@ -142,13 +142,10 @@ m_linkEnc2PosRatio := 2*PI*m_linkEncoderDir/(m_linkEncoderReduction*m_linkEncode
 m_motorEnc2PosRatio := 2*PI * m_motorDir/(m_motorReduction * m_motorEncoderRes);
 
 // motor data init
-m_curJntPos := m_curMotorPos;
 m_curJntVel:=0;
 m_curJntTrq :=0;
-m_cmdJntPos :=m_curJntPos;
 m_cmdJntVel :=0.0;
 m_cmdJntTrq :=0.0;
-m_lastJntPos :=m_curJntPos;
 m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armControlFreq);
 m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armControlFreq);
 
@@ -169,7 +166,11 @@ END_VAR
 m_linkEncCycles:=0;
 m_curLinkPos :=linkEnc2Pos();
 m_initLinkPos:=m_curLinkPos;
-m_initMotorEnc :=m_motorInputs.m_motorEncoder;]]></ST>
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curMotorPos:=motorEnc2Pos();
+m_curJntPos := m_curMotorPos;
+m_cmdJntPos :=m_curJntPos;	
+m_lastJntPos :=m_curJntPos;]]></ST>
       </Implementation>
     </Method>
     <Property Name="initLinkPos" Id="{d7776925-1122-4a68-9f90-f18c7af4e629}" FolderPath="property\">
@@ -347,6 +348,7 @@ m_curJntPos := m_curMotorPos;
 // compute joint velocity
 m_curJntVel:= (m_curJntPos-m_lastJntPos)/g_armControlLoopInterval;
 m_curJntVel := m_jntVelLpf.run(m_curJntVel);
+m_lastJntPos :=m_curJntPos;
 
 m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       </Implementation>
@@ -368,11 +370,17 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
     </LineIds>
     <LineIds Name="FB_Joint.init">
       <LineId Id="89" Count="28" />
-      <LineId Id="122" Count="20" />
+      <LineId Id="122" Count="6" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="133" Count="1" />
+      <LineId Id="136" Count="6" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="FB_Joint.initJntPos">
       <LineId Id="23" Count="4" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="1" />
     </LineIds>
     <LineIds Name="FB_Joint.initLinkPos.Get">
       <LineId Id="2" Count="0" />
@@ -439,6 +447,7 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       <LineId Id="7" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="9" Count="1" />
+      <LineId Id="22" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="11" Count="0" />
     </LineIds>

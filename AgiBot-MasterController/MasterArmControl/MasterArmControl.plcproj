@@ -19,6 +19,9 @@
     <Released>false</Released>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AgiMaths\sign.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\Communication\ST_MasterDynaData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -143,6 +146,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_TrajectoryPlanning\linear_trajectory_with_quintic_polynomial_blends.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TrajectoryPlanning\OTG\FB_secOrdTrajFilter.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_TrajectoryPlanning\OTG\FB_thirdOrdTrajFilter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_TrajectoryPlanning\quintic_spline_curve.TcPOU">
@@ -289,6 +298,7 @@
     <Folder Include="FBs_TrajectoryPlanning" />
     <Folder Include="FBs_RobotDynamics" />
     <Folder Include="FBs_Filters" />
+    <Folder Include="FBs_TrajectoryPlanning\OTG" />
     <Folder Include="GVLs" />
     <Folder Include="FBs_BasicControllers" />
     <Folder Include="AgiMaths" />

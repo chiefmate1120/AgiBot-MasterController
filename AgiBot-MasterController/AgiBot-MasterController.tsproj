@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}" AutoDeleteType="true">Vec7d</Name>
@@ -11,19 +11,19 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{A8F93691-3340-9F64-384A-1FADDA5F5E51}" AutoDeleteType="true">ST_MasterJointData</Name>
+			<Name GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}" AutoDeleteType="true">ST_MasterJointData</Name>
 			<Comment><![CDATA[ Output from master arm control task 
  Input to safety task and force controller task]]></Comment>
-			<BitSize>25088</BitSize>
+			<BitSize>7168</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ joint position compute with motor encoder]]></Comment>
-				<BitSize>3136</BitSize>
+				<BitSize>896</BitSize>
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
@@ -31,77 +31,77 @@
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ joint position compute with link/abs encoder]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>3136</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>896</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntPos</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ target joint position ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>6272</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>1792</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curJntPos</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>9408</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>2688</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntVel</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ target joint velocity ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>12544</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>3584</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curJntVel</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint position ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>15680</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>4480</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_cmdJntTrq</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ command joint torque ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>18816</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>5376</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curJntTrq</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
-					<Elements>7</Elements>
+					<Elements>2</Elements>
 				</ArrayInfo>
 				<Comment><![CDATA[ current joint torque ]]></Comment>
-				<BitSize>3136</BitSize>
-				<BitOffs>21952</BitOffs>
+				<BitSize>896</BitSize>
+				<BitOffs>6272</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -834,7 +834,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterArmControl" PrjFilePath="MasterArmControl\MasterArmControl.plcproj" TmcFilePath="MasterArmControl\MasterArmControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc" TmcHash="{A813CB4A-D446-C755-992A-966A2C04FC38}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc">
 					<Name>MasterArmControl Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -842,7 +842,7 @@
 						<Var>
 							<Name>RobotDynamics.m_masterJointsData</Name>
 							<Comment><![CDATA[ master robot arms joint data]]></Comment>
-							<Type GUID="{A8F93691-3340-9F64-384A-1FADDA5F5E51}">ST_MasterJointData</Type>
+							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -1027,7 +1027,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
 							<Comment><![CDATA[ master robot joint data]]></Comment>
-							<Type GUID="{A8F93691-3340-9F64-384A-1FADDA5F5E51}">ST_MasterJointData</Type>
+							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
 						</Var>
 					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
@@ -1044,7 +1044,7 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -1053,7 +1053,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -1070,7 +1070,7 @@
 			</Project>
 		</Plc>
 		<Io>
-			<Device Id="3" DevType="111" DevFlags="#x0003" AmsPort="28675" AmsNetId="169.254.206.98.4.1" RemoteName="Device 3 (EtherCAT)" InfoImageId="7">
+			<Device Id="3" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28675" AmsNetId="169.254.206.98.4.1" RemoteName="Device 3 (EtherCAT)" InfoImageId="7">
 				<Name>Device 3 (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -3594,8 +3594,9 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500820000403}" Id="#x02030020"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500840000403}" Id="#x02030030"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0120-500820000403}" Id="#x02030010"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0120-500840000403}" Id="#x02030020"/>
+		<MappingInfo Identifier="{08502002-2001-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterArmControl^MasterArmControl Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1 (AX58200_MotorControl)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -3752,6 +3753,10 @@
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+			</OwnerB>
+			<OwnerB Name="TIPC^MasterArmControl^MasterArmControl Instance">
+				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_masterDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_masterDynaData"/>
+				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCtrlBase IMPLEMENTS I_MasterArmCtrl
 VAR_INPUT
@@ -44,10 +44,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// set all command to current value in default
-m_cmdJntAcc :=g_zeroVec7d;
-m_cmdJntVel :=i_masterArm.curJntVel;
-m_cmdJntPos := i_masterArm.curJntPos;]]></ST>
+        <ST><![CDATA[]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{31ee0fe6-80c4-42e7-bd18-5b745e895642}">
@@ -66,17 +63,6 @@ END_VAR
       <Implementation>
         <ST><![CDATA[// set joint torque to zero in default
 m_cmdJntTrq := g_zeroVec7d;]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="driverCtrl" Id="{3948af2b-e841-4242-bc3c-781098471e79}">
-      <Declaration><![CDATA[METHOD PUBLIC driverCtrl : BOOL
-VAR_IN_OUT CONSTANT
-	i_masterArm :FB_MasterArm;
-END_VAR
-
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[]]></ST>
       </Implementation>
     </Method>
     <Method Name="Init" Id="{63e02c69-11c3-4e06-9c58-dcaf1b3a881b}">
@@ -148,10 +134,6 @@ END_VAR]]></Declaration>
 	m_firstIn:=FALSE;
 END_IF
 
-
-// set the joint drive control word and operation mode
-driverCtrl(i_masterArm);
-
 // check if arm enabled
 IF FALSE = i_masterArm.isEnabled(m_jntEnableFlag) THEN
 //	RETURN;
@@ -182,15 +164,11 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.calcCmdJntPos">
-      <LineId Id="13" Count="0" />
-      <LineId Id="25" Count="2" />
+      <LineId Id="27" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.calcCmdJntTrq">
       <LineId Id="5" Count="0" />
       <LineId Id="17" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArmCtrlBase.driverCtrl">
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.Init">
       <LineId Id="49" Count="0" />
@@ -214,9 +192,6 @@ m_timePeriod := m_timePeriod+g_armControlLoopInterval;
       <LineId Id="7" Count="1" />
       <LineId Id="43" Count="0" />
       <LineId Id="9" Count="0" />
-      <LineId Id="83" Count="0" />
-      <LineId Id="44" Count="1" />
-      <LineId Id="13" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="2" />

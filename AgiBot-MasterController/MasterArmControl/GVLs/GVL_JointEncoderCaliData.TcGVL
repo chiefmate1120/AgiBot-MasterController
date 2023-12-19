@@ -2,18 +2,18 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_JointEncoderCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
-	// abolute encoder limit buffer
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
 	g_linkEncLimitBuffer : DINT := 5000;
 	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[8989196+g_linkEncLimitBuffer, 4134520+g_linkEncLimitBuffer, 15344624-g_linkEncLimitBuffer, 1912720+g_linkEncLimitBuffer, 16331520-g_linkEncLimitBuffer, 14419696-g_linkEncLimitBuffer, 0,
-		 13092100+g_linkEncLimitBuffer, 9431568+g_linkEncLimitBuffer, 8498692-g_linkEncLimitBuffer, 8222800+g_linkEncLimitBuffer, 659040-g_linkEncLimitBuffer, 8986672-g_linkEncLimitBuffer, 0];
+		[8989196, 4134520, 15344624, 1912720, 16331520, 14419696, 0,
+		 13092100, 9431568, 8498692, 8222800, 659040, 8986672, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[14678512-g_linkEncLimitBuffer, 15070764-g_linkEncLimitBuffer, 1808188+g_linkEncLimitBuffer, 7240592-g_linkEncLimitBuffer, 12225952+g_linkEncLimitBuffer, 1889888+g_linkEncLimitBuffer, 16777216,
-		 2006608-g_linkEncLimitBuffer, 3571264-g_linkEncLimitBuffer, 12804156 + g_linkEncLimitBuffer, 13548864-g_linkEncLimitBuffer, 13314448+g_linkEncLimitBuffer, 13295680+g_linkEncLimitBuffer, 16777216];
+		[14678512, 15070764, 1808188, 7240592, 12225952, 1889888, 16777216,
+		 2006608, 3571264, 12804156, 13548864, 13314448, 13295680, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=

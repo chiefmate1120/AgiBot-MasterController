@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_ArmInit" Id="{2f1b91d8-ebd5-4b63-92d8-450fe3a94973}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Initialization
 FUNCTION_BLOCK PUBLIC FB_ArmInit EXTENDS FB_MasterArmCtrlBase
@@ -8,7 +8,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	m_jnt7SelfCheckVel : LREAL :=30*g_deg2Rad;
+	m_jnt7SelfCheckVel : LREAL :=90*g_deg2Rad;
 	m_jnt7HalfMotionRange : LREAL := 1.75*PI+0.26;
 	m_jnt7LimitErr :LREAL := 5*g_deg2Rad;
 	m_jnt7CenterPos :LREAL;
@@ -61,7 +61,7 @@ CASE m_initState OF
 		centerVel :=LIMIT(-m_jnt7SelfCheckVel,(m_jnt7CenterPos-m_cmdJntPos[7])/g_armControlLoopInterval,m_jnt7SelfCheckVel);
 		m_cmdJntPos[7] := m_cmdJntPos[7] + centerVel * g_armControlLoopInterval;
 		IF ABS(m_jnt7CenterPos-curJntPos[7]) < g_jntCtrlPosTol THEN
-//			m_isFinished :=TRUE;
+			m_isFinished :=TRUE;
 		END_IF
 END_CASE
 

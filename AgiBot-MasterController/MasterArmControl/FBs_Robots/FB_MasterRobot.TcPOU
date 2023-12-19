@@ -203,8 +203,20 @@ END_VAR]]></Declaration>
 		//home
 		MasterArmState_Home:
 			IF m_armCtrl[i].isFinished  THEN
-	//			m_nextMasterArmState[i]:=MasterArmState_Standby;
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			END_IF
+		
+		//standby
+(*		MasterArmState_Standby:
+		
+		//matching
+		MasterArmState_Matching:
+		
+		//ready
+		MasterArmState_Ready:
+		
+		//MasterSlave
+		MasterArmState_MasterSlave:*)
 	END_CASE
 	
 	// Controller transit
@@ -296,6 +308,7 @@ END_FOR]]></ST>
       <LineId Id="41" Count="2" />
       <LineId Id="45" Count="1" />
       <LineId Id="44" Count="0" />
+      <LineId Id="86" Count="11" />
       <LineId Id="18" Count="0" />
       <LineId Id="56" Count="3" />
       <LineId Id="61" Count="2" />

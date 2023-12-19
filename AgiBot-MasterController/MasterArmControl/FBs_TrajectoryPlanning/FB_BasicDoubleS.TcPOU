@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_BasicDoubleS" Id="{3d4218fa-47ff-4ce3-8b1a-14c663d40404}" SpecialFunc="None">
     <Declaration><![CDATA[// reference: Trajectory planning for automation machines and robots
 FUNCTION_BLOCK FB_BasicDoubleS EXTENDS FB_trajBase
@@ -224,7 +224,7 @@ else
 			m_limitAcc:=maxJ*m_Taj;
 			m_limitDec:=-maxJ*m_Tdj;
 			m_limitVel:=v0+(m_Ta-m_Taj)*m_limitAcc;
-			RETURN;       
+			EXIT;       
 		END_IF
 		recursiveTime:=recursiveTime+1;
 		maxA:=maxA*recursiveStep;
