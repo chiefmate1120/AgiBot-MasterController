@@ -23,6 +23,7 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>

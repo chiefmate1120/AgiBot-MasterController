@@ -5,10 +5,14 @@
 VAR_GLOBAL CONSTANT
 	// master arm joint position controller parameters
 	g_posKp :ARRAY[1..7] OF LREAL :=[0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0];
-	g_posKd :ARRAY[1..7] OF LREAL :=[0.0, 0.0, 0.0, 0.03, 0.0, 0.0, 0.0];
+	g_posKd :ARRAY[1..7] OF LREAL :=[0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0];
 	g_posKi :ARRAY[1..7] OF LREAL :=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 	g_posKiLimit :ARRAY[1..7] OF LREAL :=[500,500,500,500,100,100,100];// define in current
 	g_posCtrlLimit :ARRAY[1..7] OF LREAL :=[1000,1000,1000,1000,200,200,200];// define in current
+	
+	// redundant joint4 following motion parameters
+	g_jnt4MaxFollowVel :LREAL :=2*pi;
+	g_jnt4MaxFollowAcc :LREAL :=6*pi;
 	
 	// control tolerance
 	g_jntCtrlPosTol :LREAL :=0.2*g_deg2Rad;

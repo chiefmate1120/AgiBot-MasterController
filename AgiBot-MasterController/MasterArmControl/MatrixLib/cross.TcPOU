@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="cross" Id="{c93e3312-b801-4db9-af16-39772db794e7}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION cross : Vec3d
+VAR_IN_OUT CONSTANT
+	a, b :Vec3d;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[cross[1]:=a[2]*b[3]-a[3]*b[2];
+cross[2]:=a[3]*b[1]-a[1]*b[3];
+cross[3]:=a[1]*b[2]-a[2]*b[1];]]></ST>
+    </Implementation>
+    <LineIds Name="cross">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

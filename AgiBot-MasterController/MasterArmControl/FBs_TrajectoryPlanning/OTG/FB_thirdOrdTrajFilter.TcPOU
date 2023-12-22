@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_thirdOrdTrajFilter" Id="{a9e84a09-bcd5-4b04-bd05-9b76d4fe4fcc}" SpecialFunc="None">
+    <Declaration><![CDATA[// reference: trajectory planning for automatic machines and robots
+FUNCTION_BLOCK FB_thirdOrdTrajFilter
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// command pos, vel and acc from last cycle
+	m_cmdPos :LREAL;
+	m_cmdVel :LREAL;
+	m_cmdAcc :LREAL;
+	m_cmdJerk:LREAL;
+	
+	// max velocity and acceleration
+	m_maxV :LREAL;
+	m_maxA :LREAL;
+	m_maxJ :LREAL;
+	
+	// samping time
+	m_Ts :LREAL;
+	
+	// middle variable
+	ek,ek_dot,ek_ddot :LREAL;
+	eDot_min, eDot_max, eDdot_min, eDdot_max:LREAL;
+	delta, sigma, vp, vn, CapSig,uc:LREAL;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{e34faa4f-1e3b-456f-bad4-eaa6758f5764}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_curCmdPos : LREAL;
+	i_curCmdVel :LREAL;
+	i_curCmdAcc :LREAL;
+	i_maxV : LREAL;
+	i_maxA :LREAL;
+	i_maxJ :LREAL;
+	i_Ts :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdPos:=i_curCmdPos;
+m_cmdVel:=i_curCmdVel;
+m_cmdAcc:=i_curCmdAcc;
+m_maxV :=i_maxV;
+m_maxA :=i_maxA;
+m_maxJ :=i_maxJ;
+m_Ts :=i_Ts;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{19fa9a91-50b5-4ba6-9d54-a27d8dff0868}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	i_targetPos, i_targetVel, i_targetAcc :LREAL;
+END_VAR
+
+VAR_OUTPUT
+	o_cmdAcc, o_cmdVel, o_cmdPos:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ek:=(m_cmdPos-i_targetPos)/m_maxJ;
+ek_dot:=(m_cmdVel-i_targetVel)/m_maxJ;
+ek_ddot:=(m_cmdAcc-i_targetAcc)/m_maxJ;
+
+eDot_min:=(-m_maxV-i_targetVel)/m_maxJ;
+eDot_max:=(m_maxV-i_targetVel)/m_maxJ;
+eDdot_min:=(-m_maxA-i_targetAcc)/m_maxJ;
+eDdot_max:=(m_maxA-i_targetAcc)/m_maxJ;
+
+delta:=ek_dot+ek_ddot*ABS(ek_ddot)/2;
+sigma:=ek+ek_dot*ek_ddot*sign(delta)-EXPT( ek_ddot,3)*(1-3*ABS(sign(delta)))/6+
+	   sign(delta)*SQRT(2* EXPT((EXPT(ek_ddot,2)+2*ek_dot*sign(delta)),3))/4;
+vp:=ek-eDdot_max*(ek_ddot*ek_ddot-2*ek_dot)/4-EXPT(ek_ddot*ek_ddot-2*ek_dot,2)/(8*eDdot_max)-ek_ddot*(3*ek_dot-ek_ddot*ek_ddot)/3;
+vn:=ek-eDdot_min*(ek_ddot*ek_ddot+2*ek_dot)/4-EXPT(ek_ddot*ek_ddot+2*ek_dot,2)/(8*eDdot_min)+ek_ddot*(3*ek_dot+ek_ddot*ek_ddot)/3;
+
+CapSig:=sigma;
+IF ek_ddot<eDdot_max AND ek_dot<= (ek_ddot*ek_ddot/2-eDdot_max*eDdot_max) THEN
+	CapSig:=vp;
+ELSIF ek_ddot>eDdot_min AND ek_dot>= (-ek_ddot*ek_ddot/2+eDdot_min*eDdot_min) THEN
+	CapSig:=vn;
+END_IF
+
+uc:=-m_maxJ*sign(CapSig+(1-ABS(sign(CapSig)))*(delta+(1-ABS(sign(delta)))*ek_ddot));
+m_cmdJerk:=MAX(uv(eDot_min),MIN(uc,uv(eDot_max)));
+
+o_cmdAcc:=m_cmdAcc+m_cmdJerk*m_Ts;
+o_cmdVel:=m_cmdVel+(o_cmdAcc+m_cmdAcc)*m_Ts/2;
+o_cmdPos:=m_cmdPos+(o_cmdVel+m_cmdVel)*m_Ts/2;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="uv" Id="{7e6645fc-31d8-444f-bd4e-35c2089f853f}">
+      <Declaration><![CDATA[METHOD PROTECTED uv : LREAL
+VAR_INPUT
+	in :LREAL;
+END_VAR
+VAR
+	ua_min, ua_max, sigmaV,ucv :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ua_min:=-m_maxJ*sign(ek_ddot-eDdot_min);
+ua_max:=-m_maxJ*sign(ek_ddot-eDdot_max);
+sigmaV:=ek_ddot*ABS(ek_ddot)+2*(ek_dot-in);
+ucv:=-m_maxJ*sign(sigmaV+(1-ABS(sign(sigmaV)))*ek_ddot);
+uv:=MAX(ua_min,MIN(ucv,ua_max));
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_thirdOrdTrajFilter">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_thirdOrdTrajFilter.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_thirdOrdTrajFilter.run">
+      <LineId Id="29" Count="27" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_thirdOrdTrajFilter.uv">
+      <LineId Id="11" Count="4" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

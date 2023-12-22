@@ -154,8 +154,7 @@ stateMachine(i_masterInputDataPool);
 
 FOR i:=1 TO g_mArmNum DO
 	// update dynamic data
-	m_masterArms[i].updateDyna(i_masterInputDataPool.m_masterDynaData.m_massMat[i],
-								i_masterInputDataPool.m_masterDynaData.m_gravity[i]);
+	m_masterArms[i].updateDyna(i_masterInputDataPool.m_masterDynaData);
 								
 	// update master arm kinematics
 	m_masterArms[i].updateStatus();
@@ -278,7 +277,7 @@ END_FOR]]></ST>
       <LineId Id="79" Count="0" />
       <LineId Id="19" Count="2" />
       <LineId Id="11" Count="0" />
-      <LineId Id="88" Count="2" />
+      <LineId Id="88" Count="1" />
       <LineId Id="97" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="5" Count="0" />

@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="matMultiVec" Id="{8fa1fc4e-9bb5-44b4-829c-607306747973}" SpecialFunc="None">
+    <Declaration><![CDATA[// vecB = matA * vecA
+FUNCTION matMultiVec : bool
+VAR_IN_OUT CONSTANT
+	matA :ARRAY[*,*] OF LREAL;//m*n
+	vecA:ARRAY[*] OF LREAL; // n*1
+END_VAR
+VAR_IN_OUT 
+		vecB :ARRAY[*] OF LREAL;
+END_VAR
+VAR
+	m,n :DINT;
+	i,j, k :DINT;
+ 
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(matA,1);
+n:= UPPER_BOUND(matA,2);
+FOR i:=1 TO m DO
+	vecB[i]:=0.0;
+	FOR j:=1 TO n DO
+		vecB[i]:=vecB[i]+matA[i,j]*vecA[j];
+	END_FOR
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="matMultiVec">
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="1" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

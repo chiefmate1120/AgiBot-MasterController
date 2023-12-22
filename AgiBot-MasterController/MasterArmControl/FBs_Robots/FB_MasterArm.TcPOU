@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -33,6 +33,8 @@ VAR
 	// arm daynamic data
 	m_jntGravity : Vec7d;
 	m_jntMassMat : Mat7d;
+	m_lambda :Mat6d;
+	m_dynaNullspace :Mat7d;
 	
 	// arm jacobian 
 	m_jaco :ARRAY[1..g_cartDofs, 1..g_mJntNum] OF LREAL;
@@ -238,6 +240,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[curMotorPos:=m_curMotorPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="dynaNullspace" Id="{872e2eb4-66b0-4b49-98a3-75080f1189e3}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC dynaNullspace : Mat7d]]></Declaration>
+      <Get Name="Get" Id="{8a06f4b9-0c57-44d4-b602-0075d0a644d1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[dynaNullspace := m_dynaNullspace;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -550,6 +563,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="massMat" Id="{c4fbf6a1-1d71-4f80-9bfa-395c19261a6f}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC massMat : Mat7d]]></Declaration>
+      <Get Name="Get" Id="{b8079ba8-3835-474b-9d8e-6afd86dc6a9b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[massMat :=m_jntMassMat;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="updateCmds" Id="{4f271d3a-4b2b-4f85-986e-f8fdffb5994c}">
       <Declaration><![CDATA[// update joints control command
 METHOD PUBLIC updateCmds : BOOL
@@ -589,13 +613,15 @@ END_FOR]]></ST>
     <Method Name="updateDyna" Id="{02de28e3-c8a7-46cf-834a-5bf048b5e039}">
       <Declaration><![CDATA[METHOD PUBLIC updateDyna : BOOL
 VAR_IN_out constant
-	i_massMat :Mat7d;
-	i_gravity :Vec7d;
+	masterDynaData : ST_MasterDynaData;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_jntMassMat:=i_massMat;
-m_jntGravity:=i_gravity;]]></ST>
+        <ST><![CDATA[m_jntMassMat:=masterDynaData.m_massMat[m_armIdx];
+m_lambda:=masterDynaData.m_lambda[m_armIdx];
+m_dynaNullspace:=masterDynaData.m_dynaNullspace[m_armIdx];
+m_jntGravity:=masterDynaData.m_gravity[m_armIdx];
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{21b3fe9a-0eba-4313-bb9a-33b1f0038771}">
@@ -678,6 +704,9 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
     <LineIds Name="FB_MasterArm.curMotorPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterArm.dynaNullspace.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterArm.enable">
       <LineId Id="15" Count="2" />
       <LineId Id="26" Count="2" />
@@ -739,6 +768,9 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
     <LineIds Name="FB_MasterArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterArm.massMat.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterArm.updateCmds">
       <LineId Id="40" Count="0" />
       <LineId Id="52" Count="0" />
@@ -765,7 +797,9 @@ m_curCartTwist:=Mat67Vec7(m_jaco,m_curJntVel);]]></ST>
     </LineIds>
     <LineIds Name="FB_MasterArm.updateDyna">
       <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="1" />
       <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateStatus">
       <LineId Id="30" Count="2" />

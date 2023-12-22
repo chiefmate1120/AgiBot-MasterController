@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_JointEncoderCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
@@ -13,7 +13,7 @@
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[14678512, 15070764, 1808188, 7240592, 12225952, 1889888, 16777216,
-		 2006608, 3571264, 12804156, 13548864, 13314448, 13295680, 16777216];
+		 2006608, 3571264, 12804156, 13448864, 13314448, 13295680, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=

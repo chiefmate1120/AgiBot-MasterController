@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="sign" Id="{73314d4f-8960-4437-b969-7aac31f0a87d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION sign : int
+VAR_INPUT
+	value : LREAL;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF value > 0 THEN 
+	sign := 1;
+ELSIF value <  0 THEN
+	sign :=-1;
+ELSE 
+	sign :=0;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="sign">
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="3" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

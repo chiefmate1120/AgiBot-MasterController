@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -16,32 +16,65 @@ VAR
 	// grivity model block
 	m_gravityModel :ARRAY[1..g_mArmNum] OF FB_MasterGravity;
 	
+	// master arm dynamic model
+	m_armDynamic :ARRAY[1..g_mArmNum] OF FB_MasterDynamic;
+	
+	// code execute time measure
+	m_codeTime : Profiler;
+	
 	i: INT;
+	
+	//##################
+	testJntPos :Vec7d :=[ 0.3142,   -1.1694,    0.5585,   -0.4014,    2.9496,    1.8675,    0.5934];
+	mata,matb : Mat3d;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[// robot dynamic model init
+      <ST><![CDATA[m_codeTime(START:=TRUE, RESET:=TRUE);
+
+// robot dynamic model init
 IF m_robotDynaInit =FALSE THEN
 	FOR i:=1 TO g_mArmNum DO
 		m_gravityModel[i].Init(i);
+		m_armDynamic[i].init(i);
 	END_FOR
 
 	m_robotDynaInit:=TRUE;
 END_IF
 
-// run dynamic
+// run gravity model
 FOR i:=1 TO g_mArmNum DO
 	m_gravityModel[i].run(m_masterJointsData.m_curJntPos[i], m_masterDynaData.m_gravity[i]);
-END_FOR]]></ST>
+END_FOR
+
+// run dynamic model
+FOR i:=1 TO g_mArmNum DO
+	m_armDynamic[i].updateDynamic(m_masterJointsData.m_curJntPos[i]);
+	m_masterDynaData.m_massMat[i]:=m_armDynamic[i].jntMassMat;
+	m_masterDynaData.m_lambda[i]:=m_armDynamic[i].cartMassMat;
+	m_masterDynaData.m_dynaNullspace[i]:=m_armDynamic[i].dynaNullspace;
+END_FOR
+
+m_codeTime(START:=FALSE);
+]]></ST>
     </Implementation>
     <LineIds Name="RobotDynamics">
+      <LineId Id="81" Count="1" />
       <LineId Id="15" Count="1" />
-      <LineId Id="24" Count="2" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="26" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="28" Count="2" />
       <LineId Id="27" Count="0" />
+      <LineId Id="54" Count="3" />
+      <LineId Id="116" Count="2" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="110" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

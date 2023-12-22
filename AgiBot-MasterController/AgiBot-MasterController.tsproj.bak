@@ -118,8 +118,21 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{CC14C054-64DF-A3DA-F72F-4AF3A03A1CDC}" AutoDeleteType="true">ST_MasterDynaData</Name>
-			<BitSize>7168</BitSize>
+			<Name GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}" AutoDeleteType="true">Mat6d</Name>
+			<BitSize>2304</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}" AutoDeleteType="true">ST_MasterDynaData</Name>
+			<BitSize>18048</BitSize>
 			<SubItem>
 				<Name>m_massMat</Name>
 				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
@@ -132,6 +145,28 @@
 				<BitOffs>0</BitOffs>
 			</SubItem>
 			<SubItem>
+				<Name>m_lambda</Name>
+				<Type GUID="{A0671BED-9207-4AD7-552A-01ED20F8D524}">Mat6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ mass matrix in cartesian space]]></Comment>
+				<BitSize>4608</BitSize>
+				<BitOffs>6272</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_dynaNullspace</Name>
+				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ dynamic nullspace]]></Comment>
+				<BitSize>6272</BitSize>
+				<BitOffs>10880</BitOffs>
+			</SubItem>
+			<SubItem>
 				<Name>m_gravity</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
 				<ArrayInfo>
@@ -140,7 +175,7 @@
 				</ArrayInfo>
 				<Comment><![CDATA[ gravity]]></Comment>
 				<BitSize>896</BitSize>
-				<BitOffs>6272</BitOffs>
+				<BitOffs>17152</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -850,7 +885,7 @@
 						<Var>
 							<Name>RobotDynamics.m_masterDynaData</Name>
 							<Comment><![CDATA[ dynamic output]]></Comment>
-							<Type GUID="{CC14C054-64DF-A3DA-F72F-4AF3A03A1CDC}">ST_MasterDynaData</Type>
+							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
@@ -958,7 +993,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
 							<Comment><![CDATA[ master dynamic data]]></Comment>
-							<Type GUID="{CC14C054-64DF-A3DA-F72F-4AF3A03A1CDC}">ST_MasterDynaData</Type>
+							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">
@@ -3596,6 +3631,7 @@
 	<Mappings>
 		<MappingInfo Identifier="{00000000-2001-0850-0120-500820000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0120-500840000403}" Id="#x02030020"/>
+		<MappingInfo Identifier="{08502002-2001-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterArmControl^MasterArmControl Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1 (AX58200_MotorControl)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -3755,6 +3791,7 @@
 			</OwnerB>
 			<OwnerB Name="TIPC^MasterArmControl^MasterArmControl Instance">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_masterDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_masterDynaData"/>
+				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

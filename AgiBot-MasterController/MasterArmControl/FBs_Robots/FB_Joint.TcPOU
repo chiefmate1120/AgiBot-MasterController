@@ -327,6 +327,7 @@ END_VAR
 // pos mode
 IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
+	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
 	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	m_motorOutputs.m_cmdCurrent:=LREAL_TO_DINT(LIMIT(-m_maxCurrent, i_cmdTrq*m_trq2CurrentRatio,m_maxCurrent));
@@ -437,6 +438,7 @@ m_curJntTrq := m_motorInputs.m_current * m_current2TrqRatio;]]></ST>
       <LineId Id="31" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="28" Count="1" />
+      <LineId Id="42" Count="0" />
       <LineId Id="32" Count="3" />
       <LineId Id="30" Count="0" />
     </LineIds>

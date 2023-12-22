@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="DHTrans" Id="{6f2f5444-d30f-44ea-b23b-d19608633eba}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION DHTrans : ST_Frame
+VAR_IN_OUT CONSTANT
+	// DH parameters: alpha, a, d, DH[4]
+	DH :Vec4d;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[DHTrans.m_rot[1,1]:= COS(DH[4]);
+DHTrans.m_rot[1,2]:=  -SIN(DH[4]);
+DHTrans.m_rot[1,3]:= 0;
+DHTrans.m_rot[2,1]:= COS(DH[1])*SIN(DH[4]);
+DHTrans.m_rot[2,2]:= COS(DH[1])*COS(DH[4]);
+DHTrans.m_rot[2,3]:= -SIN(DH[1]);
+DHTrans.m_rot[3,1]:= SIN(DH[1])*SIN(DH[4]);
+DHTrans.m_rot[3,2]:= SIN(DH[1])*COS(DH[4]);
+DHTrans.m_rot[3,3]:= COS(DH[1]);
+
+DHTrans.m_pos[1]:=DH[2];
+DHTrans.m_pos[2]:=-DH[3]*SIN(DH[1]);
+DHTrans.m_pos[3]:=DH[3]*COS(DH[1]);
+]]></ST>
+    </Implementation>
+    <LineIds Name="DHTrans">
+      <LineId Id="7" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

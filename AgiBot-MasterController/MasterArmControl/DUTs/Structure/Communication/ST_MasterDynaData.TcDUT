@@ -6,6 +6,12 @@ STRUCT
 	// mass matrix in joint space
 	m_massMat :ARRAY[1..g_mArmNum] OF Mat7d;
 	
+	// mass matrix in cartesian space
+	m_lambda :ARRAY[1..g_mArmNum] OF Mat6d;
+	
+	// dynamic nullspace
+	m_dynaNullspace :ARRAY[1..g_mArmNum] OF Mat7d;
+	
 	// gravity
 	m_gravity :ARRAY[1..g_mArmNum] OF Vec7d;
 END_STRUCT

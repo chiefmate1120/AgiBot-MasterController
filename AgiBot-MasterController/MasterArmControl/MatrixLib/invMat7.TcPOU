@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="invMat7" Id="{e60c154b-d5c5-461b-abce-ac90f00b4245}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION invMat7 : bool
+VAR_IN_OUT CONSTANT
+	mat :Mat7d;
+END_VAR
+
+VAR_IN_OUT
+	invMat :Mat7d;
+END_VAR
+VAR
+	dim : INT :=7;
+	i,j,k,h:INT;
+	m,n :INT;
+	cofactorMat : Mat6d;
+	adjointMat :Mat7d;
+	matDet :LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[matDet :=Det7(mat);
+IF matDet=0 THEN
+	invMat7:=FALSE;
+	RETURN;
+END_IF
+
+FOR i :=1 TO dim DO
+	FOR j:=1 TO dim DO
+		// get cofactor mat
+		m:=1;
+		n:=1;
+		FOR k:=1 TO dim DO
+			FOR h:=1 TO dim DO
+				IF k<>i AND h <> j THEN
+					cofactorMat[m,n]:=mat[k,h];
+					n:=n+1;
+					IF n>=dim THEN
+						m:=m+1;
+						n:=1;
+					END_IF
+				END_IF
+			END_FOR
+		END_FOR
+		
+		adjointMat[i,j]:=EXPT(-1,i+j)*Det6(cofactorMat);
+	END_FOR
+END_FOR
+
+FOR i :=1 TO dim DO
+	FOR j:=1 TO dim DO
+		invMat[i,j]:=adjointMat[j,i]/matDet;
+	END_FOR
+END_FOR
+invMat7:=true;]]></ST>
+    </Implementation>
+    <LineIds Name="invMat7">
+      <LineId Id="52" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="20" Count="14" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="59" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

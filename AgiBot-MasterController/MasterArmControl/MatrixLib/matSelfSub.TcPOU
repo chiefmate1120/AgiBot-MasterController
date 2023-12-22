@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="matSelfSub" Id="{3b37dd0f-d269-4745-b585-d37991be4829}" SpecialFunc="None">
+    <Declaration><![CDATA[// A -=B
+FUNCTION matSelfSub : BOOL
+VAR_IN_OUT;
+	matA :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR_IN_OUT CONSTANT
+	matB :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR
+	m,n :DINT;
+	i,j, k :DINT;
+ 
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(matA,1);
+n:= UPPER_BOUND(matA,2);
+FOR i:=1 TO m DO
+	FOR j:=1 TO n DO
+		matA[i,j]:=matA[i,j]-matB[i,j];
+	END_FOR
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="matSelfSub">
+      <LineId Id="82" Count="5" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

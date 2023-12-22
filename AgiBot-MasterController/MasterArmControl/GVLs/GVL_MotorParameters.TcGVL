@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_MotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
@@ -13,7 +13,7 @@ VAR_GLOBAL CONSTANT
 	
 	// motor parameters
 	g_motorTrqConst :ARRAY[1..7] OF LREAL :=[0.0538,0.0538,0.0538,0.0299,0.0193,0.0193,0.0193];
-	g_motorMaxCurrent :ARRAY[1..7] OF LREAL :=[1000,1000,1000,1010,204,204,204];
+	g_motorMaxCurrent :ARRAY[1..7] OF LREAL :=[1000,1000,1000,1010,204,204,204];//mA
 	
 	// motor and absEncoder direction
 	g_motorDir :ARRAY[1..2, 1..7] OF INT :=[1, 1, -1, 1, 1, -1, -1,	
@@ -22,10 +22,10 @@ VAR_GLOBAL CONSTANT
 												 -1, -1, 1, -1, 1, 1, 1];
 																 
 	// joint position limit
-	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-2*pi,-135*g_deg2Rad+pi,-45*g_deg2Rad-pi/2,-340*g_deg2Rad,
-											 -60*g_deg2Rad,-45*g_deg2Rad-pi/2,30*g_deg2Rad,-pi,-135*g_deg2Rad+pi,-45*g_deg2Rad+pi/2,-340*g_deg2Rad];
-	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,60*g_deg2Rad-pi/2,135*g_deg2Rad,0,135*g_deg2Rad+pi,45*g_deg2Rad-pi/2,340*g_deg2Rad,
-								             60*g_deg2Rad,60*g_deg2Rad-pi/2,135*g_deg2Rad,pi,135*g_deg2Rad+pi,45*g_deg2Rad+pi/2,340*g_deg2Rad];
+	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad, 	-2*pi, 	-135*g_deg2Rad+pi,		-45*g_deg2Rad-pi/2,		-340*g_deg2Rad,
+											 								-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad,	-pi,		-135*g_deg2Rad+pi,		-45*g_deg2Rad+pi/2,	-340*g_deg2Rad];
+	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		0,			135*g_deg2Rad+pi,		45*g_deg2Rad-pi/2,		340*g_deg2Rad,
+								             								 60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		pi,			135*g_deg2Rad+pi,		45*g_deg2Rad+pi/2,		340*g_deg2Rad];
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..7] OF LREAL :=[7(2*pi)];
