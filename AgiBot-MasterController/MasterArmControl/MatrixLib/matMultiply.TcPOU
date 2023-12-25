@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="matMultiply" Id="{5788eceb-11a5-4bc1-a9a5-b84962dc2a38}" SpecialFunc="None">
     <Declaration><![CDATA[// matC = matA * matB
 FUNCTION matMultiply : BOOL
@@ -38,16 +38,7 @@ FOR i:=1 TO m DO
 		matC[i,j]:=matC[i,j]+tmp*matB[k,j];
 		END_FOR
 	END_FOR
-END_FOR
-(*
-FOR i:=1 TO m DO
-	FOR j:=1 TO n DO
-		matC[i,j]:=0.0;
-		FOR k:=1 TO p DO 
-		matC[i,j]:=matC[i,j]+matA[i,k]*matB[k,j];
-		END_FOR
-	END_FOR
-END_FOR*)]]></ST>
+END_FOR]]></ST>
     </Implementation>
     <LineIds Name="matMultiply">
       <LineId Id="78" Count="2" />
@@ -60,8 +51,6 @@ END_FOR*)]]></ST>
       <LineId Id="86" Count="0" />
       <LineId Id="32" Count="3" />
       <LineId Id="26" Count="0" />
-      <LineId Id="88" Count="7" />
-      <LineId Id="87" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

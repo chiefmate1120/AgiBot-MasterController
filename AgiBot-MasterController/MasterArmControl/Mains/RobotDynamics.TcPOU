@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -21,12 +21,10 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
+	m_codeTime1 : Profiler;
 	
 	i: INT;
 	
-	//##################
-	testJntPos :Vec7d :=[ 0.3142,   -1.1694,    0.5585,   -0.4014,    2.9496,    1.8675,    0.5934];
-	mata,matb : Mat3d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -59,7 +57,8 @@ m_codeTime(START:=FALSE);
 ]]></ST>
     </Implementation>
     <LineIds Name="RobotDynamics">
-      <LineId Id="81" Count="1" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="161" Count="0" />
       <LineId Id="15" Count="1" />
       <LineId Id="24" Count="1" />
       <LineId Id="52" Count="0" />

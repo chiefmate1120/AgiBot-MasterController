@@ -10,8 +10,6 @@ VAR
 	i,j,k:INT;
 	m,n :INT;
 	cofactorMat : Mat6d;
-	matdet :matrix66_det;
-	tmp :LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>

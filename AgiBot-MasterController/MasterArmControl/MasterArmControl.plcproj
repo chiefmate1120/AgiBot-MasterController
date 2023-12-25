@@ -22,9 +22,6 @@
     <Compile Include="AgiMaths\DHTrans.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\mat3Mat3_1.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -137,57 +134,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\Adjoint_matrix.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\Cross_Product.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\fun_vex.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\Linki.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix33_from_matrix44.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix55_det.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix66_det.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\Matrix_Cofactor.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_fun_inv.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_inverse_calculation_1.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_1.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_31.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_3x3.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_61.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_76_61.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_multiplication_v2_1.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_Matrix\matrix_transpose_1.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_MasterDynamic.TcPOU">
@@ -370,6 +316,9 @@
     <Compile Include="MatrixLib\Det7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="MatrixLib\invMat6Old.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="MatrixLib\invMat7.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -425,7 +374,6 @@
     <Folder Include="DUTs\Structure\Communication" />
     <Folder Include="DUTs\Type" />
     <Folder Include="DUTs\Structure" />
-    <Folder Include="FBs_Matrix" />
     <Folder Include="FBs_TrajectoryPlanning" />
     <Folder Include="FBs_RobotDynamics" />
     <Folder Include="FBs_Filters" />

@@ -1,74 +1,103 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="invMat7" Id="{e60c154b-d5c5-461b-abce-ac90f00b4245}" SpecialFunc="None">
+  <POU Name="invMat7" Id="{f162c1d1-04ae-41f7-b209-2d011fa5334f}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION invMat7 : bool
 VAR_IN_OUT CONSTANT
 	mat :Mat7d;
 END_VAR
-
 VAR_IN_OUT
-	invMat :Mat7d;
+	invMat : Mat7d;
 END_VAR
 VAR
-	dim : INT :=7;
-	i,j,k,h:INT;
-	m,n :INT;
-	cofactorMat : Mat6d;
-	adjointMat :Mat7d;
-	matDet :LREAL;
+	n:INT:=7;
+	m:INT:=1;
+	b :ARRAY[1..7] OF LREAL := [7(0)];
+	indxc,indxr, ipiv:ARRAY[1..7] OF INT := [7(0)];
+
+	
+	i,icol, irow, j,k,l,ll: INT;
+	big, dum, pivinv,tmp: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[matDet :=Det7(mat);
-IF matDet=0 THEN
-	invMat7:=FALSE;
-	RETURN;
-END_IF
+      <ST><![CDATA[invMat := mat;
+FOR i:=1 TO n DO   
+    big:=0.0;
+    FOR j:=1 TO n DO  
+        IF (ipiv[j] <> 1) THEN
+            FOR k:=1 TO n DO 
+                IF (ipiv[k] = 0) THEN
+                    IF (ABS(invMat[j,k]) >= big) THEN
+                        big:=ABS(invMat[j,k]);
+                        irow:=j;
+                        icol:=k;
+                    END_IF
+                END_IF
+            END_FOR
+        END_IF
+    END_FOR
+    ipiv[icol]:=ipiv[icol]+1;
+    
+    IF (irow <> icol) THEN
+        FOR l:=1 TO n DO 
+            tmp:=invMat[irow,l];
+            invMat[irow,l]:=invMat[icol,l];
+            invMat[icol,l]:=tmp;
+        END_FOR
+ (*       FOR  l:=1 TO m DO  
+            tmp:=b[irow,l];
+            b[irow,l]:=b[icol,l];
+            b[icol,l]:=tmp;
+        END_FOR*)
+    END_IF
+	
+    indxr[i]:=irow; 
+    indxc[i]:=icol;
+	
+    IF invMat[icol,icol] = 0.0 THEN 
+          invMat7:=FALSE;
+		  RETURN;
+    END_IF
+	
+    pivinv:=1.0/invMat[icol,icol];
+    invMat[icol,icol]:=1.0;
+    FOR l:=1 TO n DO  
+        invMat[icol,l] := invMat[icol,l]*pivinv;
+    END_FOR
+ (*   FOR l:=1 TO m DO 
+        b[icol,l] := b[icol,l]*pivinv;
+    END_FOR*)
+    FOR ll:=1 TO n DO  
+        IF (ll <> icol) THEN 
+            dum:=invMat[ll,icol];
+            invMat[ll,icol]:=0.0;
+            FOR l:=1 TO n DO  
+                invMat[ll,l]:=invMat[ll,l] - invMat[icol,l]*dum;
+            END_FOR
+   (*         FOR l:=1 TO m DO  
+                b[ll,l]:=b[ll,l] - b[icol,l]*dum;
+            END_FOR*)
+        END_IF
+    END_FOR
 
-FOR i :=1 TO dim DO
-	FOR j:=1 TO dim DO
-		// get cofactor mat
-		m:=1;
-		n:=1;
-		FOR k:=1 TO dim DO
-			FOR h:=1 TO dim DO
-				IF k<>i AND h <> j THEN
-					cofactorMat[m,n]:=mat[k,h];
-					n:=n+1;
-					IF n>=dim THEN
-						m:=m+1;
-						n:=1;
-					END_IF
-				END_IF
-			END_FOR
-		END_FOR
-		
-		adjointMat[i,j]:=EXPT(-1,i+j)*Det6(cofactorMat);
-	END_FOR
 END_FOR
 
-FOR i :=1 TO dim DO
-	FOR j:=1 TO dim DO
-		invMat[i,j]:=adjointMat[j,i]/matDet;
-	END_FOR
+
+FOR l:=n-1 TO 1 BY -1 DO 
+    IF (indxr[l] <> indxc[l]) THEN
+        FOR k:=1 TO n DO
+            tmp:=invMat[k,indxr[l]];
+            invMat[k,indxr[l]]:=invMat[k,indxc[l]];
+            invMat[k,indxc[l]]:=tmp;
+        END_FOR
+    END_IF
 END_FOR
-invMat7:=true;]]></ST>
+
+invMat7:=TRUE;]]></ST>
     </Implementation>
     <LineIds Name="invMat7">
-      <LineId Id="52" Count="0" />
-      <LineId Id="54" Count="1" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="18" Count="1" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="20" Count="14" />
-      <LineId Id="43" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="46" Count="1" />
+      <LineId Id="137" Count="72" />
       <LineId Id="7" Count="0" />
-      <LineId Id="48" Count="2" />
-      <LineId Id="59" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
