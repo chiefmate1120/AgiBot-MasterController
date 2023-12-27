@@ -869,7 +869,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterArmControl" PrjFilePath="MasterArmControl\MasterArmControl.plcproj" TmcFilePath="MasterArmControl\MasterArmControl.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc" TmcHash="{356EB445-35FD-12E9-28FB-2E9C64EBF09B}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterArmControl\MasterArmControl.tmc" TmcHash="{6B7C673F-6238-8FF0-F83B-0A9DA9EC18B9}">
 					<Name>MasterArmControl Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

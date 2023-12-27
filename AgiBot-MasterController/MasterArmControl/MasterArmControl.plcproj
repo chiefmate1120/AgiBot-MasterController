@@ -85,13 +85,10 @@
     <Compile Include="DUTs\Type\Vec4d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FBRedunOriControl.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FB_PID.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_BasicControllers\ITF.TcIO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_DriverCtrlWord.TcDUT">

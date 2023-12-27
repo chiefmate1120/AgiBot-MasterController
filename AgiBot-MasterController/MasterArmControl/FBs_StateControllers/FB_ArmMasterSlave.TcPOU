@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_ArmMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_ArmMasterSlave EXTENDS FB_MasterArmCtrlBase
@@ -8,27 +8,13 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// OTG for joint4 motion
-	m_trajFilter : FB_secOrdTrajFilter;
-	
-	// max vel and acc for joint4 motion
-	m_jnt4MaxFollowVel :LREAL :=2*pi;
-	m_jnt4MaxFollowAcc :LREAL :=6*pi;
-	m_jnt4MinFollowAcc :LREAL :=2*pi;
-	m_jnt4MinAccVel:LREAL:= 0.5*pi;
-	m_jnt4MaxAccVel:LREAL:= 1.0*pi;
-	m_jnt4StaticVel:LREAL:= 6.0*g_deg2rad;
-	m_jnt4StaticTime:LREAL:=0;
-	m_jnt4StaticTimeThres:LREAL:=0.5;
-	
-	// target position of joint4
-	m_jnt4TargetPos :LREAL:=0;
+	// joint4 controller
+	m_redunJntCtrl : FB_RedunJntControl;
 	
 	// flag if project joint4 torque to nullspace
 	m_nullspaceCtrl : BOOL :=FALSE;
 	
-	// joint4 control torque threshold to start nullspace projection
-	m_nullsapceCtrlTrqThres :LREAL:=0.001;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -47,35 +33,11 @@ VAR_IN_OUT CONSTANT
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
 var 
-	cartTwist :Vec6d;
-	jntVel: Vec7d;
-	maxAcc, minDec:LREAL;
+
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[cartTwist:=i_masterArm.curCartTwist;
-jntVel:=i_masterArm.curJntVel;
-
-// TODO: Code below attempt to hault joint4 motion when user's arm not on gripper, but it would lead a small "jump" when switch on/off
-// only update joint4 position if joint6 is actively driven
-(*IF ABS(jntVel[6])<m_jnt4StaticVel THEN
-	m_jnt4StaticTime:=m_jnt4StaticTime+g_armControlLoopInterval;
-ELSE
-		m_jnt4StaticTime:=0;	
-END_IF;
-IF m_jnt4StaticTime<m_jnt4StaticTimeThres THEN
-		m_jnt4TargetPos:=calcRedunPos(i_masterArm);
-END_IF*)
-m_jnt4TargetPos:=calcRedunPos(i_masterArm);
-
-// scale following acceleration based on yaw velocity
-maxAcc:=(m_jnt4MaxFollowAcc-m_jnt4MinFollowAcc)*(ABS(cartTwist[6])-m_jnt4MinAccVel)/(m_jnt4MaxAccVel-m_jnt4MinAccVel)+m_jnt4MinFollowAcc;
-minDec:=m_trajFilter.minDec(m_jnt4TargetPos);
-maxAcc := MAX(maxAcc, minDec);
-maxAcc := LIMIT(m_jnt4MinFollowAcc,maxAcc, m_jnt4MaxFollowAcc);
-
-// run OTG
-m_trajFilter.maxA:=maxAcc;
-m_trajFilter.run(m_jnt4TargetPos, 0.0, o_cmdAcc=>m_cmdJntAcc[4],o_cmdVel=>m_cmdJntVel[4], o_cmdPos=>m_cmdJntPos[4]);]]></ST>
+        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos;
+m_cmdJntVel:=i_masterArm.curJntVel;]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{590b7c96-65ed-47d5-8eb2-8a13ee8a5533}">
@@ -92,28 +54,17 @@ VAR_IN_OUT CONSTANT
 END_VAR
 
 VAR 
-	jnt4PosErr,jnt4VelErr :LREAL;
-	curJntPos : Vec7d;
-	curJntVel : Vec7d;
-	m_integral: INT;
 	nullspaceMat :Mat7d;
-	massMat:Mat7d;
 	ctrlTrq : Vec7d;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[curJntPos := i_masterArm.curJntPos;
-curJntVel :=i_masterArm.curJntVel;
-jnt4PosErr:=m_cmdJntPos[4]-curJntPos[4];
-jnt4VelErr:=m_cmdJntVel[4]-curJntVel[4];
-massMat:=i_masterArm.massMat;
-
-// joint PD control
+        <ST><![CDATA[// redundant joint4 controller
 ctrlTrq := g_zeroVec7d;
-ctrlTrq[4] :=LIMIT(-0.5,massMat[4,4]*m_cmdJntAcc[4]+ g_posKp[4]*jnt4PosErr+g_posKd[4]*jnt4VelErr,0.5) ;
+ctrlTrq[4] := m_redunJntCtrl.run(i_masterArm);
 
 // project to nullspace
-IF m_nullspaceCtrl AND ABS(ctrlTrq[4])>m_nullsapceCtrlTrqThres THEN
+IF m_nullspaceCtrl THEN
 	nullspaceMat:=i_masterArm.dynaNullspace;
 	matMultiVec(nullspaceMat,ctrlTrq, m_cmdJntTrq);
 	vecSelfMultiNum(m_cmdJntTrq, ctrlTrq[4] / m_cmdJntTrq[4]);
@@ -127,29 +78,6 @@ END_IF
 
 
 ]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="calcRedunPos" Id="{a0a32529-6279-4a6d-9027-5d0c66427120}">
-      <Declaration><![CDATA[METHOD PROTECTED calcRedunPos : LREAL
-VAR_IN_OUT CONSTANT
-	i_masterArm :FB_MasterArm;
-END_VAR
-
-VAR 
-	j6Bias :LREAL;
-	curJntPos : Vec7d;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// compute desired joint4 link position
-curJntPos :=  i_masterArm.curLinkPos;
-IF 1= i_masterArm.armIdx THEN
-	j6Bias :=curJntPos[6]+PI/2;
-ELSE 
-	j6Bias := curJntPos[6]-PI/2;
-END_IF
-j6Bias := j6Bias * ABS(COS(curJntPos[5]));
-calcRedunPos := LIMIT(g_minJntPos[i_masterArm.armIdx,4], curJntPos[4]-j6Bias,g_maxJntPos[i_masterArm.armIdx,4]); ]]></ST>
       </Implementation>
     </Method>
     <Method Name="Init" Id="{1bea1de4-0538-46fc-be44-e671d6da03c3}">
@@ -168,51 +96,24 @@ END_VAR
         <ST><![CDATA[SUPER^.Init(i_masterArm,i_masterArmCtrlCmd);
 
 m_jntOPMode := g_allTrqMode;
-(*FOR i:=1 TO g_mJntNum DO 
-	IF 4 = i THEN
-		m_jntOPMode[i]:=DriverOPMode_PosTrq;
-	ELSE 
-		m_jntOPMode[i]:=DriverOPMode_Trq;
-	END_IF
-END_FOR*)
-m_jnt4TargetPos:=m_cmdJntPos[4];
 
-// init OTG
-m_jnt4MaxFollowVel :=g_jnt4MaxFollowVel;
-m_jnt4MaxFollowAcc :=g_jnt4MaxFollowAcc;
-m_trajFilter.init(m_cmdJntPos[4],m_cmdJntVel[4],m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,g_armControlLoopInterval);]]></ST>
+// init controller
+m_redunJntCtrl.init(i_masterArm);
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_ArmMasterSlave">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_ArmMasterSlave.calcCmdJntPos">
-      <LineId Id="65" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="78" Count="0" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="71" Count="6" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="79" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="63" Count="1" />
-      <LineId Id="59" Count="2" />
       <LineId Id="14" Count="0" />
+      <LineId Id="96" Count="0" />
     </LineIds>
     <LineIds Name="FB_ArmMasterSlave.calcCmdJntTrq">
-      <LineId Id="42" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="27" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="31" Count="1" />
+      <LineId Id="32" Count="0" />
       <LineId Id="48" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="104" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="53" Count="0" />
@@ -223,27 +124,12 @@ m_trajFilter.init(m_cmdJntPos[4],m_cmdJntVel[4],m_jnt4MaxFollowVel,m_jnt4MinFoll
       <LineId Id="34" Count="1" />
       <LineId Id="13" Count="0" />
     </LineIds>
-    <LineIds Name="FB_ArmMasterSlave.calcRedunPos">
-      <LineId Id="41" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="10" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="15" Count="3" />
-      <LineId Id="20" Count="0" />
-    </LineIds>
     <LineIds Name="FB_ArmMasterSlave.Init">
       <LineId Id="13" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="24" Count="1" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="15" Count="2" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="59" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
