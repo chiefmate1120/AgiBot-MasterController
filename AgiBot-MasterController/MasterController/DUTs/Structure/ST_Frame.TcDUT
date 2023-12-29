@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_Frame" Id="{0c0aabb6-6c60-4edd-80ca-fa032ce1cbfa}">
+    <Declaration><![CDATA[TYPE ST_Frame :
+STRUCT
+	m_pos :Vec3d :=g_zeroVec3d;
+	m_rot :Mat3d :=g_eye3d;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

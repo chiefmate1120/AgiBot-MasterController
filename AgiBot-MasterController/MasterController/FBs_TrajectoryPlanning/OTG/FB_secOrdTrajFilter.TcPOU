@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_secOrdTrajFilter" Id="{91327420-790d-494e-8246-92e2c2f7a607}" SpecialFunc="None">
+    <Declaration><![CDATA[// reference: trajectory planning for automatic machines and robots
+FUNCTION_BLOCK FB_secOrdTrajFilter
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// command pos and vel from last cycle
+	m_cmdPos :LREAL;
+	m_cmdVel :LREAL;
+	
+	// max velocity and acceleration
+	m_maxV :LREAL;
+	m_maxA :LREAL;
+	
+	// samping time
+	m_Ts :LREAL;
+	
+	// middle variable
+	ek,ek_dot,zk,zk_dot,m,sigma,satSigma :LREAL;
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{7443659e-760a-425e-b4ec-3dd4663e7cfa}" />
+    <Method Name="init" Id="{c7259430-84f5-4af7-aa17-3d341475f6a9}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_curCmdPos : LREAL;
+	i_curCmdVel :LREAL;
+	i_maxV : LREAL;
+	i_maxA :LREAL;
+	i_Ts :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdPos:=i_curCmdPos;
+m_cmdVel:=i_curCmdVel;
+m_maxV :=i_maxV;
+m_maxA :=i_maxA;
+m_Ts :=i_Ts;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="maxA" Id="{a11a2349-2978-4d12-a699-37948393c858}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC maxA : LREAL]]></Declaration>
+      <Get Name="Get" Id="{9da62163-ce59-4f92-b4c1-d7eef16f869d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[maxA:=m_maxA;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ef3e1356-e8ee-49a2-92bf-272206c59790}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_maxA :=maxA;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="maxV" Id="{45e272e0-1efb-4ba7-bf48-8241a51dfc92}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY PUBLIC maxV : LREAL]]></Declaration>
+      <Get Name="Get" Id="{ab2d823a-4d66-4d38-87bf-91aa8a52b01d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[maxV:=m_maxV;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{ba65a3f4-de59-45f1-af12-1c55e3282d0a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[m_maxV:=maxV;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="minDec" Id="{933c3aa9-acf2-40f9-b2cc-427f29c6030c}">
+      <Declaration><![CDATA[// get minimum deceleration to avoid overshoot
+METHOD PUBLIC minDec : LREAL
+VAR_INPUT
+	i_targetPos : LREAL;
+END_VAR
+
+VAR
+	dis : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[dis := i_targetPos-m_cmdPos;
+// if target position reverse direciton, there always be a overshoot
+IF dis*m_cmdVel <0 THEN
+	minDec :=g_smallNum;
+	RETURN;
+END_IF
+
+dis := MAX(g_smallNum, ABS(dis));
+minDec := m_cmdVel *m_cmdVel /(2*dis);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{f402fbed-14ea-40e9-a016-701170b0ce01}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	i_targetPos, i_targetVel :LREAL;
+END_VAR
+
+VAR_OUTPUT
+	o_cmdAcc, o_cmdVel, o_cmdPos :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[    ek:=(m_cmdPos-i_targetPos)/m_maxA;
+    ek_dot:=(m_cmdVel-i_targetVel)/m_maxA;
+    
+    zk:=(ek/m_Ts+ek_dot/2)/m_Ts;
+    zk_dot:=ek_dot/m_Ts;
+    
+    m:= floor((1+SQRT(1+8*ABS(zk)))/2);
+    sigma:=zk_dot+zk/m+sign(zk)*(m-1)/2;
+    satSigma:=MIN(1, MAX(-1,sigma));
+    
+    o_cmdAcc:=-m_maxA*satSigma*(1+sign(m_cmdVel*sign(sigma)+m_maxV-m_Ts*m_maxA))/2;
+    o_cmdVel:=m_cmdVel+o_cmdAcc*m_Ts;
+    o_cmdPos:=m_CmdPos+(o_cmdVel+m_cmdVel)*m_Ts/2;
+	
+	m_cmdVel := o_cmdVel;
+	m_cmdPos := o_cmdPos;
+    ]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_secOrdTrajFilter">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.maxA.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.maxA.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.maxV.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.maxV.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.minDec">
+      <LineId Id="17" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_secOrdTrajFilter.run">
+      <LineId Id="6" Count="12" />
+      <LineId Id="25" Count="2" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

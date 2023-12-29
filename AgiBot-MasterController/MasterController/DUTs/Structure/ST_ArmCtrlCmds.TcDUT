@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_ArmCtrlCmds" Id="{0454013e-c8cb-47dd-933d-f5a976121303}">
+    <Declaration><![CDATA[TYPE ST_ArmCtrlCmds :
+STRUCT
+	// arm control data
+	m_jntEnableFlag : Vec7i;
+	m_jntOPMode : Vec7i;
+	m_cmdJntPos : VEC7d;
+	m_cmdJntVel : VEC7d;
+	m_cmdJntAcc : VEC7d;
+	m_cmdJntTrq : VEC7d;
+	m_cmdCartPose : ST_Frame;
+	m_cmdCartTwist : Vec6d;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

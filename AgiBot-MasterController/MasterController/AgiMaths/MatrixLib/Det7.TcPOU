@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="Det7" Id="{a87caff6-9780-4148-8c5d-14158f678cc4}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION Det7 : LREAL
+VAR_IN_OUT CONSTANT
+	mat: Mat7d;
+END_VAR
+VAR
+	dim : INT :=7;
+	i,j,k:INT;
+	m,n :INT;
+	cofactorMat : Mat6d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Det7:=0;
+FOR i :=1 TO dim DO
+	// get cofactor mat
+	m:=1;
+	n:=1;
+	FOR j:=1 TO dim DO
+		FOR k:=1 TO dim DO
+			IF j<>1 AND k <> i THEN
+				cofactorMat[m,n]:=mat[j,k];
+				n:=n+1;
+				IF n>=dim THEN
+					m:=m+1;
+					n:=1;
+				END_IF
+			END_IF
+		END_FOR
+	END_FOR
+	
+	Det7:=Det7+ mat[1,i]*EXPT(-1,1+i)*Det6(cofactorMat);
+END_FOR
+]]></ST>
+    </Implementation>
+    <LineIds Name="Det7">
+      <LineId Id="33" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="25" Count="2" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="54" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_InstruStatus" Id="{49069bd1-9347-4c90-906b-80e5c1a30026}">
+    <Declaration><![CDATA[TYPE ST_InstruStatus :
+STRUCT
+	
+	m_ready:BOOL := FALSE;
+	m_type : E_InstrumentType := InstruType_UNKNOWM;
+	m_fingerAngle:LREAL := 0.0;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

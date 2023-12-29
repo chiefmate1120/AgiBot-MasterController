@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="rot2AngAxis" Id="{2ad75c44-ef95-44e4-9940-6f53f74e7147}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION rot2AngAxis : bool
+VAR_IN_OUT CONSTANT
+	rot : Mat3d;
+END_VAR
+VAR_OUTPUT
+	angle: LREAL;
+	axis : Vec3d;
+END_VAR
+VAR
+	tmp:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[tmp:=LIMIT(-1, (rot[1,1]+rot[2,2]+rot[3,3]-1)/2 , 1);
+angle := ACOS(tmp);
+
+// no rotation
+IF ABS(angle)<g_smallAng THEN
+	angle :=0;
+	axis[1]:=1;
+	axis[2]:=0;
+	axis[3]:=0;
+// rotate pi
+ELSIF ABS(angle-pi)< g_smallAng THEN
+	angle :=PI;
+	axis[1]:=SQRT((rot[1,1]+1)/2);
+	axis[2]:=SQRT((rot[2,2]+1)/2);
+	axis[3]:=SQRT((rot[3,3]+1)/2);
+	IF axis[1]>g_smallNum THEN
+		axis[2]:=0.5*rot[1,2]/axis[1];
+		axis[3]:=0.5*rot[1,3]/axis[1];
+	ELSIF axis[1]>g_smallNum THEN
+		axis[1]:=0.5*rot[2,1]/axis[2];
+		axis[3]:=0.5*rot[2,3]/axis[2];
+	ELSE
+		axis[1]:=0.5*rot[3,1]/axis[3];
+		axis[2]:=0.5*rot[3,2]/axis[3];
+	END_IF
+// others
+ELSE
+	tmp:=2*SIN(angle);
+	axis[1]:=(rot[3,2]-rot[2,3])/tmp;
+	axis[2]:=(rot[1,3]-rot[3,1])/tmp;
+	axis[3]:=(rot[2,1]-rot[1,2])/tmp;
+END_IF
+
+// normalize
+normVec(axis);]]></ST>
+    </Implementation>
+    <LineIds Name="rot2AngAxis">
+      <LineId Id="63" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="5" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="51" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

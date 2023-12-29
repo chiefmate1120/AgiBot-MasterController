@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="atan2" Id="{87ba860d-899f-4cfa-80d6-9dc1deead6f8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION atan2 : LREAL
+VAR_INPUT
+	y:LREAL;
+	x:lreal;	
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF (x>0 AND y>0) THEN  //第1象限
+	atan2:=ATAN(y/x);
+ELSIF(x<0 AND y>0) THEN  //第2象限
+	atan2:=ATAN(y/x)+pi;
+
+ELSIF(x<0 AND y<0) THEN  //第3象限
+	atan2:=ATAN(y/x)-pi;
+
+ELSIF(x>0 AND y<0) THEN  //第4象限
+	atan2:=ATAN(y/x);
+
+ELSIF (x=0 AND y>0) THEN  //正Y轴
+	atan2:=pi/2;
+
+ELSIF (x=0 AND y<0) THEN  //负Y轴
+	atan2:=-pi/2;
+	
+ELSIF (x>0 AND y=0) THEN  //正X轴
+	atan2:=0;
+
+ELSIF (x<0 AND y=0) THEN  //负X轴
+	atan2:=pi;	
+	
+END_IF
+]]></ST>
+    </Implementation>
+    <LineIds Name="atan2">
+      <LineId Id="10" Count="2" />
+      <LineId Id="14" Count="21" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

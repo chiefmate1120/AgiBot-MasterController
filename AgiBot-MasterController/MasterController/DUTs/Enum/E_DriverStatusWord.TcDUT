@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_DriverStatusWord" Id="{13c36d80-9912-42da-8fd3-6d5f4e3aede7}">
+    <Declaration><![CDATA[TYPE E_DriverStatusWord :
+(
+	DriverStatusWord_INIT := 4641,
+	DriverStatusWord_PREOP := 4659,
+	DriverStatusWord_OP := 4663
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

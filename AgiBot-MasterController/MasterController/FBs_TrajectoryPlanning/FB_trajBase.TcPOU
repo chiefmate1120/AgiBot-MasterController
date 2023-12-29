@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_trajBase" Id="{f82b2b7b-78c8-43b3-8920-9f856daa52d8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_trajBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// total trajectory duration
+	m_duration :LREAL:=0;
+	
+	// flag is trajectory is init successfully 
+	m_isGenerated : BOOL :=FALSE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="duration" Id="{b4ade5b1-eaa6-4e50-b5ce-32104382721a}">
+      <Declaration><![CDATA[PROPERTY duration : lreal]]></Declaration>
+      <Get Name="Get" Id="{606bb1de-0742-4a23-914c-c42332aad377}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[duration:=m_duration;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="isGene" Id="{749168c0-621a-4da1-936e-d65a95c2edeb}">
+      <Declaration><![CDATA[PROPERTY isGene : bool]]></Declaration>
+      <Get Name="Get" Id="{14e08cf2-4a1a-4960-8b51-b97817f37afb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isGene:=m_isGenerated;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="FB_trajBase">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_trajBase.duration.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_trajBase.isGene.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

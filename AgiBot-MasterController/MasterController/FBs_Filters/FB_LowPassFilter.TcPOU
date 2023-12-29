@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_LowPassFilter" Id="{22bde730-b1df-4d37-a2fe-82eb863bc978}" SpecialFunc="None">
+    <Declaration><![CDATA[// Low pass filter based on tusin transformation
+// Author: Ni Feijian
+// Data: 2023.11.27
+FUNCTION_BLOCK FB_LowPassFilter
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// first data flag
+	m_firstData:BOOL:=true;
+	
+	// sample frequency
+	m_sampleFreq:LREAL;
+	
+	// cutoff frequency
+	m_cutoffFreq:LREAL;
+	
+	// filter order
+	m_filterOrd:INT:=1;
+	
+	// historic input data
+	m_xk_1:LREAL;
+	
+	// coefficient for  input data
+	m_cxk_1: LREAL;
+	
+	// historic output data
+	m_yk_1:LREAL;
+	
+	// coefficient for output data
+	m_cyk_1:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{8a60f7dd-8773-4bbf-9420-500cce1d38de}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_INPUT
+	// filter orde
+	i_filterOrd:INT;
+	
+	// cutoff frequency
+	i_cutoffFreq:LREAL;
+	
+	// sample frequency
+	i_sampleFreq:LREAL;
+END_VAR
+VAR
+	tgw:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_firstData:=TRUE;
+m_filterOrd:=1; // we currenty support fisrt order filt
+m_cutoffFreq:=i_cutoffFreq;
+m_sampleFreq:=i_sampleFreq;
+
+CASE m_filterOrd OF
+1:
+	tgw:=TAN(pi*m_cutoffFreq/m_sampleFreq);
+	m_cxk_1:=tgw/(tgw+1);
+	m_cyk_1:=(tgw-1)/(tgw+1);
+	init:=TRUE;
+ELSE
+	init :=FALSE;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{d9862220-fc1e-4564-a67e-e6359ba7e42d}">
+      <Declaration><![CDATA[METHOD PUBLIC run : LREAL
+VAR_INPUT
+	// raw data
+	i_rawData:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[CASE m_filterOrd OF
+1:
+	IF m_firstData=TRUE THEN
+		m_xk_1:=i_rawData;
+		m_yk_1:=i_rawData;
+		run:=i_rawData;
+		m_firstData:=FALSE;
+	ELSE
+		run:= m_cxk_1*(i_rawData+m_xk_1)-m_cyk_1*m_yk_1;
+		m_xk_1:=i_rawData;
+		m_yk_1:=run;
+	END_IF
+ELSE
+	run:=i_rawData;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_LowPassFilter">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LowPassFilter.init">
+      <LineId Id="19" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LowPassFilter.run">
+      <LineId Id="10" Count="1" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="20" Count="3" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

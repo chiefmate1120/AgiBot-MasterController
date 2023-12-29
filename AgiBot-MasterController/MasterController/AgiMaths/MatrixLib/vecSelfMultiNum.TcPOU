@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="vecSelfMultiNum" Id="{8965e60b-9e28-4b9c-9ec6-21311af54a9f}" SpecialFunc="None">
+    <Declaration><![CDATA[// vecA*=num
+FUNCTION vecSelfMultiNum : BOOL
+VAR_IN_OUT 
+	vecA :ARRAY[*] OF LREAL;
+END_VAR
+
+VAR_INPUT
+	num :LREAL;
+END_VAR
+
+VAR
+	m :DINT;
+	i :DINT;
+ 
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(vecA,1);
+
+FOR i:=1 TO m DO
+		vecA[i]:=num*vecA[i];
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="vecSelfMultiNum">
+      <LineId Id="53" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

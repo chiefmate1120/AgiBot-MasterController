@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_ArmStandBy" Id="{82e389e4-7a38-4619-a14b-0246d1236311}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Master Arm Standby
+FUNCTION_BLOCK PUBLIC FB_ArmStandBy EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{e4eba8ef-1092-44ea-8fed-edb6d236e75a}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+
+VAR
+	j:INT;
+	maxJntErr:LREAL;
+	jntCtrlErr:Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+
+// check if to hold the command joint position unchanged
+checkToHoldLastCmds(i_masterArm,r_masterArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_ArmStandBy">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_ArmStandBy.init">
+      <LineId Id="57" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

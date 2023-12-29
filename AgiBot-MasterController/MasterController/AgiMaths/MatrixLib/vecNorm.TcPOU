@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="vecNorm" Id="{0015b5c6-4029-411f-8387-131591190194}" SpecialFunc="None">
+    <Declaration><![CDATA[// normalize the input vector
+FUNCTION vecNorm : LREAL
+VAR_IN_OUT CONSTANT
+	vec :ARRAY[*] OF LREAL;
+END_VAR
+VAR
+	m,i:DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(vec,1);
+vecNorm:=0;
+FOR i:=1 TO m DO
+	vecNorm := vecNorm + vec[i]*vec[i];
+END_FOR
+]]></ST>
+    </Implementation>
+    <LineIds Name="vecNorm">
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="transform" Id="{7ca6f97b-de44-4b21-a77a-278a6c7df5be}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION transform : ST_Frame
+VAR_IN_OUT CONSTANT
+	i_frame1 :ST_Frame;
+	i_frame2 :ST_Frame;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[matMultiply(i_frame1.m_rot, i_frame2.m_rot, transform.m_rot);
+matMultiVec(i_frame1.m_rot, i_frame2.m_pos,transform.m_pos );
+vecAdd(transform.m_pos,i_frame1.m_pos,transform.m_pos);]]></ST>
+    </Implementation>
+    <LineIds Name="transform">
+      <LineId Id="7" Count="0" />
+      <LineId Id="10" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

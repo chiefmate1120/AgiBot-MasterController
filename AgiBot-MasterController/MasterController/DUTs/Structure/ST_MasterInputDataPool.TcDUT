@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MasterInputDataPool" Id="{8edc6f5a-e934-4abf-9384-df71872be806}">
+    <Declaration><![CDATA[// Struct contains all data from other tasks and controller used for master control
+TYPE ST_MasterInputDataPool :
+STRUCT
+		
+	// UI information, import from UI controller
+	m_UIData AT %I*:ST_MasterUIData;
+	
+	// safety information, import from safety check task
+	m_safetyData AT %I*: ST_SafetyData;
+	
+	// cart information, import from other task
+	m_cartStatus AT %I*:ST_CartStatus;
+	
+	// slave robot information, import from other device
+	m_slaveStatus AT %I*:ST_SlaveStatus;
+	
+	// master dynamic data
+	m_masterDynaData AT %I* : ST_MasterDynaData;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

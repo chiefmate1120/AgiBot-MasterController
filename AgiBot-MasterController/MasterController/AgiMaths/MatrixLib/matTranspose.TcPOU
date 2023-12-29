@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="matTranspose" Id="{c744a8b5-1541-4ecf-ac88-a9ba6c423c75}" SpecialFunc="None">
+    <Declaration><![CDATA[// B =A'
+FUNCTION matTranspose : BOOL
+VAR_IN_OUT CONSTANT
+	matA :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR_IN_OUT 
+	matB :ARRAY[*,*] OF LREAL;
+END_VAR
+
+VAR
+	i,j:DINT;
+	m,n :DINT;
+ 
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(matB,1);
+n:= UPPER_BOUND(matB,2);
+FOR i:=1 TO m DO
+	FOR j:=1 TO n DO
+		matB[i,j]:=matA[j,i];
+	END_FOR
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="matTranspose">
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="29" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

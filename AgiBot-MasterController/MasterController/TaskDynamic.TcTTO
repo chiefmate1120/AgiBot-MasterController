@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <Task Name="TaskDynamic" Id="{c6dfea4b-57de-464e-9a6e-8b0fe05dc457}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>2</Priority>
+    <PouCall>
+      <Name>RobotDynamics</Name>
+    </PouCall>
+    <TaskFBGuid>{a2aad17b-092d-49ad-9a4f-e46b59355634}</TaskFBGuid>
+    <Fb_init>{b028ae39-1db5-4651-b1a0-5b332ff1e118}</Fb_init>
+    <Fb_exit>{b413d013-968d-4555-99fa-a97bacbd6b7c}</Fb_exit>
+    <CycleUpdate>{8c683b0c-2e5a-477d-bfed-6cc3b8b1cd7b}</CycleUpdate>
+    <PostCycleUpdate>{dbdd139d-8cfa-48dc-a68a-4eead3193094}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

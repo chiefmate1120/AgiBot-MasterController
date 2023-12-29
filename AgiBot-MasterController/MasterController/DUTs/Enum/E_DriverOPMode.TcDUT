@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="E_DriverOPMode" Id="{a3d3fd7a-69f3-43ec-b98e-ee3226b0a71a}">
+    <Declaration><![CDATA[TYPE E_DriverOPMode :
+(
+	DriverOPMode_Pos := 0, // driver position control
+	DriverOPMode_Trq :=1, // driver torque control, robot force control
+	DriverOPMode_PosTrq :=2 // driver torque control, robot position contorl
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

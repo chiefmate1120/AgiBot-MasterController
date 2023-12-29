@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_MathDefine" Id="{7eb77e09-e6c3-483f-ae23-6f0bf731cf6b}">
+    <Declaration><![CDATA[VAR_GLOBAL CONSTANT
+	g_smallNum :LREAL := 1E-6;
+	g_smallAng :LREAL := 0.01*PI/180;
+	g_largeNum: LREAL :=1E16;
+	g_deg2Rad :LREAL := pi/180.0;
+	g_rad2Deg :LREAL := 180.0/pi;
+	
+	g_eye3d :Mat3d:=[1, 0, 0,
+					 0, 1, 0,
+					 0, 0, 1];
+	g_eye4d :Mat4d:=[1, 0, 0, 0,
+					 0, 1, 0, 0,
+					 0, 0, 1, 0,
+					 0, 0, 0, 1];
+	g_zeorMat3d :Mat3d:=[9(0)];
+	
+	g_zeroMat6d :Mat6d:=[36(0)];
+	g_zeroMat7d :Mat7d:=[49(0)];
+	g_eye7d :Mat7d:=[1, 0, 0, 0, 0, 0, 0, 
+					 0, 1, 0, 0, 0, 0, 0, 
+					 0, 0, 1, 0, 0, 0, 0, 
+					 0, 0, 0, 1, 0, 0, 0,
+					 0, 0, 0, 0, 1, 0, 0,
+					 0, 0, 0, 0, 0, 1, 0,
+					 0, 0, 0, 0, 0, 0, 1];
+	
+	g_zeroVec3d :Vec3d:= [3(0)];
+	g_onesVec3d: Vec3d:=[3(1)];
+	
+	g_zeroVec6d: Vec6d:=[6(0)];
+	g_onesVec6d: Vec6d:=[6(1)];
+	
+	g_zeroVec7d: Vec7d:=[7(0)];
+	g_onesVec7d: Vec7d:=[7(1.0)];
+	g_zeroVec7i: Vec7i:=[7(0)];
+	g_onesVec7i: Vec7i:=[7(1)];
+	
+	g_allPosMode:Vec7i:=[7(DriverOPMode_Pos)];
+	g_allTrqMode:Vec7i:=[7(DriverOPMode_Trq)];
+	g_allPosTrqMode:Vec7i:=[7(DriverOPMode_PosTrq)];
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

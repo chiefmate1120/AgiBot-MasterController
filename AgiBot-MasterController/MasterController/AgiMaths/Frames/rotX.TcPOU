@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="rotX" Id="{e7448ad1-988f-46ca-886a-6ce44eea6109}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION rotX : mat3d
+VAR_IN_OUT CONSTANT
+	i_mat : Mat3d;
+	i_ang : LREAL;
+END_VAR
+VAR
+	rot :Mat3d := g_eye3d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[rot[2,2]:=COS(i_ang);
+rot[3,3]:=rot[2,2];
+rot[3,2]:=SIN(i_ang);
+rot[2,3]:=-rot[3,2];
+matMultiply(i_mat, rot,rotX);]]></ST>
+    </Implementation>
+    <LineIds Name="rotX">
+      <LineId Id="7" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="14" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
