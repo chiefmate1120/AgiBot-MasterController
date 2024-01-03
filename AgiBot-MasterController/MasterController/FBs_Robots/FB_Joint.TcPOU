@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
 VAR_INPUT
@@ -146,8 +146,8 @@ m_curJntVel:=0;
 m_curJntTrq :=0;
 m_cmdJntVel :=0.0;
 m_cmdJntTrq :=0.0;
-m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armControlFreq);
-m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armControlFreq);
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
+m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armCtrlFreq);
 
 // driver init value
 m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
@@ -347,7 +347,7 @@ m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
 
 // compute joint velocity
-m_curJntVel:= (m_curJntPos-m_lastJntPos)/g_armControlLoopInterval;
+m_curJntVel:= (m_curJntPos-m_lastJntPos)/g_armCtrlCycleTime;
 m_curJntVel := m_jntVelLpf.run(m_curJntVel);
 m_lastJntPos :=m_curJntPos;
 

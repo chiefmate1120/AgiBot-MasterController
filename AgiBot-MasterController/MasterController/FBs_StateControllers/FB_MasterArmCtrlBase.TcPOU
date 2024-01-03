@@ -186,7 +186,7 @@ r_masterArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
 r_masterArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
 
 // update time period
-m_timePeriod := m_timePeriod+g_armControlLoopInterval;
+m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
 ]]></ST>
       </Implementation>
     </Method>

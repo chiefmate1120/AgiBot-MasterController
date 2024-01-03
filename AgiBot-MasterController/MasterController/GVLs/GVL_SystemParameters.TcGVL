@@ -12,12 +12,12 @@
 	
 	
 	// control loop interval for each task
-	g_armControlLoopInterval :LREAL :=0.001;
-	g_armControlFreq :LREAL :=1.0/g_armControlLoopInterval;
-	g_armDynamicLoopInterval :LREAL := 0.001;
-	g_armDynamicFreq :LREAL := 1.0/g_armDynamicLoopInterval;
-	g_cartControlLoopInterval :LREAL := 0.001;
-	g_cartControlFreq :LREAL := 1.0/g_cartControlLoopInterval;
+	g_armCtrlCycleTime :LREAL :=0.001;
+	g_armCtrlFreq :LREAL :=1.0/g_armCtrlCycleTime;
+	g_armDynamicCycleTime :LREAL := 0.001;
+	g_armDynamicFreq :LREAL := 1.0/g_armDynamicCycleTime;
+	g_cartCtrlCycleTime :LREAL := 0.001;
+	g_cartCtrlFreq :LREAL := 1.0/g_cartCtrlCycleTime;
 	
 	// wait time before robot init  for ethercat to stablize 
 	g_robotInitWaitTime : LREAL := 1.0;

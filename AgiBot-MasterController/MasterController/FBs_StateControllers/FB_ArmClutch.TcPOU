@@ -103,7 +103,7 @@ redunCtrlVel[4]:=nullJ[1,4]*jnt4TrackVel;
 FOR i :=1 TO 4 DO 
 //	m_cmdJntVel[i+3]:=jntTrackVel[i];
 	m_cmdJntVel[i+3]:=jntTrackVel[i]+redunCtrlVel[i];
-	m_cmdJntPos[i+3]:=m_cmdJntPos[i+3]+m_cmdJntVel[i+3]*g_armControlLoopInterval;
+	m_cmdJntPos[i+3]:=m_cmdJntPos[i+3]+m_cmdJntVel[i+3]*g_armCtrlCycleTime;
 END_FOR
 
 ]]></ST>

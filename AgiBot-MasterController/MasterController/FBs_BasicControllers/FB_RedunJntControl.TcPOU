@@ -89,7 +89,7 @@ m_cmdJntVel:=0;
 
 // init controller
 currentRatioMotor2Jnt:=g_motorTrqConst[4]*g_motorReduction[4]/1000;
-m_jntPIDCtrl.init(g_armControlLoopInterval,m_redunJntKp,m_redunJntKd,m_redunJntKi,
+m_jntPIDCtrl.init(g_armCtrlCycleTime,m_redunJntKp,m_redunJntKd,m_redunJntKi,
 		m_redunJntKiLimit* currentRatioMotor2Jnt,	m_redunJntCtrlLimit*currentRatioMotor2Jnt);
 
 // init OTG

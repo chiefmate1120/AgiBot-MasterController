@@ -51,15 +51,15 @@ CASE m_initState OF
 			m_initState :=1;
 		END_IF
 	1: 
-		m_cmdJntPos[7] := m_cmdJntPos[7] + m_jnt7SelfCheckVel * g_armControlLoopInterval;
+		m_cmdJntPos[7] := m_cmdJntPos[7] + m_jnt7SelfCheckVel * g_armCtrlCycleTime;
 		IF m_cmdJntPos[7]-curJntPos[7] > m_jnt7LimitErr THEN
 			m_cmdJntPos[7]:=curJntPos[7];
 			m_jnt7CenterPos :=m_cmdJntPos[7]-m_jnt7HalfMotionRange;
 			m_initState :=2;
 		END_IF
 	2:
-		centerVel :=LIMIT(-m_jnt7SelfCheckVel,(m_jnt7CenterPos-m_cmdJntPos[7])/g_armControlLoopInterval,m_jnt7SelfCheckVel);
-		m_cmdJntPos[7] := m_cmdJntPos[7] + centerVel * g_armControlLoopInterval;
+		centerVel :=LIMIT(-m_jnt7SelfCheckVel,(m_jnt7CenterPos-m_cmdJntPos[7])/g_armCtrlCycleTime,m_jnt7SelfCheckVel);
+		m_cmdJntPos[7] := m_cmdJntPos[7] + centerVel * g_armCtrlCycleTime;
 		IF ABS(m_jnt7CenterPos-curJntPos[7]) < g_jntCtrlPosTol THEN
 			m_isFinished :=TRUE;
 		END_IF

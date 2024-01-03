@@ -31,7 +31,7 @@ END_VAR
 
 // wait communication to be stable
 IF(m_robotInitWaitTime<g_robotInitWaitTime) THEN
-	m_robotInitWaitTime := m_robotInitWaitTime+g_armControlLoopInterval;
+	m_robotInitWaitTime := m_robotInitWaitTime+g_armCtrlCycleTime;
 	RETURN;
 END_IF
 

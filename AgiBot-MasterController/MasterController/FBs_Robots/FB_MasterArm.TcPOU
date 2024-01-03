@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -8,7 +8,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// arm index, 0 for left arm, 1 for right arm
+	// arm index, 1 for left arm, 2 for right arm
 	m_armIdx: INT;
 	
 	// grip angle from hall sensor IO
@@ -395,7 +395,7 @@ initJntPos();
 // joint controller init
 FOR i:=1 TO g_mJntNum DO 
 	currentRatioMotor2Jnt:=g_motorTrqConst[i]*g_motorReduction[i]/1000;
-	m_jntPIDCtrl[i].init(g_armControlLoopInterval,g_posKp[i],g_posKd[i],g_posKi[i],
+	m_jntPIDCtrl[i].init(g_armCtrlCycleTime,g_posKp[i],g_posKd[i],g_posKi[i],
 		g_posKiLimit[i]* currentRatioMotor2Jnt,	g_posCtrlLimit[i]*currentRatioMotor2Jnt);
 END_FOR
 
