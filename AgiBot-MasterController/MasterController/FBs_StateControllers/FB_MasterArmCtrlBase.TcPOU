@@ -164,7 +164,11 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// check if arm enabled
+        <ST><![CDATA[IF m_isFinished THEN
+	RETURN;
+END_IF
+
+// check if arm enabled
 IF FALSE = i_masterArm.isEnabled(m_jntEnableFlag) THEN
 //	RETURN;
 END_IF
@@ -227,6 +231,8 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
       <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.run">
+      <LineId Id="127" Count="2" />
+      <LineId Id="126" Count="0" />
       <LineId Id="86" Count="0" />
       <LineId Id="88" Count="2" />
       <LineId Id="46" Count="0" />

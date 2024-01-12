@@ -71,6 +71,15 @@ ELSE
 END_CASE]]></ST>
       </Implementation>
     </Method>
+    <Method Name="reset" Id="{c1afcb18-c76d-4511-9970-f831f386dcc0}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_firstData:=true;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="run" Id="{d9862220-fc1e-4564-a67e-e6359ba7e42d}">
       <Declaration><![CDATA[METHOD PUBLIC run : LREAL
 VAR_INPUT
@@ -101,6 +110,9 @@ END_CASE]]></ST>
     </LineIds>
     <LineIds Name="FB_LowPassFilter.init">
       <LineId Id="19" Count="12" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_LowPassFilter.reset">
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_LowPassFilter.run">

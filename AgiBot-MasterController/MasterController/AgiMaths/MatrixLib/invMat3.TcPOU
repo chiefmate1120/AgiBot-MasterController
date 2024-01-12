@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="invMat3" Id="{8dbea4d9-fd4f-487a-ad00-22dc84496133}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION invMat3 : bool
 VAR_IN_OUT CONSTANT
@@ -54,7 +54,7 @@ FOR i:=1 TO n DO
     indxr[i]:=irow; 
     indxc[i]:=icol;
 	
-    IF invMat[icol,icol] = 0.0 THEN 
+ 	IF ABS(invMat[icol,icol]) < g_smallNum THEN  
           invMat3:=FALSE;
 		  RETURN;
     END_IF
@@ -96,7 +96,9 @@ END_FOR
 invMat3:=TRUE;]]></ST>
     </Implementation>
     <LineIds Name="invMat3">
-      <LineId Id="244" Count="72" />
+      <LineId Id="244" Count="33" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="279" Count="37" />
       <LineId Id="7" Count="0" />
     </LineIds>
   </POU>

@@ -109,37 +109,52 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_MatchedMasterArmIdx.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_InstrumentType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MasterDynaData.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MasterArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MasterUIData.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedMasterArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_CartStatus.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedSlaveArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MasterStatus.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_SlaveArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MasterJointData.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MotorInputs.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_MasterStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_MotorOutputs.TcDUT">
+    <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_SlaveStatus.TcDUT">
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterDynaData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_SlaveJointData.TcDUT">
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterUIData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\Communication\ST_SafetyData.TcDUT">
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_CartStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterJointData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_MotorInputs.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_MotorOutputs.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_SlaveJointData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_SafetyData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_ArmCtrlCmds.TcDUT">
@@ -184,6 +199,9 @@
     <Compile Include="DUTs\Type\Vec6i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec8d.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -199,22 +217,7 @@
     <Compile Include="DUTs\Enum\E_DriverStatusWord.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_MatchedSlaveArmIdx.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_SlaveArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="DUTs\Structure\ST_Frame.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat3d.TcDUT">
@@ -235,28 +238,31 @@
     <Compile Include="FBs_RobotDynamics\FB_MasterDynamic.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmClutch.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlClutch.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmEndoscope.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlEndoscope.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmCart.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmMatching.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlGraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmHome.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlMatching.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmError.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlHome.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmReady.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlError.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmMasterSlave.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlReady.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_StateControllers\FB_StateCtrlMasterSlave.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_TrajectoryPlanning\FB_BasicDoubleS.TcPOU">
@@ -346,10 +352,10 @@
     <Compile Include="FBs_Robots\FB_MasterRobot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmInit.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlInit.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_StateControllers\FB_ArmStandBy.TcPOU">
+    <Compile Include="FBs_StateControllers\FB_StateCtrlStandBy.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_StateControllers\FB_MasterArmCtrlBase.TcPOU">
@@ -376,7 +382,8 @@
     <Folder Include="AgiMaths\MatrixLib" />
     <Folder Include="DUTs" />
     <Folder Include="DUTs\Enum" />
-    <Folder Include="DUTs\Structure\Communication" />
+    <Folder Include="DUTs\Structure\TasksCommunication" />
+    <Folder Include="DUTs\Structure\MasterSlaveCommunication" />
     <Folder Include="DUTs\Type" />
     <Folder Include="DUTs\Structure" />
     <Folder Include="FBs_TrajectoryPlanning" />

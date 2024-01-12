@@ -22,6 +22,7 @@ VAR_GLOBAL CONSTANT
 	// filter cut-off frequency for velocity and torque
 	g_curJntVelLpfCutoffFreq :LREAL := 30;
 	g_cmdJntPosLpfCutoffFreq :LREAL := 30;
+	g_curJntTrqLpfCutoffFreq :LREAL := 300;
 	g_cmdJntTrqLpfCutoffFreq :LREAL := 300;
 	
 	// controller would keep command unchanged when error 

@@ -54,7 +54,7 @@ FOR i:=1 TO n DO
     indxr[i]:=irow; 
     indxc[i]:=icol;
 	
-    IF invMat[icol,icol] = 0.0 THEN 
+ 	IF ABS(invMat[icol,icol]) < g_smallNum THEN 
           invMat7:=FALSE;
 		  RETURN;
     END_IF

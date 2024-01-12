@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_SlaveJointData" Id="{775e1618-4069-46ed-920d-0e7ed2d13e2f}">
+    <Declaration><![CDATA[TYPE ST_SlaveJointData :
+STRUCT
+	// joint position compute with motor encoder
+	m_curMotorPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// joint position compute with link/abs encoder
+	m_curLinkPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// target joint position 
+	m_cmdJntPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// current joint position 
+	m_curJntPos :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// target joint velocity 
+	m_cmdJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// current joint position 
+	m_curJntVel :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// command joint torque 
+	m_cmdJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// current joint torque 
+	m_curJntTrq :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// raw joint current  
+	m_rawJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// filtd  joint current  
+	m_filtJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
+	
+	// command joint current 
+	m_cmdJntCurrent :ARRAY[1..g_sArmNum] OF Vec8d;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,14 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="matAdd" Id="{ceb1b6c4-412e-46f4-b056-c6697f5a47e0}" SpecialFunc="None">
+  <POU Name="matAdd" Id="{17cd4287-e232-42e8-b50d-782248cceaa0}" SpecialFunc="None">
     <Declaration><![CDATA[// C = A + B;
 FUNCTION matAdd : BOOL
-VAR_IN_OUT;
+VAR_IN_OUT CONSTANT
 	matA :ARRAY[*,*] OF LREAL;
+	matB :ARRAY[*,*] OF LREAL;
 END_VAR
 
-VAR_IN_OUT CONSTANT
-		matB :ARRAY[*,*] OF LREAL;
+VAR_IN_OUT 
+	matC :ARRAY[*,*] OF LREAL;
 END_VAR
 
 VAR
@@ -18,20 +19,17 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[m:=UPPER_BOUND(matA,1);
-n:= UPPER_BOUND(matA,2);
+      <ST><![CDATA[m:=UPPER_BOUND(matC,1);
+n:= UPPER_BOUND(matC,2);
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
-		matA[i,j]:=matA[i,j]+matB[i,j];
+		matC[i,j]:=matA[i,j]+ matB[i,j];
 	END_FOR
 END_FOR]]></ST>
     </Implementation>
     <LineIds Name="matAdd">
-      <LineId Id="53" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="29" Count="2" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="26" Count="0" />
+      <LineId Id="69" Count="5" />
+      <LineId Id="68" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

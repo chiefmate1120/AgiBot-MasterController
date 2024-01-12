@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_StateCtrlEndoscope" Id="{6b490525-446d-48f2-ab19-237faca074bd}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Master Arm Endoscope Control
+FUNCTION_BLOCK PUBLIC FB_StateCtrlEndoscope EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <LineIds Name="FB_StateCtrlEndoscope">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MasterJointData" Id="{481fb358-dbe2-4355-8644-ff68db78f2fc}">
+    <Declaration><![CDATA[// Output from master arm control task 
+// Input to safety task and force controller task
+TYPE ST_MasterJointData :
+STRUCT
+	// joint position compute with motor encoder
+	m_curMotorPos :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// joint position compute with link/abs encoder
+	m_curLinkPos :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// target joint position 
+	m_cmdJntPos :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// current joint position 
+	m_curJntPos :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// target joint velocity 
+	m_cmdJntVel :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// current joint position 
+	m_curJntVel :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// command joint torque 
+	m_cmdJntTrq :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// current joint torque 
+	m_curJntTrq :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// raw joint current  
+	m_rawJntCurrent :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// filtd  joint current  
+	m_filtJntCurrent :ARRAY[1..g_mArmNum] OF Vec7d;
+	
+	// command joint current 
+	m_cmdJntCurrent :ARRAY[1..g_mArmNum] OF Vec7d;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

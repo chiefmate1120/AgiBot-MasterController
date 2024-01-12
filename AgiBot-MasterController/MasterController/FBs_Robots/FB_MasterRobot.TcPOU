@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR_INPUT
@@ -26,16 +26,17 @@ VAR
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_mArmNum,1..MasterArmState_totalNum] OF I_MasterArmCtrl;
-	m_armError :ARRAY[1..g_mArmNum] OF FB_ArmError;
-	m_armInit :ARRAY[1..g_mArmNum] OF FB_ArmInit;
-	m_armHome :ARRAY[1..g_mArmNum] OF FB_ArmHome;
-	m_armStandBy :ARRAY[1..g_mArmNum] OF FB_ArmStandBy;
-	m_armMatching :ARRAY[1..g_mArmNum] OF FB_ArmMatching;
-	m_armReady :ARRAY[1..g_mArmNum] OF FB_ArmReady;
-	m_armMasterSlave :ARRAY[1..g_mArmNum] OF FB_ArmMasterSlave;
-	m_armClutch :ARRAY[1..g_mArmNum] OF FB_ArmClutch;
-	m_armEndoscope :ARRAY[1..g_mArmNum] OF FB_ArmEndoscope;
-	m_armCart :ARRAY[1..g_mArmNum] OF FB_ArmCart;
+	m_armError :ARRAY[1..g_mArmNum] OF FB_StateCtrlError;
+	m_armInit :ARRAY[1..g_mArmNum] OF FB_StateCtrlInit;
+	m_armHome :ARRAY[1..g_mArmNum] OF FB_StateCtrlHome;
+	m_armStandBy :ARRAY[1..g_mArmNum] OF FB_StateCtrlStandBy;
+	m_armMatching :ARRAY[1..g_mArmNum] OF FB_StateCtrlMatching;
+	m_armReady :ARRAY[1..g_mArmNum] OF FB_StateCtrlReady;
+	m_armMasterSlave :ARRAY[1..g_mArmNum] OF FB_StateCtrlMasterSlave;
+	m_armClutch :ARRAY[1..g_mArmNum] OF FB_StateCtrlClutch;
+	m_armEndoscope :ARRAY[1..g_mArmNum] OF FB_StateCtrlEndoscope;
+	m_armCart :ARRAY[1..g_mArmNum] OF FB_StateCtrlCart;
+	m_armGravityCali :ARRAY[1..g_mArmNum] OF FB_StateCtrlGraCali;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
@@ -48,6 +49,15 @@ END_VAR
 
 ]]></ST>
     </Implementation>
+    <Method Name="checkTeleSalveArmIdx" Id="{cbcc2536-c1d7-4752-a469-261e927f6a1f}">
+      <Declaration><![CDATA[METHOD checkTeleSalveArmIdx : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO: decide the matched slave arm index for each master arm]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
       <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
 VAR_IN_OUT
@@ -81,6 +91,8 @@ FOR i:=1 TO g_mArmNum DO
 	r_masterJointsData.m_curJntPos[i]:=m_masterArms[i].curJntPos;
 	r_masterJointsData.m_curJntVel[i]:=m_masterArms[i].curJntVel;
 	r_masterJointsData.m_curJntTrq[i]:=m_masterArms[i].curJntTrq;
+	r_masterJointsData.m_rawJntCurrent[i]:=m_masterArms[i].rawJntCurrent;
+	r_masterJointsData.m_filtJntCurrent[i]:=m_masterArms[i].filtJntCurrent;
 	
 	// command info
 	// cartesion
@@ -90,6 +102,7 @@ FOR i:=1 TO g_mArmNum DO
 	r_masterJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
 	r_masterJointsData.m_cmdJntVel[i]:=m_armCtrlCmds[i].m_cmdJntVel;
 	r_masterJointsData.m_cmdJntTrq[i]:=m_armCtrlCmds[i].m_cmdJntTrq;
+	r_masterJointsData.m_cmdJntCurrent[i]:=m_masterArms[i].cmdJntCurrent;
 	
 END_FOR]]></ST>
       </Implementation>
@@ -132,6 +145,7 @@ END_VAR
 	m_armCtrlFactory[i,MasterArmState_Clutch] := m_armClutch[i];
 	m_armCtrlFactory[i,MasterArmState_Endoscope] := m_armEndoscope[i];
 	m_armCtrlFactory[i,MasterArmState_Cart] := m_armCart[i];
+	m_armCtrlFactory[i,MasterArmState_GravityCali] := m_armGravityCali[i];
 
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
@@ -243,6 +257,9 @@ END_FOR]]></ST>
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterRobot.checkTeleSalveArmIdx">
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterRobot.getStatus">
       <LineId Id="29" Count="0" />
       <LineId Id="23" Count="1" />
@@ -255,6 +272,7 @@ END_FOR]]></ST>
       <LineId Id="26" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="57" Count="5" />
+      <LineId Id="95" Count="1" />
       <LineId Id="56" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="65" Count="0" />
@@ -263,7 +281,9 @@ END_FOR]]></ST>
       <LineId Id="31" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="0" />
-      <LineId Id="39" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
@@ -275,6 +295,7 @@ END_FOR]]></ST>
       <LineId Id="94" Count="0" />
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="9" />
+      <LineId Id="108" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />

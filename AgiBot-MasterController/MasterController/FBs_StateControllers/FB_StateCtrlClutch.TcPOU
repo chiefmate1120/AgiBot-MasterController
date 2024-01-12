@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_StateCtrlClutch" Id="{093bd9ec-6cc6-4389-91e4-f8586e50bb1f}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Master Arm Clutch
+FUNCTION_BLOCK PUBLIC FB_StateCtrlClutch EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_rotTrackKp : LREAL := 200;
+	m_maxTrackVel :LREAL := PI;
+	m_jnt4AdjustKp : LREAL :=50;
+	m_jnt4MaxVel :LREAL :=pi ;
+	m_cartTrackVel :Vec3d;
+	
+	
+	rotT,rotErr:Mat3d;
+	angle : LREAL;
+	axis,localAxis :Vec3d;
+	oriJaco:Mat34;
+	oriJt:Mat43;
+	oriJJt:Mat3d;
+	oriJJtInv:Mat3d;
+	oriJPinv:Mat43;
+	cartTrackVel:Vec3d;
+	jntTrackVel:Vec4d;
+	JpinvJ, nullJ:Mat4d;
+	eye4d :Mat4d := g_eye4d;
+	redunCtrlVel :Vec4d;
+	jnt4TrackVel :LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{333a90ec-7de9-44a1-afdb-da87410216d3}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+VAR_INPUT
+	monitorAngle :LREAL;
+	slaveIdx :INT;
+END_VAR
+
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+var 
+	i,j : INT;
+
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO: use matched slave arm orientation as target, 
+//	and transform from view coordinate to arm coordinate 
+
+// first three joints is passive control
+FOR i:=1 TO 3 DO 
+	m_cmdJntPos[i]:=i_masterArm.curJntPos[i];
+	m_cmdJntVel[i]:=i_masterArm.curJntVel[i];
+END_FOR
+
+// compute cartesian tracking velocity
+matTranspose(i_masterArm.simCartPose.m_rot, rotT);
+matMultiply(rotT, m_cmdCartPose.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>angle,axis=>localAxis);
+matMultiVec(i_masterArm.simCartPose.m_rot, localAxis, axis);
+vecMultiNum(axis, LIMIT(-m_maxTrackVel, angle*m_rotTrackKp, m_maxTrackVel), cartTrackVel);
+m_cartTrackVel :=cartTrackVel;
+
+// compute pinv of orientation jacobian
+FOR i:=1 TO 3 DO
+	FOR j:=1 TO 4 DO
+		oriJaco[i,j]:=i_masterArm.simJaco[i+3,j+3];
+	END_FOR
+END_FOR
+matTranspose(oriJaco, oriJt);
+matMultiply(oriJaco ,oriJt , oriJJt);
+invMat3(oriJJt, oriJJtInv);
+matMultiply(oriJt, oriJJtInv, oriJPinv);
+matMultiVec(oriJpinv, cartTrackVel, jntTrackVel);
+
+// calculate nullspace
+matMultiply(oriJPinv, oriJaco, JpinvJ);
+matSub(eye4d , JpinvJ, nullJ);
+
+// redundant velocity
+jnt4TrackVel:=calcRedunVel(i_masterArm);
+redunCtrlVel[1]:=nullJ[1,1]*jnt4TrackVel;
+redunCtrlVel[2]:=nullJ[1,2]*jnt4TrackVel;
+redunCtrlVel[3]:=nullJ[1,3]*jnt4TrackVel;
+redunCtrlVel[4]:=nullJ[1,4]*jnt4TrackVel;
+
+// update final command joint position and velocity
+FOR i :=1 TO 4 DO 
+//	m_cmdJntVel[i+3]:=jntTrackVel[i];
+	m_cmdJntVel[i+3]:=jntTrackVel[i]+redunCtrlVel[i];
+	m_cmdJntPos[i+3]:=m_cmdJntPos[i+3]+m_cmdJntVel[i+3]*g_armCtrlCycleTime;
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcRedunVel" Id="{e23d7933-67bc-411c-a163-bdd1a130fde2}">
+      <Declaration><![CDATA[METHOD PROTECTED calcRedunVel : LREAL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+
+VAR 
+	j6Bias,j5Bias :LREAL;
+	curJntPos : Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute desired joint4 link position
+curJntPos :=  i_masterArm.curLinkPos;
+IF 1= i_masterArm.armIdx THEN
+	j6Bias :=curJntPos[6]+PI/2;
+ELSE 
+	j6Bias := curJntPos[6]-PI/2;
+END_IF
+
+j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
+j6Bias := j6Bias * ABS(COS(j5Bias));
+calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{1106e191-9e61-4227-a6e7-a957758f71da}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+
+m_jntOPMode[1] := DriverOPMode_Trq;
+m_jntOPMode[2] := DriverOPMode_Trq;
+m_jntOPMode[3] := DriverOPMode_Trq;
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_StateCtrlClutch">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlClutch.calcCmdJntPos">
+      <LineId Id="97" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="103" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="115" Count="1" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="126" Count="1" />
+      <LineId Id="129" Count="1" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="136" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="150" Count="1" />
+      <LineId Id="153" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="156" Count="3" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="131" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlClutch.calcRedunVel">
+      <LineId Id="77" Count="10" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlClutch.init">
+      <LineId Id="13" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="66" Count="5" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

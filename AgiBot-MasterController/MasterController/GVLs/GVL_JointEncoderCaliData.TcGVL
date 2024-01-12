@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_JointEncoderCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position

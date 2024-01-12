@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_SlaveStatus" Id="{8673ecde-c145-4df2-8157-2e6da5d46538}">
+    <Declaration><![CDATA[// Output from slave arm control task, including arm status and cartesian data
+// Input to safety task and Master controller
+TYPE ST_SlaveStatus :
+STRUCT
+	
+	// state machine
+	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Init)];
+	
+	// index(0 to 2) of master arm which is tele-linked to slave arm
+	m_teleMasterArmIdx :ARRAY[1..g_sArmNum] OF E_MatchedMasterArmIdx;
+	
+	// instrument info
+	m_instruStauts :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
+	
+	// command arm pose in endoscope view
+	m_cmdArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// current arm pose in endoscope view
+	m_curArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
+	
+	// command arm twist[linear velocity; angular veloicty] in endoscope view
+	m_cmdArmTwist:ARRAY[1..g_sArmNum] OF Vec6d;
+	
+	// current arm twist[linear velocity; angular veloicty] in endoscope view
+	m_curArmTwist:ARRAY[1..g_sArmNum] OF vec6d;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

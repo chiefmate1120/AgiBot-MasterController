@@ -124,7 +124,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{8A256E62-23A9-6CC2-7F96-0824129B10CA}" AutoDeleteType="true">E_SlaveArmState</Name>
+			<Name GUID="{A8F77B6C-F704-25D1-4C95-91305682657E}" AutoDeleteType="true">E_SlaveArmState</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
 			<EnumInfo>
@@ -178,6 +178,14 @@
 			<EnumInfo>
 				<Text><![CDATA[SlaveArmState_Cart]]></Text>
 				<Enum>13</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_GravityCali]]></Text>
+				<Enum>14</Enum>
+			</EnumInfo>
+			<EnumInfo>
+				<Text><![CDATA[SlaveArmState_totalNum]]></Text>
+				<Enum>14</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -364,13 +372,13 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{4EA5A01E-D70C-1842-6929-824CEAA0F6B0}" AutoDeleteType="true">ST_SlaveStatus</Name>
+			<Name GUID="{81BFABF0-1319-9125-9F01-DE76EA56C16D}" AutoDeleteType="true">ST_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
 			<BitSize>9856</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{8A256E62-23A9-6CC2-7F96-0824129B10CA}">E_SlaveArmState</Type>
+				<Type GUID="{A8F77B6C-F704-25D1-4C95-91305682657E}">E_SlaveArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
@@ -580,7 +588,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{52ADBB40-70DD-5E56-3E98-E5CD9839A0F3}" AutoDeleteType="true">E_MasterArmState</Name>
+			<Name GUID="{8D5FDB10-26BF-358B-2FE8-6070020F20E8}" AutoDeleteType="true">E_MasterArmState</Name>
 			<Comment><![CDATA[ Notice: Each state has a corresponding controller, which has a fixed index.
  Add the new state at the end and update the total num]]></Comment>
 			<BitSize>16</BitSize>
@@ -626,8 +634,12 @@
 				<Enum>10</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[MasterArmState_GravityCali]]></Text>
+				<Enum>11</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[MasterArmState_totalNum]]></Text>
-				<Enum>10</Enum>
+				<Enum>11</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -666,7 +678,7 @@
 			</Properties>
 		</DataType>
 		<DataType>
-			<Name GUID="{5A96E024-33CA-51C7-C38E-62CCEEFE3DCF}" AutoDeleteType="true">ST_MasterStatus</Name>
+			<Name GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}" AutoDeleteType="true">ST_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
 			<BitSize>4864</BitSize>
@@ -679,7 +691,7 @@
 			</SubItem>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{52ADBB40-70DD-5E56-3E98-E5CD9839A0F3}">E_MasterArmState</Type>
+				<Type GUID="{8D5FDB10-26BF-358B-2FE8-6070020F20E8}">E_MasterArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>2</Elements>
@@ -756,10 +768,10 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}" AutoDeleteType="true">ST_MasterJointData</Name>
+			<Name GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}" AutoDeleteType="true">ST_MasterJointData</Name>
 			<Comment><![CDATA[ Output from master arm control task 
  Input to safety task and force controller task]]></Comment>
-			<BitSize>7168</BitSize>
+			<BitSize>9856</BitSize>
 			<SubItem>
 				<Name>m_curMotorPos</Name>
 				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
@@ -848,6 +860,39 @@
 				<BitSize>896</BitSize>
 				<BitOffs>6272</BitOffs>
 			</SubItem>
+			<SubItem>
+				<Name>m_rawJntCurrent</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ raw joint current  ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>7168</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_filtJntCurrent</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ filtd  joint current  ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>8064</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_cmdJntCurrent</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ command joint current ]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>8960</BitOffs>
+			</SubItem>
 		</DataType>
 		<DataType>
 			<Name GUID="{18071995-0000-0000-0000-00200000000C}" IecBaseType="true" AutoDeleteType="true" HideSubItems="true">ARRAY [0..11] OF BIT</Name>
@@ -921,7 +966,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{EBCCDCFF-D847-B78D-5D8E-B3B0680247CA}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{5317E99E-F603-7126-298C-CC81C53B7485}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1024,7 +1069,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_slaveStatus</Name>
 							<Comment><![CDATA[ slave robot information, import from other device]]></Comment>
-							<Type GUID="{4EA5A01E-D70C-1842-6929-824CEAA0F6B0}">ST_SlaveStatus</Type>
+							<Type GUID="{81BFABF0-1319-9125-9F01-DE76EA56C16D}">ST_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
@@ -1093,12 +1138,12 @@
 						<Var>
 							<Name>MasterArmControl.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{5A96E024-33CA-51C7-C38E-62CCEEFE3DCF}">ST_MasterStatus</Type>
+							<Type GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
 							<Comment><![CDATA[ master robot joint data]]></Comment>
-							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
+							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="1" AreaNo="16">
@@ -1106,7 +1151,7 @@
 						<Var>
 							<Name>RobotDynamics.m_masterJointsData</Name>
 							<Comment><![CDATA[ master robot arms joint data]]></Comment>
-							<Type GUID="{0AE97D18-C18F-A0D2-2A74-D9A897D79F08}">ST_MasterJointData</Type>
+							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="1" AreaNo="17">

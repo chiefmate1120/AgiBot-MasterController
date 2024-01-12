@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_MotorOutputs" Id="{6a696c9f-2f66-4f8b-9a6b-9688385e8758}">
+    <Declaration><![CDATA[TYPE ST_MotorOutputs :
+STRUCT
+	// driver control word
+	m_controlWord: UINT :=DriverCtrlWord_INIT;
+	
+	// motor control mode, 0 for position mode, 1 for torque mode
+	m_opMode : SINT :=INT_TO_SINT(DriverOPMode_Pos);;
+	
+	// target motor encoder
+	m_cmdMotorEncoder :DINT := 0;
+	
+	// motor current to IO
+	m_cmdCurrent :DINT := 0;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

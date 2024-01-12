@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_SafetyData" Id="{322b279b-f9a5-4da8-8f90-8d4b82ec3137}">
+    <Declaration><![CDATA[// Output from safety check task
+// Input to master arm control task
+TYPE ST_SafetyData :
+STRUCT
+	m_faultTrigged:BOOL := FALSE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

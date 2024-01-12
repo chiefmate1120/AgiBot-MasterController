@@ -78,12 +78,10 @@ VAR_IN_OUT CONSTANT
 	i_masterArm :FB_MasterArm;
 END_VAR
 VAR
-	curJntPos:Vec7d;
 	currentRatioMotor2Jnt:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[curJntPos:=i_masterArm.curJntPos;
-m_cmdJntPos:=curJntPos[4];
+        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos[4];
 m_jnt4TargetPos:=m_cmdJntPos;
 m_cmdJntVel:=0;
 
@@ -107,20 +105,13 @@ END_VAR
 
 
 VAR
-	cartTwist :Vec6d;
-	jntPos,jntVel: Vec7d;
 	maxAcc, minDec:LREAL;
-	massMat:Mat7d;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[cartTwist:=i_masterArm.curCartTwist;
-jntPos := i_masterArm.curJntPos;
-jntVel:=i_masterArm.curJntVel;
-
-m_jnt4TargetPos:=calcRedunPos(i_masterArm);
+        <ST><![CDATA[m_jnt4TargetPos:=calcRedunPos(i_masterArm);
 
 // scale following acceleration based on yaw velocity
-maxAcc:=(m_jnt4MaxFollowAcc-m_jnt4MinFollowAcc)*(ABS(cartTwist[6])-m_jnt4MinAccVel)/(m_jnt4MaxAccVel-m_jnt4MinAccVel)+m_jnt4MinFollowAcc;
+maxAcc:=(m_jnt4MaxFollowAcc-m_jnt4MinFollowAcc)*(ABS(i_masterArm.curCartTwist[6])-m_jnt4MinAccVel)/(m_jnt4MaxAccVel-m_jnt4MinAccVel)+m_jnt4MinFollowAcc;
 minDec:=m_trajFilter.minDec(m_jnt4TargetPos);
 maxAcc := MAX(maxAcc, minDec);
 maxAcc := LIMIT(m_jnt4MinFollowAcc,maxAcc, m_jnt4MaxFollowAcc);
@@ -131,8 +122,8 @@ m_trajFilter.run(m_jnt4TargetPos, 0.0, o_cmdAcc=>m_cmdJntAcc,o_cmdVel=>m_cmdJntV
 	
 
 // joint position control torque control
-m_jntCtrlTrq:=m_jntPIDCtrl.run(m_cmdJntPos,jntPos[4], m_cmdJntVel, jntVel[4]);
-m_jntCtrlTrq:= m_jntCtrlTrq+massMat[4,4]*m_cmdJntAcc;
+m_jntCtrlTrq:=m_jntPIDCtrl.run(m_cmdJntPos,i_masterArm.curJntPos[4], m_cmdJntVel, i_masterArm.curJntVel[4]);
+//m_jntCtrlTrq:= m_jntCtrlTrq+i_masterArm.massMat[4,4]*m_cmdJntAcc;
 
 
 run:=m_jntCtrlTrq;
@@ -156,7 +147,6 @@ run:=m_jntCtrlTrq;
       <LineId Id="67" Count="0" />
     </LineIds>
     <LineIds Name="FB_RedunJntControl.init">
-      <LineId Id="82" Count="0" />
       <LineId Id="51" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="22" Count="0" />
@@ -172,10 +162,6 @@ run:=m_jntCtrlTrq;
       <LineId Id="35" Count="0" />
     </LineIds>
     <LineIds Name="FB_RedunJntControl.run">
-      <LineId Id="318" Count="0" />
-      <LineId Id="333" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="319" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="322" Count="8" />
       <LineId Id="234" Count="0" />
