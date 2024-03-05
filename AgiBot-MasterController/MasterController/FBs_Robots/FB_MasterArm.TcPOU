@@ -411,7 +411,7 @@ m_gripAngle:=0;
 
 // joint init
 FOR i:=1 TO g_mJntNum DO
-	m_joints[i].init(m_armIdx, i);
+	m_joints[i].init(m_armIdx, i,g_armCtrlCycleTime);
 END_FOR
 
 // init joint encoder and position calculation
@@ -423,9 +423,7 @@ FOR i:=1 TO g_mJntNum DO
 	m_jntPIDCtrl[i].init(g_armCtrlCycleTime,g_posKp[i],g_posKd[i],g_posKi[i],
 		g_posKiLimit[i]* currentRatioMotor2Jnt,	g_posCtrlLimit[i]*currentRatioMotor2Jnt);
 END_FOR
-
-// compute current status
-updateStatus();]]></ST>
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="initJntPos" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
@@ -444,6 +442,9 @@ END_FOR
 // link position of joint4 is influenced by joint2 and joint3, need to handle seperately
 //q4DH=q4motor+q8-q2-90;  
 m_joints[4].initLinkPos:= m_joints[4].initLinkPos-m_joints[3].initLinkPos+m_joints[2].initLinkPos+PI/2;
+
+// update arm status after joint position is re-init
+updateStatus();
 ]]></ST>
       </Implementation>
     </Method>
@@ -867,8 +868,6 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="40" Count="1" />
       <LineId Id="43" Count="1" />
       <LineId Id="39" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.initJntPos">
@@ -877,6 +876,8 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="21" Count="0" />
       <LineId Id="24" Count="0" />
       <LineId Id="23" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="31" Count="0" />
       <LineId Id="25" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.inverseKinematic">

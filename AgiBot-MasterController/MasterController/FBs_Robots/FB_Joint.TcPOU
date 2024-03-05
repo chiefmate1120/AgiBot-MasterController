@@ -132,10 +132,11 @@ END_VAR
 VAR_INPUT
 	i_armIdx :INT;
 	i_jntIdx :INT;
+	i_controlCycleTime :LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cycleTime := g_armCtrlCycleTime;
+        <ST><![CDATA[m_cycleTime := i_controlCycleTime;
 
 // hardware parameters
 m_motorEncoderRes :=g_incEncoderRes[i_jntIdx];

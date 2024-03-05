@@ -29,10 +29,11 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
 
-// check if to hold the command joint position unchanged
-checkToHoldLastCmds(i_masterArm,r_masterArmCtrlCmd);
+// init
+SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -40,9 +41,7 @@ checkToHoldLastCmds(i_masterArm,r_masterArmCtrlCmd);
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlReady.init">
-      <LineId Id="57" Count="1" />
-      <LineId Id="40" Count="0" />
-      <LineId Id="47" Count="0" />
+      <LineId Id="72" Count="4" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
