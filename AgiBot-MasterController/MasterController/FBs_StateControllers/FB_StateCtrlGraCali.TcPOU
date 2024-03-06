@@ -60,7 +60,7 @@ calcCmdJntPos :=m_caliPlanner[m_caliTrajIdx].evaluate(m_timePeriod, jntPos=> m_c
 
 // check if to transit to next segment
 curJntVel :=i_masterArm.curJntVel;
-IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND vecNorm(curJntVel)<7*g_jntStaticVelThres) THEN
+IF(m_timePeriod > m_caliPlanner[m_caliTrajIdx].duration  AND norm(curJntVel)<7*g_jntStaticVelThres) THEN
 	m_caliTrajIdx:=m_caliTrajIdx+1;
 	m_timePeriod:=0;
 END_IF

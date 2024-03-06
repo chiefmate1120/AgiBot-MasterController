@@ -62,7 +62,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_startPos:=i_startJntPos;
 m_targetPos:=i_targetJntPos;
 vecSub(i_targetJntPos, i_startJntPos, m_moveDir);
-m_moveDistance := vecNorm(m_moveDir);
+m_moveDistance := norm(m_moveDir);
 
 IF(m_moveDistance<g_smallNum) THEN
 	vecMultiNum(g_onesVec7d,1/7, m_moveDir);;

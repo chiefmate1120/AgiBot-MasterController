@@ -7,9 +7,14 @@ VAR_GLOBAL CONSTANT
 	g_jntPosLimitBuffer :ARRAY[1..7] OF LREAL :=[7(5.0*g_deg2Rad)];
 	g_jntVelLimitBuffer :ARRAY[1..7] OF LREAL :=[7(15.0*g_deg2Rad)];
 	
+		g_maxCartPosErr :LREAL := 0.005;
+	g_maxCartOriErr :LREAL := 5.0*g_deg2Rad;
+	
 	g_maxJntCtrlErr :LREAL := 5.0*g_deg2Rad;
-	g_maxPosCtrlErr :LREAL := 0.005;
-	g_maxOriCtrlErr :LREAL := 5.0*g_deg2Rad;;
+	g_maxJntEncErr :LREAL := 5.0*g_deg2Rad;
+	
+	// joint velocity limit for safety check
+	g_jntVelSafetyLimit :ARRAY[1..g_mJntNum] OF LREAL :=[7(2*pi)];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

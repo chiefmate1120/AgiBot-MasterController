@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="norm" Id="{0015b5c6-4029-411f-8387-131591190194}" SpecialFunc="None">
+    <Declaration><![CDATA[// return the norm of a vector
+FUNCTION norm : LREAL
+VAR_IN_OUT CONSTANT
+	vec :ARRAY[*] OF LREAL;
+END_VAR
+VAR
+	m,i:DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(vec,1);
+norm:=0;
+FOR i:=1 TO m DO
+	norm := norm + vec[i]*vec[i];
+END_FOR
+
+norm := SQRT(norm);
+]]></ST>
+    </Implementation>
+    <LineIds Name="norm">
+      <LineId Id="54" Count="4" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -49,15 +49,6 @@ END_VAR
 
 ]]></ST>
     </Implementation>
-    <Method Name="checkTeleSalveArmIdx" Id="{cbcc2536-c1d7-4752-a469-261e927f6a1f}">
-      <Declaration><![CDATA[METHOD checkTeleSalveArmIdx : BOOL
-VAR_INPUT
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// TODO: decide the matched slave arm index for each master arm]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
       <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
 VAR_IN_OUT
@@ -96,12 +87,12 @@ FOR i:=1 TO g_mArmNum DO
 	
 	// command info
 	// cartesion
-	r_masterStatus.m_cmdArmPose[i]:=m_armCtrlCmds[i].m_cmdCartPose;
-	r_masterStatus.m_cmdArmTwist[i]:=m_armCtrlCmds[i].m_cmdCartTwist;
+	r_masterStatus.m_cmdArmPose[i]:=m_masterArms[i].m_cmdCartPose;
+	r_masterStatus.m_cmdArmTwist[i]:=m_masterArms[i].m_cmdCartTwist;
 	// joint info
-	r_masterJointsData.m_cmdJntPos[i]:=m_armCtrlCmds[i].m_cmdJntPos;
-	r_masterJointsData.m_cmdJntVel[i]:=m_armCtrlCmds[i].m_cmdJntVel;
-	r_masterJointsData.m_cmdJntTrq[i]:=m_armCtrlCmds[i].m_cmdJntTrq;
+	r_masterJointsData.m_cmdJntPos[i]:=m_masterArms[i].m_cmdJntPos;
+	r_masterJointsData.m_cmdJntVel[i]:=m_masterArms[i].m_cmdJntVel;
+	r_masterJointsData.m_cmdJntTrq[i]:=m_masterArms[i].m_cmdJntTrq;
 	r_masterJointsData.m_cmdJntCurrent[i]:=m_masterArms[i].cmdJntCurrent;
 	
 END_FOR]]></ST>
@@ -256,9 +247,6 @@ END_FOR]]></ST>
       <LineId Id="60" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterRobot.checkTeleSalveArmIdx">
-      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.getStatus">
       <LineId Id="29" Count="0" />

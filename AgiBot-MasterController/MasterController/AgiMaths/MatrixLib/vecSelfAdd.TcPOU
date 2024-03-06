@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="vecSelfAdd" Id="{5193c9f8-f507-4a60-8fdd-14e14d5544bb}" SpecialFunc="None">
+    <Declaration><![CDATA[// A +=B
+FUNCTION vecSelfAdd : BOOL
+VAR_IN_OUT
+	vecA :ARRAY[*] OF LREAL;
+END_VAR
+
+VAR_IN_OUT CONSTANT
+	vecB :ARRAY[*] OF LREAL;
+END_VAR
+
+VAR
+	m,i :DINT;
+ 
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(vecA,1);
+
+FOR i:=1 TO m DO
+		vecA[i]:=vecA[i]+vecB[i];
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="vecSelfAdd">
+      <LineId Id="53" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

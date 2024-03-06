@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SafetyCheck
+VAR
+	// master robot information, including arm status and cartesian data
+	m_masterStatus AT %I* :ST_masterStatus;
+	
+	// master robot joint data
+	m_masterJointData AT %I* :ST_masterJointData;
+	
+	// error check result
+	m_safetyCheckData AT %Q* :ST_SafetyData;
+	
+	m_initFlag:bool;
+	m_cartCheck :FB_CartCheck;
+	m_masterArmCheck:FB_MasterArmCheck;
+	
+	i: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// reset data
+IF FALSE = m_initFlag  THEN
+	FOR i:=1  TO g_mArmNum DO 
+		m_safetyCheckData.m_masterErrFlag[i]:=FALSE;
+		m_safetyCheckData.m_cartErrFlag:=FALSE;
+	END_FOR
+	m_initFlag:=TRUE;
+END_IF
+
+m_masterArmCheck.check(m_masterStatus,m_masterJointData, o_errorFlag=>m_safetyCheckData.m_masterErrFlag);]]></ST>
+    </Implementation>
+    <LineIds Name="SafetyCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

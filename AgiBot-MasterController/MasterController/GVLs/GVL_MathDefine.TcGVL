@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_MathDefine" Id="{7eb77e09-e6c3-483f-ae23-6f0bf731cf6b}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
-	g_smallNum :LREAL := 1E-6;
+	g_smallNum :LREAL := 1E-8;
 	g_smallAng :LREAL := 0.01*PI/180;
 	g_largeNum: LREAL :=1E16;
 	g_deg2Rad :LREAL := pi/180.0;

@@ -22,6 +22,9 @@
     <Compile Include="AgiMaths\Frames\DHTrans.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\Frames\invFrame.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\Frames\rotX.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -32,6 +35,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\Frames\transform.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AgiMaths\MatrixLib\angAxis2Rot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\cross.TcPOU">
@@ -91,10 +97,13 @@
     <Compile Include="AgiMaths\MatrixLib\vecAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecNorm.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\norm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\normVec.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\normalize.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSelfMultiNum.TcPOU">
@@ -109,28 +118,28 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_InstrumentType.TcDUT">
+    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MasterArmState.TcDUT">
+    <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedMasterArmIdx.TcDUT">
+    <Compile Include="DUTs\Enum\E_MatchedMasterArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_MatchedSlaveArmIdx.TcDUT">
+    <Compile Include="DUTs\Enum\E_MatchedSlaveArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\E_SlaveArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_InstruStatus.TcDUT">
+    <Compile Include="DUTs\Enum\E_SlaveArmState.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_MasterStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterDynaData.TcDUT">
@@ -161,6 +170,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_MasterInputDataPool.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec7b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Mat34.TcDUT">
@@ -364,6 +376,15 @@
     <Compile Include="FBs_StateControllers\I_MasterArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mains\SafetyCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_MasterArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TaskArmControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
@@ -374,6 +395,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskDynamic.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskSafetyCheck.TcTTO">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -395,6 +419,7 @@
     <Folder Include="AgiMaths" />
     <Folder Include="FBs_StateControllers" />
     <Folder Include="FBs_Robots" />
+    <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
   </ItemGroup>
@@ -423,6 +448,15 @@
     <None Include="MasterController.tmc">
       <SubType>Content</SubType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PinnedGlobalDataType Include="MSCommu_Frame" />
+    <PinnedGlobalDataType Include="MSCommu_InstruStatus" />
+    <PinnedGlobalDataType Include="MSCommu_MasterStatus" />
+    <PinnedGlobalDataType Include="MSCommu_Mat3d" />
+    <PinnedGlobalDataType Include="MSCommu_SlaveStatus" />
+    <PinnedGlobalDataType Include="MSCommu_Vec3d" />
+    <PinnedGlobalDataType Include="MSCommu_Vec6d" />
   </ItemGroup>
   <ProjectExtensions>
     <PlcProjectOptions>

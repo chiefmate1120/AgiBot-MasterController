@@ -43,7 +43,7 @@ calcCmdJntPos :=m_homePlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVe
 
 // check if to terminate
 curJntVel :=i_masterArm.curJntVel;
-m_isFinished :=m_timePeriod > m_homePlanner.duration  AND vecNorm(curJntVel)<7*g_jntStaticVelThres;]]></ST>
+m_isFinished :=m_timePeriod > m_homePlanner.duration  AND norm(curJntVel)<7*g_jntStaticVelThres;]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{c6523e12-84cb-49f8-843e-9a168bb4ce28}">

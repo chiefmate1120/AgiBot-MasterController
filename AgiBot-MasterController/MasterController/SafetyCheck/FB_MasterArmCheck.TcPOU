@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MasterArmCheck" Id="{7fa43d5a-568e-4b76-ad81-6c5cf7c4ee74}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCheck
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// cartesian pose error flag
+	m_armErrFlag :ARRAY[1..g_mArmNum] OF BOOL:=[2(FALSE)];
+	
+	// cartesian pose error flag
+	m_cartPoseErrFlag :ARRAY[1..g_mArmNum] OF BOOL;
+	
+	// joint control error flag
+	m_jntCtrlErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	
+	// joint encoder error flag
+	m_jntEncErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	
+	// joint velocity error flag
+	m_jntVelErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	
+	// cartesian position error
+	m_cartPosErr :ARRAY[1..g_mArmNum] OF Vec3d;
+	
+	// cartesian rotation angle (angle  * axis)
+	m_cartOriErr:ARRAY[1..g_mArmNum] OF  Vec3d;
+
+	// joint position control error
+	m_jntCtrlErr:ARRAY[1..g_mArmNum]  OF Vec7d;
+	
+	// motor and joint encoder error
+	m_jntEncErr:ARRAY[1..g_mArmNum]  OF Vec7d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{321cd4e5-6c66-4065-8a9a-a49a4a7544f4}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterStatus : ST_MasterStatus;
+	i_masterJointData :ST_MasterJointData;
+END_VAR
+VAR_OUTPUT
+	o_errorFlag :ARRAY[1..g_mArmNum] OF BOOL ;
+END_VAR
+
+VAR
+	i ,j:INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate error
+FOR i:=1 TO g_mArmNum DO 
+	// stop check if arm is already in error state
+	IF TRUE = m_armErrFlag[i] THEN 
+		CONTINUE;
+	END_IF
+	
+	// NOT check cartesion pose error
+	m_cartPoseErrFlag[i]:=FALSE;
+	//m_cartPoseErrFlag[i]:=poseErrCheck(i_masterStatus.m_cmdArmPose[i],  i_masterStatus.m_curArmPose[i],
+	//									o_posErr=>m_cartPosErr[i], o_oriErr=>m_cartOriErr[i]);
+	
+	// joint control error
+	m_jntCtrlErrFlag[i]:=jntCtrlErrCheck(i_masterJointData.m_cmdJntPos[i], i_masterJointData.m_curJntPos[i],
+										o_jntCtrlErr=>m_jntCtrlErr[i]);
+	
+	// encoder error
+	m_jntEncErrFlag[i]:=jntEncErrCheck(i_masterJointData.m_curMotorPos[i], i_masterJointData.m_curLinkPos[i],
+										o_jntEncErr=>m_jntEncErr[i]);
+										
+	// final arm error status check
+	IF  TRUE = m_cartPoseErrFlag[i] THEN
+		m_armErrFlag[i]:=TRUE;
+		CONTINUE;
+	END_IF
+	
+	FOR j:=1 TO g_mJntNum DO 
+		IF TRUE = m_jntCtrlErrFlag[i][j] OR TRUE = m_jntEncErrFlag[i][j] OR TRUE = m_jntVelErrFlag[i][j] THEN
+			m_armErrFlag[i]:=TRUE;
+			EXIT;
+		END_IF
+	END_FOR
+	
+END_FOR
+
+o_errorFlag:=m_armErrFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntCtrlErrCheck" Id="{f2b82bf6-f8b5-4f0c-98ca-679940c1f1fb}">
+      <Declaration><![CDATA[METHOD jntCtrlErrCheck : Vec7b
+VAR_INput
+	i_cmdJntPos : Vec7d;
+	i_curJntPos : Vec7d;
+END_VAR
+VAR_OUTPUT
+	o_jntCtrlErr :Vec7d;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  o_jntCtrlErr);
+
+// joint error check
+//NOTE: only check the first three joints.
+FOR i:=1 TO 3 DO 
+	jntCtrlErrCheck[i]:= ABS(o_jntCtrlErr[i]) > g_maxJntCtrlErr;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntEncErrCheck" Id="{31ef1a61-be8a-4cf4-8816-44c2de3e927b}">
+      <Declaration><![CDATA[METHOD jntEncErrCheck : Vec7b
+VAR_INput
+	i_motorJntPos : Vec7d;
+	i_linkJntPos : Vec7d;
+END_VAR
+VAR_OUTPUT
+	o_jntEncErr :Vec7d;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  o_jntEncErr);
+
+// joint error check
+FOR i:=1 TO g_sJntNum DO 
+	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_maxJntEncErr;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="poseErrCheck" Id="{9fe210b5-ecf0-4498-8364-258d193de1ff}">
+      <Declaration><![CDATA[METHOD poseErrCheck : BOOL
+VAR_INPUT
+	i_cmdPose : ST_Frame;
+	i_curPose :ST_Frame;
+END_VAR
+VAR_OUTPUT
+	o_posErr :Vec3d;
+	o_oriErr :Vec3d;
+END_VAR
+
+VAR
+	matT,rotErr:Mat3d;
+	errAngle :LREAL;
+	errAxis :Vec3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[	vecSub(i_cmdPose.m_pos, i_curPose.m_pos,o_posErr);
+
+	matTranspose(i_cmdPose.m_rot, matT);
+	matMultiply(matT,i_curPose.m_rot, rotErr);
+	rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxis);
+	vecMultiNum(errAxis, errAngle,o_oriErr);
+	
+	poseErrCheck:= (norm(o_posErr)>g_maxCartPosErr OR norm(o_oriErr)> g_maxCartOriErr);
+	]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterArmCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCheck.check">
+      <LineId Id="41" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="80" Count="4" />
+      <LineId Id="102" Count="1" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="109" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="111" Count="2" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="119" Count="11" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCheck.jntCtrlErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCheck.jntEncErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCheck.poseErrCheck">
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="10" Count="3" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

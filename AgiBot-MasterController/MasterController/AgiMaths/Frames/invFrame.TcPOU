@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="invFrame" Id="{e267f179-1cb3-4e2a-898f-03f4afe668ea}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION invFrame : ST_Frame
+VAR_INPUT
+	i_frame :ST_Frame;
+END_VAR
+VAR
+	invPos :Vec3d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[matTranspose(i_frame.m_rot, invFrame.m_rot);
+vecMultiNum(i_frame.m_pos, -1, invPos);
+matMultiVec(invFrame.m_rot, invPos, invFrame.m_pos);
+]]></ST>
+    </Implementation>
+    <LineIds Name="invFrame">
+      <LineId Id="21" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

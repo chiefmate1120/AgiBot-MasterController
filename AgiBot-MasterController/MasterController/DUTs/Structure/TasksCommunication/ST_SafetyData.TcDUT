@@ -5,7 +5,8 @@
 // Input to master arm control task
 TYPE ST_SafetyData :
 STRUCT
-	m_faultTrigged:BOOL := FALSE;
+	m_masterErrFlag :ARRAY[1..g_mArmNum] OF BOOL :=[2(FALSE)];
+	m_cartErrFlag :BOOL :=FALSE;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

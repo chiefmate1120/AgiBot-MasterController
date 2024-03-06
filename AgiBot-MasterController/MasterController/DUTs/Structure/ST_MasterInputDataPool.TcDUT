@@ -14,8 +14,8 @@ STRUCT
 	// cart information, import from other task
 	m_cartStatus AT %I*:ST_CartStatus;
 	
-	// slave robot information, import from other device
-	m_slaveStatus AT %I*:ST_SlaveStatus;
+	// slave robot status, copy from MSCommu_SlaveStauts
+	m_slaveStatus :ST_SlaveStatus;
 	
 	// master dynamic data
 	m_masterDynaData AT %I* : ST_MasterDynaData;

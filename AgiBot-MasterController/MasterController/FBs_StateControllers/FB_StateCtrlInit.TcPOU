@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlInit" Id="{2f1b91d8-ebd5-4b63-92d8-450fe3a94973}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Master Slave Control
 FUNCTION_BLOCK PUBLIC FB_StateCtrlInit EXTENDS FB_MasterArmCtrlBase

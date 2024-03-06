@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="rot2AngAxis" Id="{2ad75c44-ef95-44e4-9940-6f53f74e7147}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION rot2AngAxis : bool
 VAR_IN_OUT CONSTANT
@@ -48,7 +48,7 @@ ELSE
 END_IF
 
 // normalize
-normVec(axis);]]></ST>
+normalize(axis);]]></ST>
     </Implementation>
     <LineIds Name="rot2AngAxis">
       <LineId Id="63" Count="1" />

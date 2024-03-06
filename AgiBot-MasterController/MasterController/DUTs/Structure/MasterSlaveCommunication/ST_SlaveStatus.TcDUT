@@ -9,26 +9,28 @@ STRUCT
 	// state machine
 	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Init)];
 	
-	// index(0 to 2) of master arm which is tele-linked to slave arm
-	m_teleMasterArmIdx :ARRAY[1..g_sArmNum] OF E_MatchedMasterArmIdx;
-	
 	// instrument info
 	m_instruStauts :ARRAY[1..g_sArmNum] OF ST_InstruStatus;
 	
-	// command arm pose in endoscope view
+	// flag if endoscope is mounted
+	m_endoscopeMounted :BOOL := FALSE;
+	
+	// endoscope pose in cart coordinate
+	m_endoscopePose : ST_Frame;
+	
+	// command arm pose in cart coordinate
 	m_cmdArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
-	// current arm pose in endoscope view
+	// current arm pose in cart coordinate
 	m_curArmPose:ARRAY[1..g_sArmNum] OF ST_Frame;
 	
-	// command arm twist[linear velocity; angular veloicty] in endoscope view
+	// command arm twist[linear velocity; angular veloicty] in cart view
 	m_cmdArmTwist:ARRAY[1..g_sArmNum] OF Vec6d;
 	
-	// current arm twist[linear velocity; angular veloicty] in endoscope view
+	// current arm twist[linear velocity; angular veloicty] in cart view
 	m_curArmTwist:ARRAY[1..g_sArmNum] OF vec6d;
 
 END_STRUCT
-END_TYPE
-]]></Declaration>
+END_TYPE]]></Declaration>
   </DUT>
 </TcPlcObject>

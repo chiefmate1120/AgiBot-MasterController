@@ -3,6 +3,12 @@
   <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
+		// master robot data, input from master controller box
+	m_slaveRobotData AT %I* : MSCommu_slaveStatus;
+		
+	// slave robot data, ouput to master controller box
+	m_masterRobotData AT %Q* :MSCommu_MasterStatus;
+	
 	// flag to init robot
 	m_robotInit :BOOL :=FALSE;
 	
@@ -41,14 +47,83 @@ IF m_robotInit =FALSE THEN
 	m_robotInit:=TRUE;
 END_IF
 
+// slave input data cast
+slaveInputDataCast(m_slaveRobotData, m_masterInputDataPool.m_slaveStatus);
+
 // robot run
 m_masterRobot.run(m_masterInputDataPool);
 
 // update data pool
 m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 
+// master output data cast
+masterOutputDataCast(m_masterStatus, m_masterRobotData);
+
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
+    <Method Name="masterOutputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
+      <Declaration><![CDATA[// convert from local ST_MasterStatus for control to MSCommu_MasterStatus for master-slave communication
+METHOD masterOutputDataCast : BOOL
+VAR_IN_OUT
+	masterStatus :ST_MasterStatus;
+	masterOutputData:MSCommu_MasterStatus;
+END_VAR
+
+VAR
+	i : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[masterOutputData.m_motionScale :=masterStatus.m_motionScale;
+
+FOR i:=1 TO g_mArmNum DO
+	masterOutputData.m_armState[i] := masterStatus.m_armState[i];
+	masterStatus.m_teleSlaveArmIdx[i] :=masterOutputData.m_teleSlaveArmIdx[i];
+	masterOutputData.m_gripAngle[i] := masterStatus.m_gripAngle[i] ;
+	masterOutputData.m_cmdArmPose[i].m_pos := masterStatus.m_cmdArmPose[i].m_pos;
+	masterOutputData.m_cmdArmPose[i].m_rot := masterStatus.m_cmdArmPose[i].m_rot ;
+	masterOutputData.m_curArmPose[i].m_pos := masterStatus.m_curArmPose[i].m_pos ;
+	masterOutputData.m_curArmPose[i].m_rot := masterStatus.m_curArmPose[i].m_rot ;
+	masterOutputData.m_cmdArmTwist[i] := masterStatus.m_cmdArmTwist[i] ;
+	masterOutputData.m_curArmTwist[i] := masterStatus.m_curArmTwist[i] ;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="slaveInputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
+      <Declaration><![CDATA[// convert from MSCommu_Slavetatus for master-slave communication to local ST_SlaveStatus for control
+METHOD slaveInputDataCast : BOOL
+VAR_IN_OUT
+	slaveInputData : MSCommu_SlaveStatus; 
+	slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[slaveStatus.m_endoscopeMounted :=slaveInputData.m_endoscopeMounted;
+slaveStatus.m_endoscopePose.m_pos :=slaveInputData.m_endoscopePose.m_pos;
+slaveStatus.m_endoscopePose.m_rot :=slaveInputData.m_endoscopePose.m_rot;
+FOR i:= 1 TO g_sArmNum DO
+	slaveStatus.m_armState[i] := slaveInputData.m_armState[i];
+	slaveStatus.m_instruStauts[i].m_fingerAngle := slaveInputData.m_instruStauts[i].m_fingerAngle;
+	slaveStatus.m_instruStauts[i].m_ready := slaveInputData.m_instruStauts[i].m_ready;
+	slaveStatus.m_instruStauts[i].m_type := slaveInputData.m_instruStauts[i].m_type;
+	slaveStatus.m_cmdArmPose[i].m_pos :=slaveInputData.m_cmdArmPose[i].m_pos;
+	slaveStatus.m_cmdArmPose[i].m_rot :=slaveInputData.m_cmdArmPose[i].m_rot;
+	slaveStatus.m_curArmPose[i].m_pos :=slaveInputData.m_curArmPose[i].m_pos;
+	slaveStatus.m_curArmPose[i].m_rot :=slaveInputData.m_curArmPose[i].m_rot;
+	slaveStatus.m_cmdArmTwist[i] :=slaveInputData.m_cmdArmTwist[i];
+	slaveStatus.m_curArmTwist[i] :=slaveInputData.m_curArmTwist[i];
+END_FOR
+
+
+
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="MasterArmControl">
       <LineId Id="85" Count="0" />
       <LineId Id="117" Count="0" />
@@ -60,14 +135,48 @@ m_codeTime(START:=FALSE);]]></ST>
       <LineId Id="8" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="9" Count="0" />
+      <LineId Id="172" Count="1" />
       <LineId Id="61" Count="0" />
+      <LineId Id="174" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="21" Count="0" />
       <LineId Id="64" Count="0" />
+      <LineId Id="175" Count="1" />
       <LineId Id="88" Count="0" />
+      <LineId Id="177" Count="0" />
       <LineId Id="87" Count="0" />
+    </LineIds>
+    <LineIds Name="MasterArmControl.masterOutputDataCast">
+      <LineId Id="5" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="26" Count="3" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="MasterArmControl.slaveInputDataCast">
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="8" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

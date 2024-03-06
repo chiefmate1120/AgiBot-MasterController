@@ -6,7 +6,7 @@
 TYPE ST_MasterStatus :
 STRUCT
 	// linear motion scale
-	m_motionScale : LREAL;
+	m_motionScale : LREAL:=1;
 	
 	// state machine
 	m_armState:ARRAY[1..g_mArmNum] OF E_masterArmState;

@@ -2,7 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <Task Name="TaskArmControl" Id="{93e6deff-340b-4b39-9b50-9f4d699f3671}">
     <!--CycleTime in micro seconds.-->
-    <CycleTime>1000</CycleTime>
+    <CycleTime>250</CycleTime>
     <Priority>1</Priority>
     <PouCall>
       <Name>MasterArmControl</Name>
