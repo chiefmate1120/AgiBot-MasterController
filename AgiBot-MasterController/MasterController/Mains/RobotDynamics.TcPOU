@@ -13,11 +13,17 @@ VAR
 	// flag to init robot dynamic model
 	m_robotDynaInit :BOOL :=FALSE;
 	
-	// grivity model block
+	// master grivity model 
 	m_gravityModel :ARRAY[1..g_mArmNum] OF FB_MasterGravity;
 	
 	// master arm dynamic model
 	m_armDynamic :ARRAY[1..g_mArmNum] OF FB_MasterDynamic;
+	
+	// master friction model
+	m_frictionModel : ARRAY[1..g_mArmNum] OF FB_MasterFriciton;
+	
+	// master external torque observer
+	m_jntDOB : ARRAY[1..g_mArmNum] OF FB_JntObserver;
 	
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -35,22 +41,33 @@ IF m_robotDynaInit =FALSE THEN
 	FOR i:=1 TO g_mArmNum DO
 		m_gravityModel[i].Init(i);
 		m_armDynamic[i].init(i);
+		m_frictionModel[i].init(i);
+		// NOTE: curJntPos is usually zero when init, so observer need some time to stable after code run
+		m_jntDOB[i].init(i, m_masterJointsData.m_curJntPos[i]); 
 	END_FOR
 
 	m_robotDynaInit:=TRUE;
 END_IF
 
-// run gravity model
 FOR i:=1 TO g_mArmNum DO
+	// run gravity model
 	m_gravityModel[i].run(m_masterJointsData.m_curJntPos[i], m_masterDynaData.m_gravity[i]);
-END_FOR
-
-// run dynamic model
-FOR i:=1 TO g_mArmNum DO
+	
+	// run dynamic model
 	m_armDynamic[i].updateDynamic(m_masterJointsData.m_curJntPos[i]);
 	m_masterDynaData.m_massMat[i]:=m_armDynamic[i].jntMassMat;
 	m_masterDynaData.m_lambda[i]:=m_armDynamic[i].cartMassMat;
 	m_masterDynaData.m_dynaNullspace[i]:=m_armDynamic[i].dynaNullspace;
+	
+	// run friction model
+	m_masterDynaData.m_friction[i] := m_frictionModel[i].run(m_masterDynaData.m_gravity[i],m_masterJointsData.m_curJntVel[i]);
+	
+	// run DOB
+	 m_masterDynaData.m_jntExtTrq[i] := m_jntDOB[i].run(m_masterJointsData.m_curJntTrq[i], m_masterJointsData.m_curJntPos[i], m_masterDynaData.m_massMat[i]);
+	// remove gravity and friction from external torque
+	vecSelfAdd(m_masterDynaData.m_jntExtTrq[i], m_masterDynaData.m_gravity[i]);
+	vecSelfAdd(m_masterDynaData.m_jntExtTrq[i], m_masterDynaData.m_friction[i]);
+	
 END_FOR
 
 m_codeTime(START:=FALSE);
@@ -62,16 +79,25 @@ m_codeTime(START:=FALSE);
       <LineId Id="15" Count="1" />
       <LineId Id="24" Count="1" />
       <LineId Id="52" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="213" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="5" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="28" Count="2" />
+      <LineId Id="28" Count="1" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="196" Count="2" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="201" Count="4" />
+      <LineId Id="215" Count="0" />
+      <LineId Id="248" Count="2" />
+      <LineId Id="207" Count="0" />
       <LineId Id="27" Count="0" />
-      <LineId Id="54" Count="3" />
-      <LineId Id="116" Count="2" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="84" Count="0" />
+      <LineId Id="193" Count="0" />
       <LineId Id="83" Count="0" />
       <LineId Id="110" Count="0" />
     </LineIds>

@@ -106,6 +106,9 @@
     <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecSelfSub.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSelfMultiNum.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -122,9 +125,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Enum\E_MatchedMasterArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_MatchedSlaveArmIdx.TcDUT">
@@ -247,7 +247,13 @@
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Observer\FB_JntObserver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_RobotDynamics\FB_MasterDynamic.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_RobotDynamics\FB_MasterFriciton.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlClutch.TcPOU">
@@ -419,6 +425,7 @@
     <Folder Include="AgiMaths" />
     <Folder Include="FBs_StateControllers" />
     <Folder Include="FBs_Robots" />
+    <Folder Include="FBs_Observer" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

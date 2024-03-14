@@ -24,10 +24,11 @@ VAR_GLOBAL CONSTANT
 																 
 	// joint position limit
 	//TODO: joint7 is given a large limit for initialization moiton
-	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad, 	-135*g_deg2Rad-pi/2, 	-135*g_deg2Rad+pi,		-45*g_deg2Rad-pi/2,		-340*g_deg2Rad*3,
-											 								-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad,	-pi,		-90*g_deg2Rad,		-45*g_deg2Rad+pi/2,	-340*g_deg2Rad*3];
-	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		0,			135*g_deg2Rad+pi,		45*g_deg2Rad-pi/2,		340*g_deg2Rad*3,
-								             								 60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		135*g_deg2Rad,			135*g_deg2Rad+pi,		45*g_deg2Rad+pi/2,		340*g_deg2Rad*3];
+	//NOTE: joint 4 position is coupled with joint 2/3, so the limit have a pi/2 buffer, which is just a rough number
+	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad, 	-pi/2-135*g_deg2Rad-pi/2, 	-135*g_deg2Rad+pi,		-45*g_deg2Rad-pi/2,		-340*g_deg2Rad*3,
+											 -60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad,	-pi/2-pi/2,		-135*g_deg2Rad+pi,		-45*g_deg2Rad+pi/2,	-340*g_deg2Rad*3];
+	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		pi/2-pi/2,			135*g_deg2Rad+pi,		45*g_deg2Rad-pi/2,		340*g_deg2Rad*3,
+								             60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		pi/2+225*g_deg2Rad-pi/2,			135*g_deg2Rad+pi,		45*g_deg2Rad+pi/2,		340*g_deg2Rad*3];
 	
 	// joint velocity limit
 	g_maxJntVel :ARRAY[1..7] OF LREAL :=[7(2*pi)];

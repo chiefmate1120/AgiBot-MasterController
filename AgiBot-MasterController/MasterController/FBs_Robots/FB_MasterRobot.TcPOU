@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR_INPUT
@@ -49,6 +49,19 @@ END_VAR
 
 ]]></ST>
     </Implementation>
+    <Method Name="checkTeleSlaveArmIdx" Id="{e877542b-f696-4449-b007-3e9fbc5ffaab}">
+      <Declaration><![CDATA[METHOD checkTeleSlaveArmIdx : BOOL
+VAR_IN_OUT CONSTANT
+	i_UIData : ST_MasterUIData;
+	i_CartData :ST_CartStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// TODO: update teleSlaveArmIndex based on UI and Cart information
+m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_NULL;
+m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_1;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
       <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
 VAR_IN_OUT
@@ -157,6 +170,9 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_motionScale := i_masterInputDataPool.m_UIData.m_motionScale;
 m_monitorAngle := i_masterInputDataPool.m_cartStatus.m_monitorAngle;
 
+// check tele-operated slave arms index
+checkTeleSlaveArmIdx(i_masterInputDataPool.m_UIData, i_masterInputDataPool.m_cartStatus);
+
 // state machine transition
 stateMachine(i_masterInputDataPool);
 
@@ -248,6 +264,10 @@ END_FOR]]></ST>
       <LineId Id="9" Count="0" />
       <LineId Id="33" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterRobot.checkTeleSlaveArmIdx">
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="1" />
+    </LineIds>
     <LineIds Name="FB_MasterRobot.getStatus">
       <LineId Id="29" Count="0" />
       <LineId Id="23" Count="1" />
@@ -294,7 +314,9 @@ END_FOR]]></ST>
     <LineIds Name="FB_MasterRobot.run">
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="111" Count="0" />
       <LineId Id="79" Count="0" />
+      <LineId Id="112" Count="1" />
       <LineId Id="19" Count="2" />
       <LineId Id="11" Count="0" />
       <LineId Id="88" Count="1" />

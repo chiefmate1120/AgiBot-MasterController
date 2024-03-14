@@ -31,6 +31,40 @@ VAR_GLOBAL CONSTANT
 
 	//  motor inertial at link size
 	g_motorInertia :ARRAY[1..7] OF LREAL := [34.7E-7, 34.7E-7, 34.7E-7, 9.26E-7, 0.495E-7, 0.495E-7, 0.495E-7];
+	
+	// arm gravity parameters
+	(*graParam=[ 2.7244*m3 + 2.7244*m4 + 2.7244*m5 + 2.7244*m6 + 9.8*mx2 + 9.8*mx9,
+				9.8*my2 + 9.8*my9,
+				3.577*m4 + 3.577*m5 + 3.577*m6 + 0.49*m9 + 9.8*mx3 + 9.8*mx8
+				1.5827*m4 + 1.5827*m5 + 1.5827*m6 + 9.8*my3 + 9.8*my8 + 9.8*mz4
+				mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
+				preF2,   k2,   preF3,    k3,    preF5   k5]*)
+	g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
+		[ 6.33924, -0.000238508, 3.15698, 0.793245, -0.0339737, 0.0267042, 0.0000375, 0.0000117, 0.00001, -0.016609,
+		  7.7845, 3186.78, 7.81103, 1947.5, 1.112, 574.868,
+		  5.29849, -0.0007155225, 2.146707, 0.5986092, -0.02189082, 0.01705149, 0.0000125, 0.0000117, -0.00001, -0.01034929, 
+		  14.51197, 2436.477, 16.14762, 1247.809, 3.336, 223.4988];
+	// spring parameters
+	// spring2 [L0, b1, b2, l1, r0]
+	g_spring2Param :ARRAY[1..5] OF LREAL :=[101.6E-3, 14.5E-3, 15E-3, 172E-3, 31E-3];
+	// spring3 [L0, b1, b2, l1, r0,d]
+	g_spring3Param :ARRAY[1..6] OF LREAL :=[101.6E-3, 14E-3, 15E-3, 172E-3, 30E-3, 10E-3];
+	// spring5 [L0, s1, L1, r0, beta]
+	g_spring5Param :ARRAY[1..5] OF LREAL :=[34.93E-3, 34.3E-3, 100E-3, 12.5E-3, 32.02*g_deg2rad];
+	
+	// arm friction parameters [a1,b1,...a7,b7];
+	// friction = a * gravity + b; only joint 5 and 6 is identified
+	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
+	[0, 0, 0, 0,
+	 0.2748,    0.0131,	0.3413,    0.0088];
+	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
+	 
+	 // joint observer paramters
+	g_jntObvParamL1 :Vec7d :=[0, 0, 0, 0, 300, 300, 0];
+	g_jntObvParamL2 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvParamL3 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvDamp:Vec7d := [0.8,    0.8,    0.8,     0.05, 0.05, 0.05, 0.05];// TODO: need to be identified
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

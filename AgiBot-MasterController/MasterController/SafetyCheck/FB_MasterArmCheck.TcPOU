@@ -134,7 +134,7 @@ END_VAR
         <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  o_jntEncErr);
 
 // joint error check
-FOR i:=1 TO g_sJntNum DO 
+FOR i:=1 TO g_mJntNum DO 
 	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_maxJntEncErr;
 END_FOR
 	]]></ST>

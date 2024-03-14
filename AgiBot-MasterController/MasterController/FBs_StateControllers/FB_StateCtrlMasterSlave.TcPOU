@@ -36,9 +36,9 @@ VAR
 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos;
+        <ST><![CDATA[(*m_cmdJntPos:=i_masterArm.curJntPos;
 m_cmdJntVel:=i_masterArm.curJntVel;
-m_cmdCartPose:=i_masterArm.curCartPose;
+m_cmdCartPose:=i_masterArm.curCartPose;*)
 ]]></ST>
       </Implementation>
     </Method>
@@ -58,6 +58,7 @@ END_VAR
 VAR 
 	nullspaceMat :Mat7d;
 	ctrlTrq : Vec7d;
+	i :INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -77,6 +78,10 @@ ELSE
 	m_cmdJntTrq := ctrlTrq;
 END_IF
 
+// add friction compensation
+FOR i:=1 TO g_mJntNum DO 
+	m_cmdJntTrq[i] := m_cmdJntTrq[i] + i_masterArm.jntFriction[i];
+END_FOR
 
 
 ]]></ST>
@@ -101,8 +106,7 @@ END_VAR
 m_jntOPMode := g_allTrqMode;
 
 // init controller
-m_redunJntCtrl.init(i_masterArm);
-]]></ST>
+m_redunJntCtrl.init(i_masterArm);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlMasterSlave">
@@ -124,7 +128,10 @@ m_redunJntCtrl.init(i_masterArm);
       <LineId Id="50" Count="0" />
       <LineId Id="58" Count="3" />
       <LineId Id="55" Count="2" />
-      <LineId Id="49" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="143" Count="1" />
       <LineId Id="34" Count="1" />
       <LineId Id="13" Count="0" />
     </LineIds>
@@ -134,7 +141,6 @@ m_redunJntCtrl.init(i_masterArm);
       <LineId Id="19" Count="0" />
       <LineId Id="16" Count="1" />
       <LineId Id="59" Count="0" />
-      <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

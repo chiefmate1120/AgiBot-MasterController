@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{FCF2AAE3-16B8-40C6-B387-AC4F89F5A819}" PersistentType="true">MSCommu_InstruStatus</Name>
@@ -343,8 +343,8 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}" AutoDeleteType="true">ST_MasterDynaData</Name>
-			<BitSize>18048</BitSize>
+			<Name GUID="{EFC31606-5620-EF9E-1B71-A4D1735F6933}" AutoDeleteType="true">ST_MasterDynaData</Name>
+			<BitSize>19840</BitSize>
 			<SubItem>
 				<Name>m_massMat</Name>
 				<Type GUID="{8CD77D34-551D-3B7A-EDDA-09AE73424A39}">Mat7d</Type>
@@ -388,6 +388,28 @@
 				<Comment><![CDATA[ gravity]]></Comment>
 				<BitSize>896</BitSize>
 				<BitOffs>17152</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_friction</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ friction]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>18048</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_jntExtTrq</Name>
+				<Type GUID="{B31851CD-91DB-4911-5A37-E35F4803C231}">Vec7d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ external torque]]></Comment>
+				<BitSize>896</BitSize>
+				<BitOffs>18944</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -983,7 +1005,7 @@
 				<Cpu CpuId="2" RtLimit="90"/>
 			</Settings>
 			<Tasks>
-				<Task Id="3" Priority="1" CycleTime="2500" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
 					<Name>TaskArmControl</Name>
 				</Task>
 				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000004" AdtTasks="true">
@@ -996,7 +1018,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{AF3491A4-C7BA-96E8-EFEF-666CED4E748D}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1104,7 +1126,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
 							<Comment><![CDATA[ master dynamic data]]></Comment>
-							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
+							<Type GUID="{EFC31606-5620-EF9E-1B71-A4D1735F6933}">ST_MasterDynaData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" AreaNo="1">
@@ -1194,7 +1216,7 @@
 						<Var>
 							<Name>RobotDynamics.m_masterDynaData</Name>
 							<Comment><![CDATA[ dynamic output]]></Comment>
-							<Type GUID="{778C533B-52C0-A083-5537-5B1D15490C4D}">ST_MasterDynaData</Type>
+							<Type GUID="{EFC31606-5620-EF9E-1B71-A4D1735F6933}">ST_MasterDynaData</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="1" ContextId="2" AreaNo="32">
@@ -1232,16 +1254,16 @@
 					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id>0</Id>
+							<Id NeedCalleeCall="true">0</Id>
 							<Name>TaskArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
 							</ManualConfig>
 							<Priority>1</Priority>
-							<CycleTime>250000</CycleTime>
+							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>1</Id>
+							<Id NeedCalleeCall="true">1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -1250,7 +1272,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id>2</Id>
+							<Id NeedCalleeCall="true">2</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -3931,10 +3953,15 @@
 		</Io>
 	</Project>
 	<Mappings>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="10000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="a0000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="28000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterController^MasterController Instance">
+			<OwnerB Name="TIID^Device 4 (EtherCAT)^Box 28 (EL6695-0002)">
+				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_slaveRobotData" VarB="IO Inputs^SlaveRobotData"/>
+				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobotData" VarB="IO Outputs^MasterRobotData"/>
+			</OwnerB>
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1 (AX58200_MotorControl)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
@@ -4095,6 +4122,8 @@
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_masterDynaData" VarB="TaskDynamic Outputs^RobotDynamics.m_masterDynaData"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_safetyData" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterJointData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" VarB="TaskArmControl Outputs^MasterArmControl.m_masterStatus"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

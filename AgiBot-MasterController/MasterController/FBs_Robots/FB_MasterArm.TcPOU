@@ -43,6 +43,8 @@ VAR
 	m_jntMassMat : Mat7d;
 	m_lambda :Mat6d;
 	m_dynaNullspace :Mat7d;
+	m_jntFriction :Vec7d;
+	m_jntExtTrq :Vec7d;
 	
 	// arm jacobian 
 	m_jaco : Mat67;
@@ -430,14 +432,14 @@ s23:=SIN(q2+q3);
 
 // cartesian pose frame
 r_cartPose.m_pos[1]:=c1*(a4*c23 - d4*s23 + a3*c2); 
-r_cartPose.m_pos[2]:=s1*(a4*c23 - d4*s23 + a3*c2); 
-r_cartPose.m_pos[3]:=d1 - d4*c23 - a4*s23 - a3*s2; 
-r_cartPose.m_rot[1,1]:=c6*(s6*(c4*s1 - s4*(c1*c2*c3 - c1*s2*s3)) + c6*(c5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) - s5*(c1*c2*s3 + c1*c3*s2))) - s7*(s5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) + c5*(c1*c2*s3 + c1*c3*s2));
-r_cartPose.m_rot[2,1]:=s7*(s5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) - c5*(c2*s1*s3 + c3*s1*s2)) - c6*(s6*(c1*c4 - s4*(s1*s2*s3 - c2*c3*s1)) + c6*(c5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) + s5*(c2*s1*s3 + c3*s1*s2)));
-r_cartPose.m_rot[3,1]:=- s7*(c23*c5 - s23*c4*s5) - c6*(c23*c6*s5 - s23*s4*s6 + s23*c4*c5*c6); 
-r_cartPose.m_rot[1,2]:=- s7*(s6*(c4*s1 - s4*(c1*c2*c3 - c1*s2*s3)) + c6*(c5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) - s5*(c1*c2*s3 + c1*c3*s2))) - c6*(s5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) + c5*(c1*c2*s3 + c1*c3*s2)); 
-r_cartPose.m_rot[2,2]:=s7*(s6*(c1*c4 - s4*(s1*s2*s3 - c2*c3*s1)) + c6*(c5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) + s5*(c2*s1*s3 + c3*s1*s2))) + c6*(s5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) - c5*(c2*s1*s3 + c3*s1*s2)); 
-r_cartPose.m_rot[3,2]:=s7*(c23*c6*s5 - s23*s4*s6 + s23*c4*c5*c6) - c6*(c23*c5 - s23*c4*s5); 
+r_cartPose.m_pos[2]:=s1*(a4*c23 - d4*s23 + a3*c2);
+r_cartPose.m_pos[3]:=d1 - d4*c23 - a4*s23 - a3*s2;  
+r_cartPose.m_rot[1,1]:=c7*(s6*(c4*s1 - s4*(c1*c2*c3 - c1*s2*s3)) + c6*(c5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) - s5*(c1*c2*s3 + c1*c3*s2))) - s7*(s5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) + c5*(c1*c2*s3 + c1*c3*s2));
+r_cartPose.m_rot[2,1]:=s7*(s5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) - c5*(c2*s1*s3 + c3*s1*s2)) - c7*(s6*(c1*c4 - s4*(s1*s2*s3 - c2*c3*s1)) + c6*(c5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) + s5*(c2*s1*s3 + c3*s1*s2)));
+r_cartPose.m_rot[3,1]:=- s7*(c23*c5 - s23*c4*s5) - c7*(c23*c6*s5 - s23*s4*s6 + s23*c4*c5*c6); 
+r_cartPose.m_rot[1,2]:=- s7*(s6*(c4*s1 - s4*(c1*c2*c3 - c1*s2*s3)) + c6*(c5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) - s5*(c1*c2*s3 + c1*c3*s2))) - c7*(s5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) + c5*(c1*c2*s3 + c1*c3*s2)); 
+r_cartPose.m_rot[2,2]:=s7*(s6*(c1*c4 - s4*(s1*s2*s3 - c2*c3*s1)) + c6*(c5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) + s5*(c2*s1*s3 + c3*s1*s2))) + c7*(s5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) - c5*(c2*s1*s3 + c3*s1*s2)); 
+r_cartPose.m_rot[3,2]:=s7*(c23*c6*s5 - s23*s4*s6 + s23*c4*c5*c6) - c7*(c23*c5 - s23*c4*s5); 
 r_cartPose.m_rot[1,3]:=s6*(c5*(s1*s4 + c4*(c1*c2*c3 - c1*s2*s3)) - s5*(c1*c2*s3 + c1*c3*s2)) - c6*(c4*s1 - s4*(c1*c2*c3 - c1*s2*s3)); 
 r_cartPose.m_rot[2,3]:=c6*(c1*c4 - s4*(s1*s2*s3 - c2*c3*s1)) - s6*(c5*(c1*s4 + c4*(s1*s2*s3 - c2*c3*s1)) + s5*(c2*s1*s3 + c3*s1*s2));
 r_cartPose.m_rot[3,3]:=- s6*(c23*s5 + s23*c4*c5) - s23*c6*s4;]]></ST>
@@ -692,6 +694,28 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="jntExtTrq" Id="{626626ac-4a19-4244-8c4e-4b8e5d00c8e6}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntExtTrq :REFERENCE TO Vec7d]]></Declaration>
+      <Get Name="Get" Id="{a09a5e22-8056-494a-9352-77be189f5fc1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntExtTrq REF= m_jntExtTrq;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="jntFriction" Id="{adee17cd-b04f-47e3-9783-a1860653d53a}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY jntFriction :REFERENCE TO Vec7d]]></Declaration>
+      <Get Name="Get" Id="{ed7d4727-a7d8-4feb-9606-8aa7b1aafe25}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[jntFriction REF= m_jntFriction;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Property Name="jntGravity" Id="{72dbb3a4-f37f-4edd-afb1-2190cd1f62fc}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntGravity :REFERENCE to Vec7d]]></Declaration>
       <Get Name="Get" Id="{5c8a2ae5-eaad-400d-b638-ec46a75b5ccb}">
@@ -803,6 +827,8 @@ END_VAR
 m_lambda:=masterDynaData.m_lambda[m_armIdx];
 m_dynaNullspace:=masterDynaData.m_dynaNullspace[m_armIdx];
 m_jntGravity:=masterDynaData.m_gravity[m_armIdx];
+m_jntFriction:=masterDynaData.m_friction[m_armIdx];
+m_jntExtTrq := masterDynaData.m_jntExtTrq[m_armIdx];
 ]]></ST>
       </Implementation>
     </Method>
@@ -925,7 +951,8 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.forwardKinematic">
-      <LineId Id="84" Count="40" />
+      <LineId Id="84" Count="32" />
+      <LineId Id="140" Count="7" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.gripAngle.Get">
@@ -976,6 +1003,12 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
     <LineIds Name="FB_MasterArm.jaco.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterArm.jntExtTrq.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jntFriction.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterArm.jntGravity.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
@@ -1023,6 +1056,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="1" />
       <LineId Id="8" Count="0" />
+      <LineId Id="21" Count="1" />
       <LineId Id="14" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateSimStatus">
