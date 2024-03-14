@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_JntObserver" Id="{bee5059a-e2c6-4d1e-970a-1219850b9b25}" SpecialFunc="None">
+    <Declaration><![CDATA[// joint state observer
+// reference: Robotic Surgical System with Joint Motion Controller Adapted to Reduce Instrument Tip Vibration
+FUNCTION_BLOCK FB_JntObserver
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// arm index
+	m_armIdx :INT;
+	
+	// observer parameters
+	m_L1,m_L2, m_L3:Vec7d;
+	
+	// joint parameters
+	m_jntInertia, m_jntDamp : Vec7d;
+	
+	// joint observed status
+	m_obvPos, m_obvVel, m_obvAcc, m_obvTrq :Vec7d;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{6ba658a3-4670-43e2-8738-8c7bf398145d}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx :INT;
+	i_jntPos:Vec7d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx:=i_armIdx;
+
+m_obvPos := i_jntPos;
+m_obvVel := g_zeroVec7d;
+m_obvAcc := g_zeroVec7d;
+m_obvTrq := g_zeroVec7d;
+
+m_L1 := g_jntObvParamL1;
+m_L2 := g_jntObvParamL2;
+m_L3 := g_jntObvParamL3;
+m_jntDamp := g_jntObvDamp;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{09d44c6e-1e82-4079-8773-aed7ad3fd95c}">
+      <Declaration><![CDATA[METHOD run : vec7d
+VAR_IN_OUT CONSTANT
+	i_jntTrq :Vec7d;
+	i_jntPos :Vec7d;
+	i_massMat :Mat7d;
+END_VAR
+
+VAR 
+	posErr :LREAL;
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mJntNum DO
+	posErr := i_jntPos[i]-m_obvPos[i];
+	
+	m_obvTrq[i] := m_obvTrq[i]+g_armDynamicCycleTime*m_L3[i]*posErr;
+	m_obvAcc[i] := (m_obvTrq[i] + i_jntTrq[i])/i_massMat[i,i];
+	m_obvVel[i] := m_obvVel[i] + g_armDynamicCycleTime*(m_L2[i]*posErr + m_obvAcc[i] - m_obvVel[i]*m_jntDamp[i]/i_massMat[i,i])
+					+ m_L1[i] * posErr;
+	m_obvPos[i] := m_obvPos[i] + g_armDynamicCycleTime * m_obvVel[i];
+END_FOR
+
+run := m_obvTrq;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_JntObserver">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_JntObserver.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_JntObserver.run">
+      <LineId Id="5" Count="0" />
+      <LineId Id="20" Count="6" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="27" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

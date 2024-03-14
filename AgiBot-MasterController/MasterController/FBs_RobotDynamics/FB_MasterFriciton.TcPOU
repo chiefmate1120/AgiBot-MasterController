@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MasterFriciton" Id="{e1c0a847-1949-4788-8871-72ab788e2df1}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterFriciton
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// joint friction compensation scale
+	m_frictionCompScale :Vec7d :=[0, 0, 0, 0, 0.8, 0.8, 0];
+	
+	// joint velocity threshold for coulomb friction transition
+	m_cFrictionVelThres : LREAL := 5.0 * g_deg2Rad;
+	
+	// arm index
+	m_armIdx: INT ;
+	
+	// joint coulomb friction parameters: friction = a * gravityTrq + b;
+	m_frictionParamA : Vec7d := g_zeroVec7d;
+	m_frictionParamB : Vec7d := g_zeroVec7d;
+	
+	// joint damping
+	m_jntDamp :Vec7d := g_zeroVec7d;
+	
+	// max joint friciton 
+	m_maxFriction :Vec7d;
+	
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{6c66ea74-5b37-4c40-853c-a414ffc369f7}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_armIdx :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_armIdx := i_armIdx;
+
+m_frictionParamA := g_zeroVec7d;
+m_frictionParamB := g_zeroVec7d;
+m_jntDamp := g_zeroVec7d;
+m_maxFriction := g_maxJntFriction;
+
+m_frictionParamA[5] := g_jntFrictionParam[m_armIdx, 1];
+m_frictionParamB[5] := g_jntFrictionParam[m_armIdx, 2];
+m_frictionParamA[6] := g_jntFrictionParam[m_armIdx, 3];
+m_frictionParamB[6] := g_jntFrictionParam[m_armIdx, 4];]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{0e064868-95f9-4591-a903-e34a876d9e26}">
+      <Declaration><![CDATA[METHOD run : vec7d
+VAR_IN_OUT CONSTANT
+	// joint gravity torque
+	i_jntGravity :Vec7d;
+	
+	// joint velocity
+	i_jntVel :Vec7d;
+END_VAR
+
+VAR
+	i:INT;
+	transitScale:LREAL;
+	cFriction, dFriction :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mJntNum DO
+	transitScale := LIMIT(0, ABS(i_jntVel[i]/m_cFrictionVelThres),1);
+	cFriction:=m_frictionParamA[i]*ABS(i_jntGravity[i])+m_frictionParamB[i];
+	cFriction:= transitScale * sign(i_jntVel[i]) * cFriction;
+	
+	dFriction:= i_jntVel[i] * m_jntDamp[i];
+	
+	run[i] := LIMIT(-m_maxFriction[i], m_frictionCompScale[i] * (cFriction+dFriction) ,m_maxFriction[i]);
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterFriciton">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterFriciton.init">
+      <LineId Id="11" Count="1" />
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterFriciton.run">
+      <LineId Id="5" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="3" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
