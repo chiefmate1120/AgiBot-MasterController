@@ -27,7 +27,6 @@ VAR
 	
 	// code execute time measure
 	m_codeTime : Profiler;
-	m_codeTime1 : Profiler;
 	
 	i: INT;
 	

@@ -16,8 +16,9 @@ TYPE E_MasterArmState :
 	MasterArmState_Endoscope :=9,
 	MasterArmState_Cart := 10,
 	MasterArmState_GravityCali := 11,
+	MasterArmState_Test :=12,
 	
-	MasterArmState_totalNum :=MasterArmState_GravityCali
+	MasterArmState_totalNum :=MasterArmState_Test
 );
 END_TYPE
 ]]></Declaration>

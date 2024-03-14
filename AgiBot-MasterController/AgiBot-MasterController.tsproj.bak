@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.29">
+<TcSmProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.53">
 	<DataTypes>
 		<DataType>
 			<Name GUID="{FCF2AAE3-16B8-40C6-B387-AC4F89F5A819}" PersistentType="true">MSCommu_InstruStatus</Name>
@@ -538,7 +538,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{8D5FDB10-26BF-358B-2FE8-6070020F20E8}" AutoDeleteType="true">E_MasterArmState</Name>
+			<Name GUID="{D48AFEA2-E9B1-FDCF-16A3-96072128A8A9}" AutoDeleteType="true">E_MasterArmState</Name>
 			<Comment><![CDATA[ Notice: Each state has a corresponding controller, which has a fixed index.
  Add the new state at the end and update the total num]]></Comment>
 			<BitSize>16</BitSize>
@@ -588,8 +588,12 @@
 				<Enum>11</Enum>
 			</EnumInfo>
 			<EnumInfo>
+				<Text><![CDATA[MasterArmState_Test]]></Text>
+				<Enum>12</Enum>
+			</EnumInfo>
+			<EnumInfo>
 				<Text><![CDATA[MasterArmState_totalNum]]></Text>
-				<Enum>11</Enum>
+				<Enum>12</Enum>
 			</EnumInfo>
 			<Properties>
 				<Property>
@@ -727,7 +731,7 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}" AutoDeleteType="true">ST_MasterStatus</Name>
+			<Name GUID="{19A3EBC6-1AF4-7DC7-AF09-A717DD6ACD46}" AutoDeleteType="true">ST_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
 			<BitSize>4864</BitSize>
@@ -737,10 +741,13 @@
 				<Comment><![CDATA[ linear motion scale]]></Comment>
 				<BitSize>64</BitSize>
 				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>1</Value>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_armState</Name>
-				<Type GUID="{8D5FDB10-26BF-358B-2FE8-6070020F20E8}">E_MasterArmState</Type>
+				<Type GUID="{D48AFEA2-E9B1-FDCF-16A3-96072128A8A9}">E_MasterArmState</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>2</Elements>
@@ -1018,7 +1025,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{06A5DB54-5F93-685E-E673-B1E7D4E909A0}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1195,7 +1202,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}">ST_MasterStatus</Type>
+							<Type GUID="{19A3EBC6-1AF4-7DC7-AF09-A717DD6ACD46}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
@@ -1224,7 +1231,7 @@
 						<Var>
 							<Name>SafetyCheck.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}">ST_MasterStatus</Type>
+							<Type GUID="{19A3EBC6-1AF4-7DC7-AF09-A717DD6ACD46}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterJointData</Name>
@@ -1252,9 +1259,16 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-03-14T16:31:58">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
+							<OwnerB Name="TIPC^MasterController^MasterController Instance">
+								<Link VarA="MasterArmControl.m_masterStatus" TypeA="ST_MasterStatus" InOutA="1" GuidA="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" RestoreInfo="TypeChanged" IdA="2377"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
-							<Id NeedCalleeCall="true">0</Id>
+							<Id>0</Id>
 							<Name>TaskArmControl</Name>
 							<ManualConfig>
 								<OTCID>#x02010030</OTCID>
@@ -1263,7 +1277,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">1</Id>
+							<Id>1</Id>
 							<Name>TaskDynamic</Name>
 							<ManualConfig>
 								<OTCID>#x02010040</OTCID>
@@ -1272,7 +1286,7 @@
 							<CycleTime>1000000</CycleTime>
 						</Context>
 						<Context>
-							<Id NeedCalleeCall="true">2</Id>
+							<Id>2</Id>
 							<Name>TaskSafetyCheck</Name>
 							<ManualConfig>
 								<OTCID>#x02010050</OTCID>
@@ -4123,7 +4137,6 @@
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_safetyData" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterJointData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" VarB="TaskArmControl Outputs^MasterArmControl.m_masterStatus"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

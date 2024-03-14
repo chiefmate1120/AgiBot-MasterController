@@ -283,6 +283,9 @@
     <Compile Include="FBs_StateControllers\FB_StateCtrlMasterSlave.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_StateControllers\FB_StateCtrlTest.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_TrajectoryPlanning\FB_BasicDoubleS.TcPOU">
       <SubType>Code</SubType>
     </Compile>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR_INPUT
@@ -37,6 +37,7 @@ VAR
 	m_armEndoscope :ARRAY[1..g_mArmNum] OF FB_StateCtrlEndoscope;
 	m_armCart :ARRAY[1..g_mArmNum] OF FB_StateCtrlCart;
 	m_armGravityCali :ARRAY[1..g_mArmNum] OF FB_StateCtrlGraCali;
+	m_armTest :ARRAY[1..g_sArmNum] OF FB_StateCtrlTest;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
@@ -150,6 +151,7 @@ END_VAR
 	m_armCtrlFactory[i,MasterArmState_Endoscope] := m_armEndoscope[i];
 	m_armCtrlFactory[i,MasterArmState_Cart] := m_armCart[i];
 	m_armCtrlFactory[i,MasterArmState_GravityCali] := m_armGravityCali[i];
+	m_armCtrlFactory[i,MasterArmState_Test] := m_armTest[i];
 
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
@@ -240,6 +242,13 @@ END_VAR]]></Declaration>
 		
 		//MasterSlave
 		MasterArmState_MasterSlave:*)
+		
+		//arm test
+		MasterArmState_Test:
+			// to standby
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			END_IF
 	END_CASE
 	
 	// Controller transit
@@ -304,6 +313,7 @@ END_FOR]]></ST>
       <LineId Id="58" Count="1" />
       <LineId Id="62" Count="9" />
       <LineId Id="108" Count="0" />
+      <LineId Id="115" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -350,6 +360,9 @@ END_FOR]]></ST>
       <LineId Id="45" Count="1" />
       <LineId Id="44" Count="0" />
       <LineId Id="86" Count="11" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="4" />
+      <LineId Id="117" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="56" Count="3" />
       <LineId Id="61" Count="2" />

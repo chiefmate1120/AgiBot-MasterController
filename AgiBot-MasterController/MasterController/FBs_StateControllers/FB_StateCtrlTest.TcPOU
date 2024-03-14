@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_StateCtrlTest" Id="{0c47bb14-eaef-4d00-89db-6153e5307754}" SpecialFunc="None">
+    <Declaration><![CDATA[// Brief: Master Arm Test
+FUNCTION_BLOCK PUBLIC FB_StateCtrlTest EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{577e5bac-bcb1-4cc3-b600-c297bc6f4cb5}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
+
+// init
+SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_StateCtrlTest">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlTest.init">
+      <LineId Id="67" Count="4" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
