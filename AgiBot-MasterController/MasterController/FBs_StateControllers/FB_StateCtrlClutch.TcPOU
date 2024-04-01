@@ -37,12 +37,10 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{333a90ec-7de9-44a1-afdb-da87410216d3}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -124,7 +122,13 @@ END_IF
 
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
-calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);]]></ST>
+calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);
+
+// joint limit
+IF (calcRedunVel > 0 AND curJntPos[4]+calcRedunVel * g_armCtrlCycleTime > g_maxJntPos[1,4])
+	 OR ( calcRedunVel <0 AND  curJntPos[4]+calcRedunVel * g_armCtrlCycleTime< g_minJntPos[1,4]) THEN
+	 calcRedunVel :=0;
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{1106e191-9e61-4227-a6e7-a957758f71da}">
@@ -198,6 +202,9 @@ m_jntOPMode[7] := DriverOPMode_PosTrq;
     </LineIds>
     <LineIds Name="FB_StateCtrlClutch.calcRedunVel">
       <LineId Id="77" Count="10" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="3" />
     </LineIds>
     <LineIds Name="FB_StateCtrlClutch.init">
       <LineId Id="13" Count="0" />

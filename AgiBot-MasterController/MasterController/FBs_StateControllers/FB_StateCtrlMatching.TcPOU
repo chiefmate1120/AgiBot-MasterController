@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlMatching" Id="{886a3c3b-c6fb-4a12-8c63-bddb11202d66}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Orientation Matching
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMatching EXTENDS FB_MasterArmCtrlBase
@@ -8,13 +8,618 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	m_cmdRotInMonitor :Mat3d;
+	
+	m_initSolvedJntPos, m_iteSovlvedJntPos :Vec7d;
+	m_IKSuccess :BOOL;
+	
+	m_matchTrajPlanner : FB_TrajMoveJ;
+	m_targetJntPos :Vec7d;
+	
+	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
+	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0];
+	m_maxMatchJntJerk:Vec7d:=[7(4.0)];
+	
+	m_rotErrAng :LREAL;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntPos" Id="{51b8574c-dbe7-40e3-8c59-ca4f0064a75b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+var 
+	i,j : INT;
+
+	q4,q5,q6,q7:LREAL;
+	rotErr:Mat3d;
+	
+	wristRotInJnt3, wristRotInJnt4 :Mat3d;
+	rot, invRot :Mat3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_IKSuccess THEN 
+	// check if planner is ready
+	IF  m_matchTrajPlanner.isGene = FALSE THEN
+		RETURN;
+	END_IF
+	
+	// traj plan
+	calcCmdJntPos :=m_matchTrajPlanner.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+	
+	matTranspose(i_masterArm.curCartPose.m_rot, invRot);
+	matMultiply(invRot, m_cmdCartPose.m_rot, rotErr);
+	rot2AngAxis(rotErr, angle=>m_rotErrAng,axis=>);
+	m_isFinished :=( m_timePeriod > m_matchTrajPlanner.duration AND  ABS(m_rotErrAng < g_jntCtrlAngTol));
+	
+	RETURN;
+END_IF
+
+// command rotation in monitor
+m_cmdRotInMonitor := i_slaveStatus.m_curArmPose[i_slaveIdx].m_rot;
+
+// command rotation in master arm base
+matTranspose(i_shoulderPose.m_rot, invRot);
+matMultiply(invRot, m_cmdRotInMonitor, m_cmdCartPose.m_rot);
+m_cmdCartPose.m_pos:= i_masterArm.curCartPose.m_pos;
+
+// try IK with optimized posture
+rot:=calcJnt3Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3]);
+matTranspose(rot, invRot);
+matMultiply(invRot, m_cmdCartPose.m_rot, wristRotInJnt3);
+IF 1=i_masterArm.armIdx THEN
+	m_IKSuccess := leftWristOptIK(wristRotInJnt3,q4=>q4, q5=>q5, q6=>q6, q7=>q7);
+ELSE
+	m_IKSuccess := rightWristOptIK(wristRotInJnt3,q4=>q4, q5=>q5, q6=>q6, q7=>q7);
+END_IF
+
+// try IK with joint4 at minimal limit
+IF NOT m_IKSuccess THEN
+	IF 1=i_masterArm.armIdx THEN
+		q4:= g_minJntPos[1,4];
+	ELSE
+		q4:= g_minJntPos[2,4];
+	END_IF
+	
+	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],q4);
+	matTranspose(rot, invRot);
+	matMultiply(invRot, m_cmdCartPose.m_rot, wristRotInJnt4);
+	m_IKSuccess := wristIK(wristRotInJnt4,i_masterArm, q5=>q5, q6=>q6, q7=>q7);
+END_IF
+
+// try IK with joint4 at maximum limit
+IF NOT m_IKSuccess THEN
+	IF 1=i_masterArm.armIdx THEN
+		q4:= g_maxJntPos[1,4];
+	ELSE
+		q4:= g_maxJntPos[2,4];
+	END_IF
+	
+	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],q4);
+	matTranspose(rot, invRot);
+	matMultiply(invRot, m_cmdCartPose.m_rot, wristRotInJnt4);
+	m_IKSuccess := wristIK(wristRotInJnt4,i_masterArm, q5=>q5, q6=>q6, q7=>q7);
+END_IF
+
+// traj plan
+IF m_IKSuccess THEN 
+	m_targetJntPos:=m_cmdJntPos;
+	m_targetJntPos[4]:=i_masterArm.jnt4LinkToMotor(m_targetJntPos[2],m_targetJntPos[3],q4);
+	m_targetJntPos[5]:=q5;
+	m_targetJntPos[6]:=q6;
+	m_targetJntPos[7]:=q7;
+
+	m_matchTrajPlanner.init(m_cmdJntPos,m_targetJntPos,m_maxMatchJntVel,m_maxMatchJntAcc,m_maxMatchJntJerk);
+	m_timePeriod :=0;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcJnt3Rotation" Id="{45e74725-458c-4f96-a988-7b138ad9e9c4}">
+      <Declaration><![CDATA[// calculate joint3 rotation in arm coordinate
+(*armDH=[   0      0   q1      d1;
+            -deg90  0   q2      0;
+            0       a3  q3      0];*)
+METHOD calcJnt3Rotation : Mat3d
+VAR_INPUT CONSTANT
+	q1:LREAL;
+	q2:LREAL;
+	q3:LREAL;
+END_VAR
+
+VAR
+	c1,c2,c3,s1,s2,s3,c23,s23 :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// !Convert active joint position to DH model for kinematic calculation
+q3:=q3-q2;  //q3=q8-q2
+
+c1:=COS(q1);
+c2:=COS(q2);
+c3:=COS(q3);
+
+s1:=SIN(q1);
+s2:=SIN(q2);
+s3:=SIN(q3);
+
+c23:=COS(q2+q3);
+s23:=SIN(q2+q3);
+
+calcJnt3Rotation[1,1]:= c23*c1;
+calcJnt3Rotation[2,1]:= c23*s1;
+calcJnt3Rotation[3,1]:= -s23;
+
+calcJnt3Rotation[1,2]:= -s23*c1;
+calcJnt3Rotation[2,2]:= -s23*s1;
+calcJnt3Rotation[3,2]:= -c23;
+
+calcJnt3Rotation[1,3]:= -s1;
+calcJnt3Rotation[2,3]:= c1;
+calcJnt3Rotation[3,3]:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcJnt4Rotation" Id="{7c3dafce-1980-4f86-996d-7fbd85661296}">
+      <Declaration><![CDATA[// calculate joint3 rotation in arm coordinate
+(*[   0      0   q1      d1;
+	-deg90  0   q2      0;
+	0       a3  q3      0;
+	 -deg90  a4  q4      d4]
+*)
+METHOD calcJnt4Rotation : Mat3d
+VAR_INPUT
+	q1 :LREAL;
+	q2 :LREAL;
+	q3 :LREAL;
+	q4 :LREAL;
+END_VAR
+
+VAR
+	c1,c2,c3,c4, s1,s2,s3,s4,c23,s23 :LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// !Convert active joint position to DH model for kinematic calculation
+q4:=q4+q3-q2-pi/2;//q4DH=q4motor+q8-q2-90;  
+q3:=q3-q2;  //q3=q8-q2
+
+c1:=COS(q1);
+c2:=COS(q2);
+c3:=COS(q3);
+c4:=COS(q4);
+
+s1:=SIN(q1);
+s2:=SIN(q2);
+s3:=SIN(q3);
+s4:=SIN(q4);
+
+c23:=COS(q2+q3);
+s23:=SIN(q2+q3);
+
+calcJnt4Rotation[1,1]:= s1*s4 + c4*c1*c23;
+calcJnt4Rotation[2,1]:= - c1*s4 + c4*s1*c23;
+calcJnt4Rotation[3,1]:= -s23*c4;
+
+calcJnt4Rotation[1,2]:= c4*s1 - s4*c1*c23;
+calcJnt4Rotation[2,2]:= -s4*s1*c23 - c1*c4;
+calcJnt4Rotation[3,2]:=   s23*s4;
+
+calcJnt4Rotation[1,3]:= -s23*c1;
+calcJnt4Rotation[2,3]:= -s23*s1;
+calcJnt4Rotation[3,3]:=-c23;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{af3225b4-51f5-49e0-8b94-24f1ab0678fd}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if to hold the command joint position unchanged
+m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
+
+// init
+SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+(*
+m_jntOPMode[4]:=DriverOPMode_PosTrq;
+m_jntOPMode[5]:=DriverOPMode_PosTrq;
+m_jntOPMode[6]:=DriverOPMode_PosTrq;
+m_jntOPMode[7]:=DriverOPMode_PosTrq;
+*)
+m_IKSuccess:=false;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="leftWristOptIK" Id="{0caeaf17-79dd-44c1-86e3-89513a734de0}">
+      <Declaration><![CDATA[// calculate command wrist joint position with an optimized posture
+(*wristDH=[   -deg90  a4  q4      d4;
+            deg90   0   q5      0;
+            -deg90  0   q6      0;
+            deg90   0   q7      0];*)
+// set q6 = -pi/2 for desired posture
+(* wristRot = 
+[ COS(q7)*SIN(q4) - COS(q4)*SIN(q5)*SIN(q7), - SIN(q4)*SIN(q7) - COS(q4)*COS(q7)*SIN(q5), -COS(q4)*COS(q5)]
+[                           cos(q5)*sin(q7),                             cos(q5)*cos(q7),         -sin(q5)]
+[ cos(q4)*cos(q7) + sin(q4)*sin(q5)*sin(q7),   cos(q7)*sin(q4)*sin(q5) - cos(q4)*sin(q7),  cos(q5)*sin(q4)]
+*)
+METHOD leftWristOptIK : BOOL
+VAR_IN_OUT CONSTANT
+	i_cmdRot :Mat3d;
+END_VAR
+VAR_OUTPUT
+	q4 :LREAL;
+	q5 :LREAL;
+	q6 :LREAL;
+	q7 :LREAL;
+END_VAR
+
+VAR
+	q51,q52 :LREAL;
+	s4,c4,s5,c5,s7,c7:LREAL;
+	q4UnreachPosMin: LREAL :=-pi/2;
+	q4UnreachPosMax: LREAL :=45*g_deg2Rad;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[q6:=-PI/2;
+// q5 = [pi-135deg, pi+135deg]
+q5 := ASIN(-i_cmdRot[2,3]);
+q5:= PI-q5;
+
+// q5=3pi/2 or q5=pi/2
+IF ABS(q5-3*PI/2)<g_smallAng OR ABS(q5-PI/2)<g_smallAng THEN
+	q4:= -pi;
+	s7:= -i_cmdRot[1,1]/(COS(q4)*SIN(q5));
+	c7:= i_cmdRot[3,1]/COS(q4);
+	q7:=atan2(s7,c7);
+	leftWristOptIK:=TRUE;
+	RETURN;
+END_IF
+
+// solution one 
+c5 :=COS(q5);
+s7:=i_cmdRot[2,1]/c5;
+c7:= i_cmdRot[2,2]/c5;
+q7:=atan2(s7,c7);
+
+//q4=[-pi/2-225deg, -pi/2]
+c4 := -i_cmdRot[1,3]/c5;
+s4:= i_cmdRot[3,3]/c5;
+q4:=atan2(s4,c4);
+IF q4> g_minJntPos[1,4] AND q4<g_maxJntPos[1,4] THEN
+	leftWristOptIK:=TRUE;
+	RETURN;
+ELSIF q4< g_minJntPos[1,4] AND q4+2*pi< g_maxJntPos[1,4] THEN
+	q4:=q4+2*PI;
+	leftWristOptIK:=TRUE;
+	RETURN;
+END_IF
+
+// solution2
+IF q5 > pi THEN
+	q5 := 3*PI-q5;
+ELSE
+	q5:= pi-q5;
+END_IF
+IF q5 > g_maxJntPos[1,5] OR q5<g_minJntPos[1,5] THEN
+	leftWristOptIK:=FALSE;
+	RETURN;
+END_IF
+
+c5 :=COS(q5);
+s7:=i_cmdRot[2,1]/c5;
+c7:= i_cmdRot[2,2]/c5;
+q7:=atan2(s7,c7);
+
+c4 := -i_cmdRot[1,3]/c5;
+s4:= i_cmdRot[3,3]/c5;
+q4:=atan2(s4,c4);
+IF q4> g_minJntPos[1,4] AND q4<g_maxJntPos[1,4] THEN
+	leftWristOptIK:=TRUE;
+	RETURN;
+ELSIF q4< g_minJntPos[1,4] AND q4+2*pi< g_maxJntPos[1,4] THEN
+	q4:=q4+2*PI;
+	leftWristOptIK:=TRUE;
+	RETURN;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="rightWristOptIK" Id="{b0cf9587-0a5e-4160-99d0-26fa71dc5b57}">
+      <Declaration><![CDATA[// calculate command wrist joint position with an optimized posture
+(*wristDH=[   -deg90  a4  q4      d4;
+            deg90   0   q5      0;
+            -deg90  0   q6      0;
+            deg90   0   q7      0];*)
+// set q6 = pi/2 for desired posture
+(* wristRot = 
+[ - cos(q7)*sin(q4) - cos(q4)*sin(q5)*sin(q7), sin(q4)*sin(q7) - cos(q4)*cos(q7)*sin(q5),  cos(q4)*cos(q5)]
+[                             cos(q5)*sin(q7),                           cos(q5)*cos(q7),          sin(q5)]
+[   sin(q4)*sin(q5)*sin(q7) - cos(q4)*cos(q7), cos(q4)*sin(q7) + cos(q7)*sin(q4)*sin(q5), -cos(q5)*sin(q4)]
+ 
+*)
+METHOD rightWristOptIK : BOOL
+VAR_IN_OUT CONSTANT
+	i_cmdRot :Mat3d;
+END_VAR
+VAR_OUTPUT
+	q4 :LREAL;
+	q5 :LREAL;
+	q6 :LREAL;
+	q7 :LREAL;
+END_VAR
+
+VAR
+	q51,q52 :LREAL;
+	s4,c4,s5,c5,s7,c7:LREAL;
+	q4UnreachPosMin: LREAL :=-pi/2;
+	q4UnreachPosMax: LREAL :=45*g_deg2Rad;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[q6:=PI/2;
+// q5 = [pi-135deg, pi+135deg]
+q5 := ASIN(i_cmdRot[2,3]);
+q5:= PI-q5;
+
+// q5=3pi/2 or q5=pi/2
+IF ABS(q5-3*PI/2)<g_smallAng OR ABS(q5-PI/2)<g_smallAng THEN
+	q4:= 0;
+	s7:= -i_cmdRot[1,1]/(COS(q4)*SIN(q5));
+	c7:= -i_cmdRot[3,1]/COS(q4);
+	q7:=atan2(s7,c7);
+	rightWristOptIK:=TRUE;
+	RETURN;
+END_IF
+
+// solution one 
+c5 :=COS(q5);
+s7:=i_cmdRot[2,1]/c5;
+c7:= i_cmdRot[2,2]/c5;
+q7:=atan2(s7,c7);
+
+//q4=[-pi/2, -pi/2+225deg]
+c4 := i_cmdRot[1,3]/c5;
+s4:= -i_cmdRot[3,3]/c5;
+q4:=atan2(s4,c4);
+IF q4> g_minJntPos[2,4] AND q4<g_maxJntPos[2,4] THEN
+	rightWristOptIK:=TRUE;
+	RETURN;
+END_IF
+
+// solution2
+IF q5 > pi THEN
+	q5 := 3*PI-q5;
+ELSE
+	q5:= pi-q5;
+END_IF
+IF q5 > g_maxJntPos[1,5] OR q5<g_minJntPos[1,5] THEN
+	rightWristOptIK:=FALSE;
+	RETURN;
+END_IF
+
+c5 :=COS(q5);
+s7:=i_cmdRot[2,1]/c5;
+c7:= i_cmdRot[2,2]/c5;
+q7:=atan2(s7,c7);
+
+//q4=[-pi/2, -pi/2+225deg]
+c4 := i_cmdRot[1,3]/c5;
+s4:= -i_cmdRot[3,3]/c5;
+q4:=atan2(s4,c4);
+IF q4> g_minJntPos[2,4] AND q4<g_maxJntPos[2,4] THEN
+	rightWristOptIK:=TRUE;
+	RETURN;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="wristIK" Id="{5d6388c7-a5fc-4ec4-bbd8-54b7da79fe62}">
+      <Declaration><![CDATA[// calculate position of joint 5/6/7 
+(*wristDH=[   deg90   0   q5      0;
+            -deg90  0   q6      0;
+            deg90   0   q7      0];*)
+(* wristRot = 
+[ cos(q5)*cos(q6)*cos(q7) - sin(q5)*sin(q7), - cos(q7)*sin(q5) - cos(q5)*cos(q6)*sin(q7), cos(q5)*sin(q6)]
+[                           cos(q7)*sin(q6),                            -sin(q6)*sin(q7),        -cos(q6)]
+[ cos(q5)*sin(q7) + cos(q6)*cos(q7)*sin(q5),   cos(q5)*cos(q7) - cos(q6)*sin(q5)*sin(q7), sin(q5)*sin(q6)]
+*)
+METHOD wristIK : BOOL
+VAR_IN_OUT CONSTANT
+	i_cmdRot :Mat3d;
+	i_masterArm :FB_MasterArm;
+END_VAR
+
+VAR_OUTPUT
+	q5:	LREAL;
+	q6:	LREAL;
+	q7:	LREAL;
+END_VAR
+
+VAR
+	invRot :Mat3d;
+	jnt4Rotation :Mat3d;
+	s5, s7, c5, c7:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// calculate wrist joint position
+// q6=[-pi/2-45deg, -pi/2+45deg]
+IF 1 = i_masterArm.armIdx THEN
+	q6:= -ACOS(-i_cmdRot[2,3]);
+// q6=[pi/2-45deg, pi/2+45deg]
+ELSE
+	q6:= ACOS(-i_cmdRot[2,3]);
+END_IF
+
+IF q6>g_maxJntPos[i_masterArm.armIdx, 6] OR q6< g_minJntPos[i_masterArm.armIdx, 6] THEN
+	wristIK:=FALSE;
+	RETURN;
+END_IF
+
+// q5 = [pi-135deg, pi+135deg]
+c5 := i_cmdRot[1,3]/SIN(q6);
+s5 := i_cmdRot[3,3]/SIN(q6);
+q5:=atan2(s5,c5);
+IF q5<g_minJntPos[1,5] THEN
+	q5:=q5+2*PI;
+END_IF
+IF q5>g_maxJntPos[1,5]THEN
+	wristIK:=FALSE;
+	RETURN;
+END_IF
+c7 := i_cmdRot[2,1]/SIN(q6);
+s7 := -i_cmdRot[2,2]/SIN(q6);
+q7:=atan2(s7,c7);
+wristIK:=true;
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_StateCtrlMatching">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.calcCmdJntPos">
+      <LineId Id="305" Count="0" />
+      <LineId Id="308" Count="1" />
+      <LineId Id="311" Count="5" />
+      <LineId Id="320" Count="2" />
+      <LineId Id="319" Count="0" />
+      <LineId Id="328" Count="1" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="233" Count="5" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="239" Count="2" />
+      <LineId Id="245" Count="1" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="264" Count="0" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="265" Count="1" />
+      <LineId Id="268" Count="1" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="271" Count="2" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="263" Count="0" />
+      <LineId Id="275" Count="12" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="250" Count="1" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="256" Count="3" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="131" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.calcJnt3Rotation">
+      <LineId Id="84" Count="1" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="86" Count="20" />
+      <LineId Id="70" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.calcJnt4Rotation">
+      <LineId Id="14" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="32" Count="3" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.init">
+      <LineId Id="67" Count="4" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="92" Count="2" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.leftWristOptIK">
+      <LineId Id="170" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="173" Count="9" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="183" Count="4" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="188" Count="4" />
+      <LineId Id="234" Count="3" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="198" Count="17" />
+      <LineId Id="238" Count="10" />
+      <LineId Id="59" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.rightWristOptIK">
+      <LineId Id="170" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="173" Count="9" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="183" Count="4" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="188" Count="4" />
+      <LineId Id="234" Count="1" />
+      <LineId Id="198" Count="12" />
+      <LineId Id="297" Count="11" />
+      <LineId Id="59" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.wristIK">
+      <LineId Id="126" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="142" Count="3" />
+      <LineId Id="157" Count="2" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="148" Count="1" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="204" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_RedunJntControl" Id="{cb173423-0217-4a8c-9780-5fd490586ac5}" SpecialFunc="None">
     <Declaration><![CDATA[// Author: Feijian Ni
 // Date: 2023.11.22
@@ -12,12 +12,21 @@ VAR
 	// control paramters for redundant joint4 position control
 	m_redunJntKp: LREAL:=3.0;
 	m_redunJntKd:LREAL:=0.1;
-	m_redunJntKi:LREAL:=0;
-	m_redunJntKiLimit: LREAL:=500;
+	m_redunJntKi:LREAL:=10;
+	m_redunJntKiLimit: LREAL:=200;
 	m_redunJntCtrlLimit:LREAL:=1000;
-	m_curJntVelLpfCutoffFreq:LREAL:=30;
+	
 	m_jntLimitBuffer : LREAL :=5.0*g_deg2Rad;
-
+	
+	// link velocity of joint6
+	m_curLinkVelJnt6 :LREAL;
+	m_lastLinkPosJnt6 :LREAL;
+	m_curJntVelLpfCutoffFreq:LREAL:=30;
+	m_jntVelLpf :FB_LowPassFilter;
+	m_jnt6StaticVelThres :LREAL := 5 *g_deg2Rad;
+	m_jnt6StaticCountsThres :INT :=200;
+	m_jnt6StaticCounts :INT;
+	m_jnt6StaticFlag :BOOL;
 		
 	// max vel and acc for joint4 motion
 	m_jnt4MaxFollowVel :LREAL :=2*pi;
@@ -41,6 +50,8 @@ VAR
 	m_jntPIDCtrl: FB_PID;
 	m_jntCtrlTrq: LREAL;
 	
+	m_testFlag :BOOL :=FALSE;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -55,11 +66,13 @@ END_VAR
 VAR 
 	j6Bias,j5Bias :LREAL;
 	curJntPos : Vec7d;
+	jnt4LinkPos :LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// compute desired joint4 link position
 curJntPos :=  i_masterArm.curLinkPos;
+jnt4LinkPos:=i_masterArm.jnt4MotorToLink(curJntPos[2],curJntPos[3],curJntPos[4]);
 IF 1= i_masterArm.armIdx THEN
 	j6Bias :=curJntPos[6]+PI/2;
 ELSE 
@@ -69,7 +82,10 @@ END_IF
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
 calcRedunPos := LIMIT(g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
-			curJntPos[4]-j6Bias,g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); ]]></ST>
+			jnt4LinkPos-j6Bias,g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); 
+			
+// convert from link position to motor position
+calcRedunPos:=i_masterArm.jnt4LinkToMotor(curJntPos[2], curJntPos[3], calcRedunPos);]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{9d915a05-cafb-49bf-956c-3cddf8a714b4}">
@@ -93,7 +109,33 @@ m_jntPIDCtrl.init(g_armCtrlCycleTime,m_redunJntKp,m_redunJntKd,m_redunJntKi,
 // init OTG
 m_trajFilter.init(m_cmdJntPos,m_cmdJntVel,m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,0.001);
 
+// init joint6 link velocity calculation
+m_lastLinkPosJnt6 := i_masterArm.curLinkPos[6];
+m_jnt6StaticCounts :=0;
+m_jntVelLpf.init(1, m_curJntVelLpfCutoffFreq, g_armCtrlFreq);
 
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isJnt6Static" Id="{4be096f2-a751-4e82-8264-ed21294d51de}">
+      <Declaration><![CDATA[METHOD isJnt6Static : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_curLinkVelJnt6 := (i_masterArm.curLinkPos[6]- m_lastLinkPosJnt6) * g_armCtrlFreq;
+m_curLinkVelJnt6 := m_jntVelLpf.run(m_curLinkVelJnt6);
+m_lastLinkPosJnt6 := i_masterArm.curLinkPos[6];
+
+IF ABS(m_curLinkVelJnt6) <m_curLinkVelJnt6 THEN
+	m_jnt6StaticCounts := MIN(m_jnt6StaticCounts + 1, m_jnt6StaticCountsThres);
+ELSE
+	m_jnt6StaticCounts :=0;
+END_IF
+
+isJnt6Static := m_jnt6StaticCounts >= m_jnt6StaticCountsThres;
 ]]></ST>
       </Implementation>
     </Method>
@@ -102,13 +144,22 @@ m_trajFilter.init(m_cmdJntPos,m_cmdJntVel,m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,
 VAR_IN_OUT CONSTANT
 	i_masterArm :FB_MasterArm;
 END_VAR
+VAR_INPUT
+	i_followEnable :BOOL;
+END_VAR
 
 
 VAR
 	maxAcc, minDec:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_jnt4TargetPos:=calcRedunPos(i_masterArm);
+        <ST><![CDATA[// check if joint 6 is static
+m_jnt6StaticFlag := isJnt6Static(i_masterArm);
+
+// determin target position of joint4
+IF FALSE = m_jnt6StaticFlag AND true = i_followEnable THEN
+	m_jnt4TargetPos:=calcRedunPos(i_masterArm);
+END_IF
 
 // scale following acceleration based on yaw velocity
 maxAcc:=(m_jnt4MaxFollowAcc-m_jnt4MinFollowAcc)*(ABS(i_masterArm.curCartTwist[6])-m_jnt4MinAccVel)/(m_jnt4MaxAccVel-m_jnt4MinAccVel)+m_jnt4MinFollowAcc;
@@ -137,6 +188,7 @@ run:=m_jntCtrlTrq;
     <LineIds Name="FB_RedunJntControl.calcRedunPos">
       <LineId Id="41" Count="0" />
       <LineId Id="66" Count="0" />
+      <LineId Id="92" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="15" Count="2" />
@@ -145,6 +197,8 @@ run:=m_jntCtrlTrq;
       <LineId Id="18" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="67" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="90" Count="0" />
     </LineIds>
     <LineIds Name="FB_RedunJntControl.init">
       <LineId Id="51" Count="0" />
@@ -157,12 +211,34 @@ run:=m_jntCtrlTrq;
       <LineId Id="72" Count="0" />
       <LineId Id="74" Count="0" />
       <LineId Id="73" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="96" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="35" Count="0" />
     </LineIds>
+    <LineIds Name="FB_RedunJntControl.isJnt6Static">
+      <LineId Id="18" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="0" />
+    </LineIds>
     <LineIds Name="FB_RedunJntControl.run">
+      <LineId Id="340" Count="1" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="344" Count="0" />
       <LineId Id="97" Count="0" />
+      <LineId Id="345" Count="0" />
       <LineId Id="322" Count="8" />
       <LineId Id="234" Count="0" />
       <LineId Id="331" Count="0" />

@@ -8,17 +8,17 @@
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[8989196, 4134520, 15344624, 1912720, 16331520, 14419696, 0,
-		 4601956, 7055232, 13478704, 878512,129104 , 13766096, 0];
+		 4601956, 7055232, 13478704, 926160,129104 , 13766096, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[14678512, 15070764, 1808188, 7240592, 12225952, 1889888, 16777216,
-		 15627720, 1237132, 1095444, 6381056, 12833456, 1296400, 16777216];
+		 15627720, 1237132, 1095444, 6402464, 12833456, 1296400, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[11841020, 1344500, 110836, 11640160, 5911600, 16609560, 9605344,
-		 1725928, 4148544, 14925640, 13421952, 6479808, 15889824, 7933056];
+		 1725928, 4148544, 14925640, 13330944, 6479808, 15889824, 7933056];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.

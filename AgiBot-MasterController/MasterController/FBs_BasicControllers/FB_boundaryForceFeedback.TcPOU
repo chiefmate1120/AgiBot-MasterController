@@ -1,0 +1,140 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_boundaryForceFeedback" Id="{0a761a35-a81f-4506-87e3-40d8a9b51e60}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_boundaryForceFeedback
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+
+VAR
+	// force control parameters in local tip coordinate
+	m_oriKp :Vec3d :=[1, 1, 0.5];
+	m_oriKd :Vec3d :=[0.04,0.04, 0.01];
+	
+	m_oriCartTrq,m_oriCartTrqLocal :Vec3d;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{85672461-4205-4eb7-9251-08e742de258a}">
+      <Declaration><![CDATA[METHOD run : Vec7d
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR
+	posErrInScope, oriErrInScope:Vec3d;
+	posErr, oriErr:Vec3d;
+	posErrLocal, oriErrLocal :Vec3d;
+	vel, velLocal, wVel,wVelLocal :Vec3d;
+	rotInv :Mat3d;
+	oriJaco, oriJacoT :Mat3d;
+	errAngle :LREAL;
+	oriJntTrq :Vec3d;
+	
+	i,j:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[run:=g_zeroVec7d;
+
+FOR i:=1 TO 3 DO
+	posErrInScope[i]:= -i_slaveStatus.m_masterSlavePoseError[i_slaveIdx][i];
+	oriErrInScope[i]:= -i_slaveStatus.m_masterSlavePoseError[i_slaveIdx][i+3];
+	vel[i]:=i_masterArm.curCartTwist[i];
+	wVel[i]:=i_masterArm.curCartTwist[i+3];
+END_FOR
+
+// calculate pose error in shoulder coordinate
+matTranspose(i_shoulderPose.m_rot, rotInv);
+matMultiVec(rotInv, posErrInScope, posErr);
+matMultiVec(rotInv, oriErrInScope, oriErr);
+
+// add threshold
+errAngle := norm(oriErr);
+IF errAngle < g_smallNum THEN
+	RETURN;
+END_IF
+
+// project error in tip coordinate
+matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+matMultiVec(rotInv, posErr, posErrLocal);
+matMultiVec(rotInv, oriErr, oriErrLocal);
+matMultiVec(rotInv, vel, velLocal);
+matMultiVec(rotInv, wVel, wVelLocal);
+
+// compute local cartesion torque
+FOR i:=1 TO 3 DO
+	m_oriCartTrqLocal[i]:= m_oriKp[i] * oriErrLocal[i]-m_oriKd[i]*wVelLocal[i];
+END_FOR
+
+// project torque back to shoulder coordinate
+matMultiVec(i_masterArm.curCartPose.m_rot, m_oriCartTrqLocal, m_oriCartTrq);
+
+// compute joint space torque
+// for simplicity, we current only use last 3 joint for torque feedback
+FOR i :=1 TO  3 DO
+	FOR j:=1 TO 3 DO
+		oriJaco[i,j]:= i_masterArm.jaco[i+3,j+4];
+	END_FOR
+END_FOR
+matTranspose(oriJaco, oriJacoT);
+matMultiVec(oriJacoT, m_oriCartTrq, oriJntTrq);
+
+run[5]:=oriJntTrq[1];
+run[6]:=oriJntTrq[2];
+run[7]:=oriJntTrq[3];]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_boundaryForceFeedback">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_boundaryForceFeedback.run">
+      <LineId Id="35" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="54" Count="1" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="65" Count="1" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="70" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -2,8 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="rotY" Id="{4642df8a-62fa-4796-b707-eab077d12800}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION rotY : mat3d
-VAR_IN_OUT CONSTANT
-	i_mat : Mat3d;
+VAR_INPUT
 	i_ang : LREAL;
 END_VAR
 VAR
@@ -15,7 +14,7 @@ END_VAR
 rot[3,3]:=rot[1,1];
 rot[1,3]:=SIN(i_ang);
 rot[3,1]:=-rot[1,3];
-matMultiply(i_mat, rot, rotY);]]></ST>
+rotY:=rot;]]></ST>
     </Implementation>
     <LineIds Name="rotY">
       <LineId Id="7" Count="0" />

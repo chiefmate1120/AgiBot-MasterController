@@ -6,7 +6,12 @@
 VAR_GLOBAL CONSTANT 
 
 // distance between shoulders of left and right arm
-g_armShoulderDistance :LREAL := 0.5;
+g_shoulderDistance :LREAL := 0.5;
+
+// master arm shoulder rotation in base monitor pose(0 rotate angle)
+g_shoulderRotInMonitor : Mat3d :=[0.0,	-1.0,	0.0,
+								  0.0,	0.0,	1.0,
+								  -1.0,	0.0,	0.0];
  	
 (* 
 % DH definetion
@@ -38,22 +43,27 @@ g_armShoulderDistance :LREAL := 0.5;
 %q10 = q8-q2
 
 *)
-	g_d1:LREAL:=0.26085;
-	g_d4:LREAL:=0.1615;
-	g_a3:LREAL:=0.278;
-	g_a4:LREAL:=0.365;
-	g_a9:LREAL:=0.06;
-	
-	//alpha,a,d,theta	
-	g_masterArmDH:ARRAY[1..9,1..4] OF LREAL :=[0,	0,		g_d1,	0,      
-											-pi/2,	0,		0,		0,
-											0,		g_a3,	0,		0,
-									        -pi/2,	g_a4,	g_d4,	0,       
-											pi/2,	0,		0,		0,
-								            -pi/2,	0,		0,		0,
-							         		pi/2,	0,		0,		0,
-											-pi/2,	0,		0,		0,// joint 8
-											0,		g_a9, 	0,		0];
+g_d1:LREAL:=0.26085;
+g_d4:LREAL:=0.1615;
+g_a3:LREAL:=0.278;
+g_a4:LREAL:=0.365;
+g_a9:LREAL:=0.06;
+
+//alpha,a,d,theta	
+g_masterArmDH:ARRAY[1..9,1..4] OF LREAL :=[0,	0,		g_d1,	0,      
+										-pi/2,	0,		0,		0,
+										0,		g_a3,	0,		0,
+										-pi/2,	g_a4,	g_d4,	0,       
+										pi/2,	0,		0,		0,
+										-pi/2,	0,		0,		0,
+										pi/2,	0,		0,		0,
+										-pi/2,	0,		0,		0,// joint 8
+										0,		g_a9, 	0,		0];
+											
+// master grip angle fitting coefficients	
+g_masterGripAngleFitCoeff : ARRAY[1..2, 1..6] OF LREAL :=
+	[-8.48260355002*EXPT(10,-14), 1.70639295742*EXPT(10,-10), -0.000000130527325258, 0.0000479951141966, -0.00912786019973, 0.902593291165,
+	 -4.066882472*EXPT(10,-14), 8.626277011*EXPT(10,-11), -0.00000007059924649, 0.00002873004943, -0.006488436511, 0.8066966591];
 
 END_VAR]]></Declaration>
   </GVL>

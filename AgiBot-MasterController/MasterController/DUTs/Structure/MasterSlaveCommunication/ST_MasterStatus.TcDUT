@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_MasterStatus" Id="{3ac2ae6d-6666-445a-980a-7914313359ec}">
     <Declaration><![CDATA[// Output from master arm control task, including arm status and cartesian data
 // Input to safety task and Slave controller
@@ -17,16 +17,16 @@ STRUCT
 	// grip angle
 	m_gripAngle:ARRAY[1..g_mArmNum] OF LREAL;
 	
-	// command arm pose in monitor
+	// command arm pose in shoulder coordinate
 	m_cmdArmPose :ARRAY[1..g_mArmNum] OF ST_Frame;
 	
-	// current arm pose in monitor
+	// current arm pose in shoulder coordinate
 	m_curArmPose:ARRAY[1..g_mArmNum] OF ST_Frame;
 	
-	// command arm twist[linear velocity; angular veloicty] in monitor
+	// command arm twist[linear velocity; angular veloicty] in shoulder coordinate
 	m_cmdArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
 	
-	// current arm twist[linear velocity; angular veloicty] in monitor
+	// current arm twist[linear velocity; angular veloicty] in shoulder coordinate
 	m_curArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
 	
 END_STRUCT
