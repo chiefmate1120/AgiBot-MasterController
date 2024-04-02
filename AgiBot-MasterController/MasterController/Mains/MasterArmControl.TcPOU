@@ -57,20 +57,26 @@ m_masterRobot.run(m_masterInputDataPool);
 m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 
 // master output data cast
-masterOutputDataCast(m_masterStatus, m_masterRobotData);
+masterOutputDataCast(shoulderPose:=m_masterRobot.shoulderPose, m_masterStatus, m_masterRobotData);
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <Method Name="masterOutputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from local ST_MasterStatus for control to MSCommu_MasterStatus for master-slave communication
 METHOD masterOutputDataCast : BOOL
+VAR_INPUT
+	shoulderPose :ARRAY[1..2] OF ST_Frame;
+END_VAR
 VAR_IN_OUT
 	masterStatus :ST_MasterStatus;
 	masterOutputData:MSCommu_MasterStatus;
 END_VAR
 
 VAR
-	i : INT;
+	i,j : INT;
+	poseInMonitor:ST_Frame;
+	velInShoulder, wVelInShoulder :Vec3d;
+	velInMonitor, wVelInMonitor :Vec3d;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -80,12 +86,22 @@ FOR i:=1 TO g_mArmNum DO
 	masterOutputData.m_armState[i] := masterStatus.m_armState[i];
 	masterOutputData.m_teleSlaveArmIdx[i] :=masterStatus.m_teleSlaveArmIdx[i];
 	masterOutputData.m_gripAngle[i] := masterStatus.m_gripAngle[i] ;
-	masterOutputData.m_cmdArmPose[i].m_pos := masterStatus.m_cmdArmPose[i].m_pos;
-	masterOutputData.m_cmdArmPose[i].m_rot := masterStatus.m_cmdArmPose[i].m_rot ;
-	masterOutputData.m_curArmPose[i].m_pos := masterStatus.m_curArmPose[i].m_pos ;
-	masterOutputData.m_curArmPose[i].m_rot := masterStatus.m_curArmPose[i].m_rot ;
-	masterOutputData.m_cmdArmTwist[i] := masterStatus.m_cmdArmTwist[i] ;
-	masterOutputData.m_curArmTwist[i] := masterStatus.m_curArmTwist[i] ;
+	
+	poseInMonitor := transform(shoulderPose[i],  masterStatus.m_curArmPose[i]);
+	masterOutputData.m_curArmPose[i].m_pos := poseInMonitor.m_pos ;
+	masterOutputData.m_curArmPose[i].m_rot := poseInMonitor.m_rot ;
+	
+	FOR j:=1 TO 3 DO
+		velInShoulder[j]:=masterStatus.m_curArmTwist[i][j];
+		wVelInShoulder[j]:=masterStatus.m_curArmTwist[i][j+3];
+	END_FOR
+	matMultiVec(shoulderPose[i].m_rot, velInShoulder,velInMonitor);
+	matMultiVec(shoulderPose[i].m_rot, wVelInShoulder,wVelInMonitor);
+	
+	FOR j:=1 TO 3 DO
+		masterOutputData.m_curArmTwist[i][j]:=velInMonitor[j];
+		masterOutputData.m_curArmTwist[i][j+3]:=wVelInMonitor[j];
+	END_FOR
 END_FOR
 ]]></ST>
       </Implementation>
@@ -111,12 +127,9 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveStatus.m_instruStauts[i].m_fingerAngle := slaveInputData.m_instruStauts[i].m_fingerAngle;
 	slaveStatus.m_instruStauts[i].m_ready := slaveInputData.m_instruStauts[i].m_ready;
 	slaveStatus.m_instruStauts[i].m_type := slaveInputData.m_instruStauts[i].m_type;
-	slaveStatus.m_cmdArmPose[i].m_pos :=slaveInputData.m_cmdArmPose[i].m_pos;
-	slaveStatus.m_cmdArmPose[i].m_rot :=slaveInputData.m_cmdArmPose[i].m_rot;
 	slaveStatus.m_curArmPose[i].m_pos :=slaveInputData.m_curArmPose[i].m_pos;
 	slaveStatus.m_curArmPose[i].m_rot :=slaveInputData.m_curArmPose[i].m_rot;
-	slaveStatus.m_cmdArmTwist[i] :=slaveInputData.m_cmdArmTwist[i];
-	slaveStatus.m_curArmTwist[i] :=slaveInputData.m_curArmTwist[i];
+	slaveStatus.m_masterSlavePoseError[i] := slaveInputData.m_masterSlavePoseError[i];
 END_FOR
 
 
@@ -152,12 +165,20 @@ END_FOR
       <LineId Id="5" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
-      <LineId Id="26" Count="3" />
-      <LineId Id="32" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="46" Count="1" />
       <LineId Id="30" Count="0" />
       <LineId Id="33" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="24" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="59" Count="2" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="25" Count="0" />
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="MasterArmControl.slaveInputDataCast">
@@ -167,12 +188,10 @@ END_FOR
       <LineId Id="23" Count="0" />
       <LineId Id="26" Count="1" />
       <LineId Id="36" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="38" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="39" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="24" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="25" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="10" Count="0" />

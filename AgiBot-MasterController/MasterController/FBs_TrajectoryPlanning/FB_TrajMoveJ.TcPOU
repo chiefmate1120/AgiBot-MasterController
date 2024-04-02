@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_TrajMoveJ" Id="{02514d4f-2747-4c08-923c-ad3b27b8c50b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_TrajMoveJ EXTENDS FB_TrajBase
 VAR_OUTPUT
@@ -13,6 +13,7 @@ VAR
 	
 	// doubleS planning for move distance
 	m_doubleS :FB_BasicDoubleS;
+
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -33,6 +34,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[evaluate:=m_doubleS.evaluate(t,q=>q,q_dot=>q_dot, q_ddot=>q_dot);
+
 IF evaluate =FALSE THEN
 	RETURN;
 END_IF
@@ -99,6 +101,7 @@ m_isGenerated:=m_doubleS.isGene;
     </LineIds>
     <LineIds Name="FB_TrajMoveJ.evaluate">
       <LineId Id="5" Count="0" />
+      <LineId Id="44" Count="0" />
       <LineId Id="15" Count="2" />
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />

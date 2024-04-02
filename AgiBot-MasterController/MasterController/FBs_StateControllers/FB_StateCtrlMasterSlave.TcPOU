@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlMasterSlave" Id="{5b96f309-da76-444d-a9fb-2d4321895cd7}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm MasterSlave controller
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMasterSlave EXTENDS FB_MasterArmCtrlBase
@@ -14,6 +14,10 @@ VAR
 	// flag if project joint4 torque to nullspace
 	m_nullspaceCtrl : BOOL :=FALSE;
 	
+	// boundary limit force feedback
+	m_boundaryForce : FB_boundaryForceFeedback;
+	
+	m_boundaryTrq :Vec7d;
 
 END_VAR
 ]]></Declaration>
@@ -23,12 +27,10 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{b549ed00-ec1a-412a-94d0-63a741bf9608}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -36,21 +38,19 @@ VAR
 
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[(*m_cmdJntPos:=i_masterArm.curJntPos;
+        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos;
 m_cmdJntVel:=i_masterArm.curJntVel;
-m_cmdCartPose:=i_masterArm.curCartPose;*)
+m_cmdCartPose:=i_masterArm.curCartPose;
 ]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcCmdJntTrq" Id="{590b7c96-65ed-47d5-8eb2-8a13ee8a5533}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
-VAR_input
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -58,32 +58,33 @@ END_VAR
 VAR 
 	nullspaceMat :Mat7d;
 	ctrlTrq : Vec7d;
+	boundaryTrq :Vec7d;
+	withinBoundary :BOOL;
 	i :INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// redundant joint4 controller
+        <ST><![CDATA[// boundary force feedback
+m_boundaryTrq :=m_boundaryForce.run(i_slaveIdx, i_shoulderPose, i_masterArm, i_slaveStatus);
+withinBoundary := (norm(m_boundaryTrq)<g_smallNum);
+
+// redundant joint4 controller
 ctrlTrq := g_zeroVec7d;
-ctrlTrq[4] := m_redunJntCtrl.run(i_masterArm);
+ctrlTrq[4] := m_redunJntCtrl.run(i_masterArm, i_followEnable:=withinBoundary);
 
 // project to nullspace
 IF m_nullspaceCtrl THEN
 	nullspaceMat:=i_masterArm.dynaNullspace;
 	matMultiVec(nullspaceMat,ctrlTrq, m_cmdJntTrq);
 	vecSelfMultiNum(m_cmdJntTrq, ctrlTrq[4] / m_cmdJntTrq[4]);
-//	m_cmdJntTrq[5]:=0;
-//	m_cmdJntTrq[6]:=0;
-//	m_cmdJntTrq[7]:=0;
 ELSE
 	m_cmdJntTrq := ctrlTrq;
 END_IF
 
 // add friction compensation
 FOR i:=1 TO g_mJntNum DO 
-	m_cmdJntTrq[i] := m_cmdJntTrq[i] + i_masterArm.jntFriction[i];
+	m_cmdJntTrq[i] := m_cmdJntTrq[i] + i_masterArm.jntFriction[i] + m_boundaryTrq[i];
 END_FOR
-
-
 ]]></ST>
       </Implementation>
     </Method>
@@ -104,9 +105,13 @@ END_VAR
         <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
 
 m_jntOPMode := g_allTrqMode;
+//m_jntOPMode := g_allPosMode;
 
 // init controller
-m_redunJntCtrl.init(i_masterArm);]]></ST>
+m_redunJntCtrl.init(i_masterArm);
+
+
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlMasterSlave">
@@ -118,6 +123,8 @@ m_redunJntCtrl.init(i_masterArm);]]></ST>
       <LineId Id="111" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMasterSlave.calcCmdJntTrq">
+      <LineId Id="204" Count="1" />
+      <LineId Id="202" Count="1" />
       <LineId Id="32" Count="0" />
       <LineId Id="48" Count="0" />
       <LineId Id="33" Count="0" />
@@ -126,21 +133,22 @@ m_redunJntCtrl.init(i_masterArm);]]></ST>
       <LineId Id="54" Count="0" />
       <LineId Id="121" Count="0" />
       <LineId Id="50" Count="0" />
-      <LineId Id="58" Count="3" />
+      <LineId Id="58" Count="0" />
       <LineId Id="55" Count="2" />
-      <LineId Id="139" Count="0" />
-      <LineId Id="138" Count="0" />
-      <LineId Id="141" Count="0" />
-      <LineId Id="143" Count="1" />
-      <LineId Id="34" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="182" Count="3" />
       <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMasterSlave.init">
       <LineId Id="13" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="19" Count="0" />
+      <LineId Id="115" Count="0" />
       <LineId Id="16" Count="1" />
       <LineId Id="59" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="74" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

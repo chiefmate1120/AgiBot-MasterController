@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArmCtrlBase" Id="{dee0ec68-3abc-4720-b67c-0fb3fd57933b}" SpecialFunc="None">
     <Declaration><![CDATA[// Master Arm Base Controller, Hold at Current Posture
 FUNCTION_BLOCK FB_MasterArmCtrlBase IMPLEMENTS I_MasterArmCtrl
@@ -34,12 +34,10 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{98ab3239-d030-4534-a55d-1eaac78d6af0}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -51,12 +49,10 @@ END_VAR
     <Method Name="calcCmdJntTrq" Id="{31ee0fe6-80c4-42e7-bd18-5b745e895642}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntTrq : BOOL
-VAR_input
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -78,13 +74,15 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// check if to hold the command joint position unchanged
-vecSub(m_cmdJntPos, i_masterArm.m_curJntPos,jntCtrlErr);
+vecSub(i_masterArm.m_cmdJntPos, i_masterArm.m_curJntPos,jntCtrlErr);
 maxJntErr:=0.0;
 FOR j:=1 TO g_mJntNum DO
 	maxJntErr:= MAX(maxJntErr, ABS(jntCtrlErr[j]));
 END_FOR
 
-checkToHoldLastCmds := (maxJntErr<g_jntCtrlErrForCmdHold);]]></ST>
+checkToHoldLastCmds := (maxJntErr<g_jntCtrlErrForCmdHold);
+
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{63e02c69-11c3-4e06-9c58-dcaf1b3a881b}">
@@ -106,6 +104,8 @@ m_cmdCartPose:=i_masterArm.curCartPose;
 m_cmdCartTwist:=g_zeroVec6d;
 IF FALSE = m_holdLastCmds THEN
 	m_cmdJntPos:=i_masterArm.curJntPos;
+ELSE 
+	m_cmdJntPos := r_masterArmCtrlCmd.m_cmdJntPos;
 END_IF
 m_cmdJntVel:=g_zeroVec7d;
 m_cmdJntAcc:=g_zeroVec7d;
@@ -146,12 +146,10 @@ METHOD reset : BOOL
     <Method Name="run" Id="{4a86d5bc-6efe-47db-8e4e-968f76a73eb3}">
       <Declaration><![CDATA[{warning '添加方法实现'}
 METHOD run : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -172,10 +170,10 @@ IF FALSE = i_masterArm.isEnabled(m_jntEnableFlag) THEN
 END_IF
 
 // calculate command joint position--Motion control
-calcCmdJntPos(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
+calcCmdJntPos(i_slaveIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 
 // calculate command joint torque -- Force control
-calcCmdJntTrq(monitorAngle, slaveIdx, i_masterArm,i_slaveStatus);
+calcCmdJntTrq(i_slaveIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 
 // update commands to arm
 r_masterArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
@@ -205,13 +203,17 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
     <LineIds Name="FB_MasterArmCtrlBase.checkToHoldLastCmds">
       <LineId Id="6" Count="6" />
       <LineId Id="26" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.init">
       <LineId Id="49" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="71" Count="1" />
-      <LineId Id="104" Count="2" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="116" Count="1" />
+      <LineId Id="106" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />

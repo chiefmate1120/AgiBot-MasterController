@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR_INPUT
@@ -13,6 +13,9 @@ VAR
 	// monitor angle
 	m_monitorAngle :LREAL;
 	
+	// master arm base pose(shoulder pose) in monitor coordinate
+	m_shoulderPoseInMonitor :ARRAY[1..2] OF ST_Frame;
+	
 	// master arms, responsible for arm kinematic and control
 	m_masterArms :ARRAY[1..g_mArmNum] OF FB_MasterArm;
 	
@@ -23,6 +26,11 @@ VAR
 	
 	// index(1 to 4) of slave arm which is tele-linked to master arm
 	m_teleSlaveArmIdx:ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx:=[MatchedSlaveArmIdx_NULL, MatchedSlaveArmIdx_null];
+	m_instruArmState:ARRAY [1..g_mArmNum] OF E_SlaveArmState:=[SlaveArmState_Error, SlaveArmState_Error];
+	m_scopeArmState :E_SlaveArmState := SlaveArmState_Error;
+	
+	// master and slave grip match flag
+	m_gripMatchFlag :ARRAY[1..g_mArmNum] OF BOOL:=[false, false];
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_mArmNum,1..MasterArmState_totalNum] OF I_MasterArmCtrl;
@@ -50,6 +58,7 @@ END_VAR
 
 ]]></ST>
     </Implementation>
+    <Folder Name="property" Id="{8f86633f-3f94-408a-ac9b-8ee0ebd6bdac}" />
     <Method Name="checkTeleSlaveArmIdx" Id="{e877542b-f696-4449-b007-3e9fbc5ffaab}">
       <Declaration><![CDATA[METHOD checkTeleSlaveArmIdx : BOOL
 VAR_IN_OUT CONSTANT
@@ -61,6 +70,31 @@ END_VAR
         <ST><![CDATA[// TODO: update teleSlaveArmIndex based on UI and Cart information
 m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_NULL;
 m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="controllerTransit" Id="{43db9dd9-8e13-4a66-a84f-800b29862df6}">
+      <Declaration><![CDATA[METHOD controllerTransit : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i :INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mArmNum DO 
+	IF m_nextMasterArmState[i]<> m_masterArmState[i] THEN
+		// reset current controller
+		m_armCtrl[i].reset();
+		
+		// transit to new controller
+		m_lastMasterArmState[i]:=m_masterArmState[i];
+		m_masterArmState[i]:=m_nextMasterArmState[i];
+		m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
+		
+		// init next controller
+		m_armCtrl[i].Init(m_masterArms[i],m_armCtrlCmds[i]);
+		m_masterArms[i].updateCmds(m_armCtrlCmds[i]);
+	END_IF
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="getStatus" Id="{b6139e8c-2703-424c-9761-ad1add6b1ff1}">
@@ -112,6 +146,17 @@ FOR i:=1 TO g_mArmNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="gripMatchCheck" Id="{fc0f22fc-348f-4e63-873d-edef8758fcd0}">
+      <Declaration><![CDATA[// check if master and slave grip angle is matched before entring master-slave controller
+METHOD gripMatchCheck : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Init" Id="{610a17f3-34c5-4e3c-bbbc-19f9c2f46946}">
       <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
 VAR_INPUT
@@ -121,7 +166,10 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
+        <ST><![CDATA[m_shoulderPoseInMonitor[1].m_pos[2]:=-g_shoulderDistance/2;
+m_shoulderPoseInMonitor[2].m_pos[2]:=g_shoulderDistance/2;
+
+FOR i:=1 TO g_mArmNum DO
 	// arm init
 	m_masterArms[i].Init(i);
 	m_masterArmState[i]:=MasterArmState_Init;
@@ -172,11 +220,17 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_motionScale := i_masterInputDataPool.m_UIData.m_motionScale;
 m_monitorAngle := i_masterInputDataPool.m_cartStatus.m_monitorAngle;
 
+// update shoulder pose
+updateShoulderPose();
+
 // check tele-operated slave arms index
 checkTeleSlaveArmIdx(i_masterInputDataPool.m_UIData, i_masterInputDataPool.m_cartStatus);
 
 // state machine transition
 stateMachine(i_masterInputDataPool);
+
+// controller transition
+controllerTransit();
 
 FOR i:=1 TO g_mArmNum DO
 	// update dynamic data
@@ -191,7 +245,7 @@ FOR i:=1 TO g_mArmNum DO
 	END_IF
 	
 	// run controller
-	m_armCtrl[i].run(m_monitorAngle, m_teleSlaveArmIdx[i], m_masterArms[i],
+	m_armCtrl[i].run(m_teleSlaveArmIdx[i], m_shoulderPoseInMonitor[i], m_masterArms[i],
 						i_masterInputDataPool.m_slaveStatus,m_armCtrlCmds[i]);
 
 	// update commands to drivers
@@ -202,6 +256,17 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="shoulderPose" Id="{6004f8dc-7ada-4ad2-9d1e-93605d16d31e}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY shoulderPose : ARRAY[1..2] OF ST_Frame]]></Declaration>
+      <Get Name="Get" Id="{4fa3cfe8-ad39-4a7f-9fe0-f47bb30c0cd4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[shoulderPose := m_shoulderPoseInMonitor;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="stateMachine" Id="{b9cc8560-9309-49e3-93b5-28cb02b4f5cc}">
       <Declaration><![CDATA[// state machine check and transit 
 METHOD PROTECTED stateMachine : BOOL
@@ -212,16 +277,46 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
-	// State machine transit 
+        <ST><![CDATA[// get instrument arm state
+FOR i:=1 TO g_mArmNum DO
+	IF MatchedSlaveArmIdx_NULL =  m_teleSlaveArmIdx[i] THEN
+		m_instruArmState[i] := SlaveArmState_Error;
+	ELSE
+		m_instruArmState[i] := i_masterInputDataPool.m_slaveStatus.m_armState[m_teleSlaveArmIdx[i]];
+	END_IF
+END_FOR
+
+// get endoscope arm state
+m_scopeArmState := SlaveArmState_Error;
+FOR i:=1 TO g_sArmNum DO 
+	IF InstruType_endoscope =  i_masterInputDataPool.m_slaveStatus.m_instruStauts[i].m_type THEN
+		m_scopeArmState := i_masterInputDataPool.m_slaveStatus.m_armState[i];
+		EXIT;
+	END_IF
+END_FOR
+
+// check if master-slave grip angle match
+gripMatchCheck(i_masterInputDataPool.m_slaveStatus);
+
+// Test Code
+m_scopeArmState := SlaveArmState_ScopeReady; 
+
+// State machine transit 
+FOR i:=1 TO g_mArmNum DO
 	CASE m_masterArmState[i] OF
+		// error
+		MasterArmState_Error:
+			// to standby
+			IF FALSE = i_masterInputDataPool.m_safetyData.m_masterErrFlag[i] THEN
+				m_nextMasterArmState[i] := MasterArmState_Standby;
+			END_IF
+			
 		// init
 		MasterArmState_Init:
 			IF m_armCtrl[i].isFinished  THEN
 				// NOTICE: multiple cycles joints back to center during initialization
 				// 			need to reset joints encoder data again
 				m_masterArms[i].initJntPos();
-				
 				m_nextMasterArmState[i]:=MasterArmState_Home;
 			END_IF
 
@@ -232,17 +327,94 @@ END_VAR]]></Declaration>
 			END_IF
 		
 		//standby
-(*		MasterArmState_Standby:
+		MasterArmState_Standby:
+			// to matching
+			IF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState THEN
+				m_nextMasterArmState[i]:=MasterArmState_Matching;
+			// to clutch
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+				m_nextMasterArmState[i] := MasterArmState_Clutch; 
+			// to cart
+			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
+				m_nextMasterArmState[i] := MasterArmState_Cart;
+			END_IF
 		
 		//matching
 		MasterArmState_Matching:
+			// to ready
+			IF m_armCtrl[i].isFinished THEN
+				m_nextMasterArmState[i]:=MasterArmState_Ready;
+			// to standby
+			ELSIF SlaveArmState_InstruReady <> m_instruArmState[i] OR SlaveArmState_ScopeReady <> m_scopeArmState THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			// to cart
+			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
+				m_nextMasterArmState[i] := MasterArmState_Cart;
+			END_IF
 		
 		//ready
 		MasterArmState_Ready:
+			// to standby
+			IF SlaveArmState_InstruReady <> m_instruArmState[i] OR SlaveArmState_ScopeReady <> m_scopeArmState THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			// to clutch
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+				m_nextMasterArmState[i] := MasterArmState_Clutch; 
+			// to cart
+			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
+				m_nextMasterArmState[i] := MasterArmState_Cart;
+			// to master-slave
+			ELSIF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
+					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_gripMatchFlag[i] THEN
+				m_nextMasterArmState[i] := MasterArmState_MasterSlave;
+			END_IF
 		
 		//MasterSlave
-		MasterArmState_MasterSlave:*)
+		MasterArmState_MasterSlave:
+			// to standdy
+			IF (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
+				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			// to clutch
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+				m_nextMasterArmState[i] := MasterArmState_Clutch; 
+			// to cart
+			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
+				m_nextMasterArmState[i] := MasterArmState_Cart;
+			END_IF
+			
+		//Clutch
+		MasterArmState_Clutch:
+			// to standby
+			IF NOT(i_masterInputDataPool.m_cartStatus.m_clutchSwitch) THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			END_IF
 		
+		// Endoscope 
+		MasterArmState_Endoscope:
+			// to standby
+			IF NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) OR SlaveArmState_ScopeReady <> m_scopeArmState
+						OR SlaveArmState_EndoScope <> m_scopeArmState THEN
+				m_nextMasterArmState[i] := MasterArmState_Standby;
+			// to cart
+			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
+				m_nextMasterArmState[i] := MasterArmState_Cart;
+			END_IF
+			
+		// Cart 
+		MasterArmState_Cart:
+			// to standby
+			IF NOT( i_masterInputDataPool.m_cartStatus.m_consoleInAdjust) THEN
+				m_nextMasterArmState[i] := MasterArmState_Standby;
+			END_IF
+		
+		//Gravity Calibration
+		MasterArmState_GravityCali:
+			// to standby
+			IF  m_armCtrl[i].isFinished THEN
+				m_nextMasterArmState[i]:=MasterArmState_Standby;
+			END_IF
+	
 		//arm test
 		MasterArmState_Test:
 			// to standby
@@ -251,21 +423,35 @@ END_VAR]]></Declaration>
 			END_IF
 	END_CASE
 	
-	// Controller transit
-	IF m_nextMasterArmState[i]<> m_masterArmState[i] THEN
-		// reset current controller
-		m_armCtrl[i].reset();
-		
-		// transit to new controller
-		m_lastMasterArmState[i]:=m_masterArmState[i];
-		m_masterArmState[i]:=m_nextMasterArmState[i];
-		m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
-		
-		// init next controller
-		m_armCtrl[i].Init(m_masterArms[i],m_armCtrlCmds[i]);
-		m_masterArms[i].updateCmds(m_armCtrlCmds[i]);
+	// error check
+	IF TRUE = i_masterInputDataPool.m_safetyData.m_masterErrFlag[i] THEN
+//		m_nextMasterArmState[i] := MasterArmState_Error;
 	END_IF
-END_FOR]]></ST>
+END_FOR
+
+// To Endoscope Control 
+IF SlaveArmState_EndoScope = m_scopeArmState AND
+  (MasterArmState_Standby = m_masterArmState[1] OR MasterArmState_Ready = m_masterArmState[1] OR MasterArmState_MasterSlave = m_masterArmState[1]) AND 
+  (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
+  m_nextMasterArmState[1] := MasterArmState_Endoscope;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateShoulderPose" Id="{fb1a54a0-df1a-4720-ac59-3d297fc90e27}">
+      <Declaration><![CDATA[METHOD updateShoulderPose : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	monitorRot :mat3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// base monitor frame(0 rotation angle) in current monitor frame 
+monitorRot := rotY( -m_monitorAngle);
+
+// shoulder pose in current monitor frame
+matMultiply(monitorRot,g_shoulderRotInMonitor, m_shoulderPoseInMonitor[1].m_rot);
+m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_MasterRobot">
@@ -276,6 +462,11 @@ END_FOR]]></ST>
     <LineIds Name="FB_MasterRobot.checkTeleSlaveArmIdx">
       <LineId Id="5" Count="0" />
       <LineId Id="8" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.controllerTransit">
+      <LineId Id="6" Count="12" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.getStatus">
       <LineId Id="29" Count="0" />
@@ -303,7 +494,13 @@ END_FOR]]></ST>
       <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterRobot.gripMatchCheck">
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
+      <LineId Id="116" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="117" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="47" Count="4" />
@@ -324,10 +521,17 @@ END_FOR]]></ST>
     <LineIds Name="FB_MasterRobot.run">
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="0" />
       <LineId Id="111" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="112" Count="1" />
-      <LineId Id="19" Count="2" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="21" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="88" Count="1" />
       <LineId Id="97" Count="0" />
@@ -347,33 +551,120 @@ END_FOR]]></ST>
       <LineId Id="40" Count="0" />
       <LineId Id="22" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterRobot.shoulderPose.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterRobot.stateMachine">
+      <LineId Id="188" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="194" Count="3" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="200" Count="1" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="283" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="189" Count="0" />
       <LineId Id="5" Count="0" />
-      <LineId Id="67" Count="0" />
       <LineId Id="15" Count="0" />
+      <LineId Id="253" Count="1" />
+      <LineId Id="258" Count="0" />
+      <LineId Id="255" Count="2" />
+      <LineId Id="259" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="75" Count="3" />
+      <LineId Id="75" Count="2" />
       <LineId Id="29" Count="1" />
       <LineId Id="41" Count="2" />
       <LineId Id="45" Count="1" />
       <LineId Id="44" Count="0" />
-      <LineId Id="86" Count="11" />
+      <LineId Id="86" Count="2" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="134" Count="1" />
+      <LineId Id="237" Count="2" />
+      <LineId Id="262" Count="2" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="89" Count="1" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="208" Count="0" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="210" Count="0" />
+      <LineId Id="212" Count="1" />
+      <LineId Id="266" Count="1" />
+      <LineId Id="265" Count="0" />
+      <LineId Id="211" Count="0" />
+      <LineId Id="92" Count="2" />
+      <LineId Id="214" Count="2" />
+      <LineId Id="242" Count="1" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="269" Count="1" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="260" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="284" Count="0" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="95" Count="2" />
+      <LineId Id="219" Count="1" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="246" Count="1" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="272" Count="1" />
+      <LineId Id="271" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="157" Count="1" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="160" Count="2" />
       <LineId Id="116" Count="0" />
+      <LineId Id="171" Count="1" />
+      <LineId Id="223" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="275" Count="1" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="176" Count="0" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="165" Count="2" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="178" Count="4" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="183" Count="0" />
       <LineId Id="118" Count="4" />
       <LineId Id="117" Count="0" />
       <LineId Id="18" Count="0" />
-      <LineId Id="56" Count="3" />
-      <LineId Id="61" Count="2" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="66" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="108" Count="0" />
-      <LineId Id="60" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="153" Count="3" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="225" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.updateShoulderPose">
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="1" />
       <LineId Id="16" Count="0" />
     </LineIds>
   </POU>

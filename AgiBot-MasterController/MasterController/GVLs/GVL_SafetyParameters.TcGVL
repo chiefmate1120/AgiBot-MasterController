@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
@@ -10,8 +10,8 @@ VAR_GLOBAL CONSTANT
 		g_maxCartPosErr :LREAL := 0.005;
 	g_maxCartOriErr :LREAL := 5.0*g_deg2Rad;
 	
-	g_maxJntCtrlErr :LREAL := 5.0*g_deg2Rad;
-	g_maxJntEncErr :LREAL := 5.0*g_deg2Rad;
+	g_maxJntCtrlErr :LREAL := 15.0*g_deg2Rad;
+	g_maxJntEncErr :LREAL := 15.0*g_deg2Rad;
 	
 	// joint velocity limit for safety check
 	g_jntVelSafetyLimit :ARRAY[1..g_mJntNum] OF LREAL :=[7(2*pi)];

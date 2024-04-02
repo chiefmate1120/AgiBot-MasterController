@@ -77,10 +77,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}" PersistentType="true">MSCommu_SlaveStatus</Name>
+			<Name GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}" PersistentType="true">MSCommu_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>10624</BitSize>
+			<BitSize>9088</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
@@ -121,49 +121,35 @@
 				<BitOffs>640</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdArmPose</Name>
-				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command arm pose in cart coordinate]]></Comment>
-				<BitSize>3072</BitSize>
-				<BitOffs>1408</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_curArmPose</Name>
 				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ current arm pose in cart coordinate]]></Comment>
+				<Comment TxtId=""><![CDATA[current arm pose in endoscope coordinate]]></Comment>
 				<BitSize>3072</BitSize>
 				<BitOffs>4480</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdArmTwist</Name>
+				<Name>m_masterSlavePoseError</Name>
 				<Type GUID="{A1DF1B0B-7855-4654-B782-96323F561C71}">MSCommu_Vec6d</Type>
 				<ArrayInfo>
 					<LBound>1</LBound>
 					<Elements>4</Elements>
 				</ArrayInfo>
-				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in cart view]]></Comment>
+				<Comment TxtId=""><![CDATA[master slave pose error in endoscope coordinate]]></Comment>
 				<BitSize>1536</BitSize>
 				<BitOffs>7552</BitOffs>
 			</SubItem>
-			<SubItem>
-				<Name>m_curArmTwist</Name>
-				<Type GUID="{A1DF1B0B-7855-4654-B782-96323F561C71}">MSCommu_Vec6d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>4</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in cart view]]></Comment>
-				<BitSize>1536</BitSize>
-				<BitOffs>9088</BitOffs>
-			</SubItem>
+			<Hides>
+				<Hide GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}"/>
+				<Hide GUID="{92C8A97B-CBFA-4853-9E09-E15AC9C81340}"/>
+				<Hide GUID="{E7F564D2-713A-4B52-82FE-494F16BFCFCE}"/>
+				<Hide GUID="{B0D3E816-FF8F-4BEE-8B1B-781B51786D4F}"/>
+				<Hide GUID="{10B186F8-9910-4DA5-834E-D036343FDDCB}"/>
+				<Hide GUID="{B84D2CC2-A66C-479B-AF98-B768D95AEC7A}"/>
+			</Hides>
 		</DataType>
 		<DataType>
 			<Name GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}" AutoDeleteType="true">ST_MotorInputs</Name>
@@ -262,49 +248,72 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{11031441-2019-F43E-1019-D9383C62ABA9}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Comment><![CDATA[ Output from cart control task
+ Input to master arm control task  ]]></Comment>
 			<BitSize>128</BitSize>
 			<SubItem>
 				<Name>m_monitorAngle</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
 				<BitSize>64</BitSize>
 				<BitOffs>0</BitOffs>
+				<Default>
+					<Value>0</Value>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_armSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>64</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_clutchSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>72</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_endoscopeSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>80</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_instrumentPowerSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>88</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 			<SubItem>
-				<Name>m_monitorAdjustSwitch</Name>
+				<Name>m_surgonReady</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>96</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 			<SubItem>
-				<Name>m_tableAdjustSwitch</Name>
+				<Name>m_consoleInAdjust</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
 				<BitOffs>104</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -413,7 +422,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{7B0276A4-65AB-4316-BC09-9A2E7141B619}" PersistentType="true">MSCommu_MasterStatus</Name>
+			<Name GUID="{6D0E508B-4E37-4AC2-9464-F48D39EC906A}" PersistentType="true">MSCommu_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
 			<BitSize>4864</BitSize>
@@ -461,17 +470,6 @@
 				<BitOffs>128</BitOffs>
 			</SubItem>
 			<SubItem>
-				<Name>m_cmdArmPose</Name>
-				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command arm pose in monitor]]></Comment>
-				<BitSize>1536</BitSize>
-				<BitOffs>256</BitOffs>
-			</SubItem>
-			<SubItem>
 				<Name>m_curArmPose</Name>
 				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
 				<ArrayInfo>
@@ -481,17 +479,6 @@
 				<Comment><![CDATA[ current arm pose in monitor]]></Comment>
 				<BitSize>1536</BitSize>
 				<BitOffs>1792</BitOffs>
-			</SubItem>
-			<SubItem>
-				<Name>m_cmdArmTwist</Name>
-				<Type GUID="{A1DF1B0B-7855-4654-B782-96323F561C71}">MSCommu_Vec6d</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<Comment><![CDATA[ command arm twist[linear velocity; angular veloicty] in monitor]]></Comment>
-				<BitSize>768</BitSize>
-				<BitOffs>3328</BitOffs>
 			</SubItem>
 			<SubItem>
 				<Name>m_curArmTwist</Name>
@@ -504,6 +491,9 @@
 				<BitSize>768</BitSize>
 				<BitOffs>4096</BitOffs>
 			</SubItem>
+			<Hides>
+				<Hide GUID="{7B0276A4-65AB-4316-BC09-9A2E7141B619}"/>
+			</Hides>
 		</DataType>
 		<DataType>
 			<Name GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}" AutoDeleteType="true">ST_MotorOutputs</Name>
@@ -1006,26 +996,26 @@
 	</ImageDatas>
 	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
-			<Settings MaxCpus="20">
-				<Cpu/>
-				<Cpu CpuId="1" RtLimit="90" BaseTime="2500"/>
+			<Settings MaxCpus="8" NonWinCpus="2">
+				<Cpu CpuId="1" RtLimit="90"/>
 				<Cpu CpuId="2" RtLimit="90"/>
+				<Cpu CpuId="6" BaseTime="2500"/>
 			</Settings>
 			<Tasks>
-				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000002" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000040" AdtTasks="true">
 					<Name>TaskArmControl</Name>
 				</Task>
-				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000004" AdtTasks="true">
+				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000002" AdtTasks="true">
 					<Name>TaskDynamic</Name>
 				</Task>
-				<Task Id="5" Priority="3" CycleTime="100000" AmsPort="352" AdtTasks="true">
+				<Task Id="5" Priority="3" CycleTime="10000" AmsPort="352" AdtTasks="true">
 					<Name>TaskSafetyCheck</Name>
 				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{06A5DB54-5F93-685E-E673-B1E7D4E909A0}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{1A3CA0F9-76CC-A832-6FF3-DF37C0844881}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1033,7 +1023,7 @@
 						<Var>
 							<Name>MasterArmControl.m_slaveRobotData</Name>
 							<Comment><![CDATA[ master robot data, input from master controller box]]></Comment>
-							<Type GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}">MSCommu_SlaveStatus</Type>
+							<Type GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorValue</Name>
@@ -1128,7 +1118,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{B1D797D8-D45D-A1CD-A7C3-82AD0F1FF851}">ST_CartStatus</Type>
+							<Type GUID="{11031441-2019-F43E-1019-D9383C62ABA9}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
@@ -1141,7 +1131,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterRobotData</Name>
 							<Comment><![CDATA[ slave robot data, ouput to master controller box]]></Comment>
-							<Type GUID="{7B0276A4-65AB-4316-BC09-9A2E7141B619}">MSCommu_MasterStatus</Type>
+							<Type GUID="{6D0E508B-4E37-4AC2-9464-F48D39EC906A}">MSCommu_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorOutputs</Name>
@@ -1259,13 +1249,6 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2024-03-14T16:31:58">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
-							<OwnerB Name="TIPC^MasterController^MasterController Instance">
-								<Link VarA="MasterArmControl.m_masterStatus" TypeA="ST_MasterStatus" InOutA="1" GuidA="{71A114BE-C7E7-A484-59B7-402B5E08DEC6}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" RestoreInfo="TypeChanged" IdA="2377"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<Contexts>
 						<Context>
 							<Id>0</Id>
@@ -1292,7 +1275,7 @@
 								<OTCID>#x02010050</OTCID>
 							</ManualConfig>
 							<Priority>3</Priority>
-							<CycleTime>10000000</CycleTime>
+							<CycleTime>1000000</CycleTime>
 						</Context>
 					</Contexts>
 					<TaskPouOids>
@@ -3844,7 +3827,7 @@
 						<SyncMan>0010000426000100010000008000da050004001026010000</SyncMan>
 						<SyncMan>0016000422000100020000008000da050004001622010000</SyncMan>
 						<SyncMan>001c60026400010003000000000000000000001c64010000</SyncMan>
-						<SyncMan>008e32052000010004000000000000000200008e20010000</SyncMan>
+						<SyncMan>008e72042000010004000000000000000200008e20010000</SyncMan>
 						<Fmmu>0000000000000000001c00020100000001000000000000000000000000000000</Fmmu>
 						<Fmmu>0000000000000000008e00010100000002000000000000000000000000000000</Fmmu>
 						<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
@@ -3951,12 +3934,12 @@
 						</Pdo>
 						<Pdo Name="IO Inputs" Index="#x1a08" Flags="#x0020" SyncMan="3">
 							<Entry Name="SlaveRobotData" Index="#x6000" Sub="#x01">
-								<Type GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}">MSCommu_SlaveStatus</Type>
+								<Type GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}">MSCommu_SlaveStatus</Type>
 							</Entry>
 						</Pdo>
 						<Pdo Name="IO Outputs" Index="#x1608" InOut="1" Flags="#x0020" SyncMan="2">
 							<Entry Name="MasterRobotData" Index="#x7000" Sub="#x01">
-								<Type GUID="{7B0276A4-65AB-4316-BC09-9A2E7141B619}">MSCommu_MasterStatus</Type>
+								<Type GUID="{6D0E508B-4E37-4AC2-9464-F48D39EC906A}">MSCommu_MasterStatus</Type>
 							</Entry>
 						</Pdo>
 						<CoeProfile ProfileNo="5001"/>
@@ -3970,7 +3953,7 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500810000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500820000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="28000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterController^MasterController Instance">
 			<OwnerB Name="TIID^Device 4 (EtherCAT)^Box 28 (EL6695-0002)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_slaveRobotData" VarB="IO Inputs^SlaveRobotData"/>

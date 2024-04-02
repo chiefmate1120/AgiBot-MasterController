@@ -8,7 +8,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	m_jnt7SelfCheckVel : LREAL :=90*g_deg2Rad;
+	m_jnt7SelfCheckVel : LREAL :=180*g_deg2Rad;
 	m_jnt7HalfMotionRange : LREAL := 1.75*PI+0.26;
 	m_jnt7LimitErr :LREAL := 5*g_deg2Rad;
 	m_jnt7CenterPos :LREAL;
@@ -23,12 +23,10 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{b37c9272-afc7-4cb0-8e50-360f85145053}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
 
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR
@@ -59,7 +57,7 @@ CASE m_initState OF
 	2:
 		centerVel :=LIMIT(-m_jnt7SelfCheckVel,(m_jnt7CenterPos-m_cmdJntPos[7])/g_armCtrlCycleTime,m_jnt7SelfCheckVel);
 		m_cmdJntPos[7] := m_cmdJntPos[7] + centerVel * g_armCtrlCycleTime;
-		IF ABS(m_jnt7CenterPos-i_masterArm.curJntPos[7]) < g_jntCtrlPosTol THEN
+		IF ABS(m_jnt7CenterPos-i_masterArm.curJntPos[7]) < g_jntCtrlAngTolLow THEN
 			m_isFinished :=TRUE;
 		END_IF
 END_CASE

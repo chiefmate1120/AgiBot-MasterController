@@ -18,12 +18,9 @@ END_VAR
     <Method Name="calcCmdJntPos" Id="{ffa3dbdd-63a1-4101-8d26-d1f3e6e5e2be}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
-VAR_INPUT
-	monitorAngle :LREAL;
-	slaveIdx :INT;
-END_VAR
-
 VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
 	i_masterArm :FB_MasterArm;
 	i_slaveStatus :ST_SlaveStatus;
 END_VAR

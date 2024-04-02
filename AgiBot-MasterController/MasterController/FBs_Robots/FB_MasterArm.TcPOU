@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -14,6 +14,7 @@ VAR
 	// grip angle from hall sensor IO
 	m_gripHallSensorValue AT%I* :UDINT;
 	m_gripAngle :LREAL;
+	m_gripAngLpf : FB_LowPassFilter;
 	
 	// joints
 	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
@@ -57,6 +58,8 @@ VAR
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_mJntNum] OF FB_PID;
 	
+	hallSensorValue :LREAL;
+	normHallSensorValue: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -79,9 +82,29 @@ END_VAR
 METHOD PROTECTED calcGripAngle : LREAL
 VAR_INPUT
 END_VAR
+
+VAR
+
+END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[]]></ST>
+        <ST><![CDATA[// sensor io parse
+hallSensorValue:=(m_gripHallSensorValue/65536) AND 16#0000FFFF; //high 16 bits
+
+// normalize hall sensor value
+normHallSensorValue:=LIMIT(0, (hallSensorValue-g_minHallSensorValue)/g_hallSenorRange, 1);
+
+// grip angle fitting
+calcGripAngle := g_masterGripAngleFitCoeff[1] * EXPT(normHallSensorValue,5)
+			+ g_masterGripAngleFitCoeff[2] * EXPT(normHallSensorValue,4)
+			+ g_masterGripAngleFitCoeff[3] * EXPT(normHallSensorValue,3)
+			+ g_masterGripAngleFitCoeff[4] * EXPT(normHallSensorValue,2)
+			+ g_masterGripAngleFitCoeff[5] * EXPT(normHallSensorValue,1)
+			+ g_masterGripAngleFitCoeff[6];
+	
+// filt and cap the result
+calcGripAngle := m_gripAngLpf.run(calcGripAngle);
+calcGripAngle := LIMIT(g_minGripAngle, calcGripAngle, g_maxGripAngle);]]></ST>
       </Implementation>
     </Method>
     <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
@@ -385,7 +408,7 @@ END_VAR
     </Property>
     <Method Name="forwardKinematic" Id="{182b544f-f7c4-475e-8af7-8c07aa230234}">
       <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
-METHOD PROTECTED forwardKinematic : BOOL
+METHOD forwardKinematic : BOOL
 VAR_IN_OUT CONSTANT
 	i_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
 END_VAR
@@ -405,7 +428,7 @@ END_VAR
 q1:=i_jntPos[1];  
 q2:=i_jntPos[2];  
 q3:=i_jntPos[3]-i_jntPos[2];  //q3=q8-q2
-q4:=i_jntPos[4]+i_jntPos[3]-i_jntPos[2]-pi/2;//q4DH=q4motor+q8-q2-90;  
+q4:=jnt4MotorToLink(i_jntPos[2],i_jntPos[3], i_jntPos[4]);//q4DH=q4motor+q8-q2-90;  
 q5:=i_jntPos[5];  
 q6:=i_jntPos[6];  
 q7:=i_jntPos[7];  
@@ -469,6 +492,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// arm statues init
 m_armIdx:=i_armIdx;
 m_gripAngle:=0;
+m_gripAngLpf.init(1, g_gripAngLpfCutoffFreq, g_armCtrlFreq);
 
 // joint init
 FOR i:=1 TO g_mJntNum DO
@@ -694,6 +718,32 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="jnt4LinkToMotor" Id="{3d664502-a5ca-4a18-947e-2de6df49b268}">
+      <Declaration><![CDATA[//convert joint4 position from link side to motor side
+METHOD jnt4LinkToMotor : LREAL
+VAR_INPUT
+	i_q2 :LREAL;
+	i_q3:LREAL;
+	i_q4Link :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[jnt4LinkToMotor:=i_q4Link-i_q3+i_q2+pi/2;//q4motor=q4DH-q8+q2+90;  ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jnt4MotorToLink" Id="{73c2344c-abd6-47df-a57c-56c9686be51c}">
+      <Declaration><![CDATA[//convert joint4 position from motor side to link side
+METHOD jnt4MotorToLink : LREAL
+VAR_INPUT
+	i_q2 :LREAL;
+	i_q3:LREAL;
+	i_q4Motor :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[jnt4MotorToLink:=i_q4Motor+i_q3-i_q2-pi/2;//q4DH=q4motor+q8-q2-90;  ]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="jntExtTrq" Id="{626626ac-4a19-4244-8c4e-4b8e5d00c8e6}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntExtTrq :REFERENCE TO Vec7d]]></Declaration>
       <Get Name="Get" Id="{a09a5e22-8056-494a-9352-77be189f5fc1}">
@@ -873,8 +923,7 @@ FOR i:=1 TO g_mJntNum DO
 	m_filtJntCurrent[i]:=m_joints[i].filtCurrent;
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
 END_FOR 
-//q4DH=q4motor+q8-q2-90;  
-m_curLinkPos[4]:=m_curLinkPos[4]-m_curLinkPos[3]+m_curLinkPos[2]+PI/2;
+m_curLinkPos[4]:=jnt4LinkToMotor(m_curLinkPos[2],m_curLinkPos[3], m_curLinkPos[4]);// q4motor=q4DH-q8+q2+90; 
 
 // cartesion pose
 forwardKinematic(m_curJntPos,m_curCartPose);
@@ -883,7 +932,8 @@ forwardKinematic(m_curJntPos,m_curCartPose);
 calcJaco(m_curJntPos,m_jaco);
 
 // cartesian twist
-matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
+matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_MasterArm">
@@ -893,7 +943,16 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.calcGripAngle">
-      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="4" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="40" Count="1" />
     </LineIds>
     <LineIds Name="FB_MasterArm.calcJaco">
       <LineId Id="126" Count="91" />
@@ -951,7 +1010,9 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.forwardKinematic">
-      <LineId Id="84" Count="32" />
+      <LineId Id="84" Count="3" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="89" Count="27" />
       <LineId Id="140" Count="7" />
       <LineId Id="29" Count="0" />
     </LineIds>
@@ -962,6 +1023,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="71" Count="0" />
       <LineId Id="54" Count="0" />
       <LineId Id="35" Count="0" />
+      <LineId Id="101" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="5" Count="0" />
@@ -1002,6 +1064,12 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
     </LineIds>
     <LineIds Name="FB_MasterArm.jaco.Get">
       <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jnt4LinkToMotor">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.jnt4MotorToLink">
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.jntExtTrq.Get">
       <LineId Id="2" Count="0" />
@@ -1075,8 +1143,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="80" Count="1" />
       <LineId Id="88" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="71" Count="0" />
+      <LineId Id="103" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="36" Count="1" />
       <LineId Id="43" Count="1" />
@@ -1084,6 +1151,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);]]></ST>
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="47" Count="0" />
+      <LineId Id="110" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
