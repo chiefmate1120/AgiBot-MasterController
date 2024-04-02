@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_MotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT

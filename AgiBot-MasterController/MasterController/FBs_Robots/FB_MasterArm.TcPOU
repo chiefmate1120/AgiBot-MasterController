@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -58,8 +58,6 @@ VAR
 	// joint position controller
 	m_jntPIDCtrl :ARRAY[1..g_mJntNum] OF FB_PID;
 	
-	hallSensorValue :LREAL;
-	normHallSensorValue: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -84,7 +82,8 @@ VAR_INPUT
 END_VAR
 
 VAR
-
+	hallSensorValue :LREAL;
+	normHallSensorValue: LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
