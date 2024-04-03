@@ -4,21 +4,25 @@
     <Declaration><![CDATA[TYPE E_SlaveArmState :
 (
 	SlaveArmState_Error := 1,
-	SlaveArmState_SelfCheck :=2,
-	SlaveArmState_Init :=3,
+	SlaveArmState_Init :=2,
+	SlaveArmState_SelfCheck :=3,
 	SlaveArmState_Standby :=4,
-	SlaveArmState_InstallPanel:=5,
+	SlaveArmState_MountPanel:=5,
 	SlaveArmState_PanelReady :=6,
-	SlaveArmState_InstallInstru :=7,
+	SlaveArmState_MountInstru :=7,
 	SlaveArmState_InstruReady :=8,
 	SlaveArmState_MasterSlave :=9,
-	SlaveArmState_InstallScope :=10,
-	SlaveArmState_ScopeReady :=11,
-	SlaveArmState_EndoScope :=12,
-	SlaveArmState_Cart := 13,
-	SlaveArmState_GravityCali := 14,
+	SlaveArmState_ScopeReady :=10,
+	SlaveArmState_EndoScope :=11,
+	SlaveArmState_Adjust :=12,
+	SlaveArmState_Package :=13,
+	SlaveArmState_Cart := 14,
+	SlaveArmState_GravityCali := 15,
+	SlaveArmState_Test := 16,
+	SlaveArmState_InstruRetract :=17,
+	SlaveArmState_InstruInvasion :=18,
 	
-	SlaveArmState_totalNum :=SlaveArmState_GravityCali
+	SlaveArmState_totalNum :=SlaveArmState_InstruInvasion
 );
 END_TYPE
 ]]></Declaration>
