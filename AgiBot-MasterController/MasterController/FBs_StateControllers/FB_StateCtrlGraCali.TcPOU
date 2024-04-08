@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlGraCali" Id="{531d8d14-1bd3-4a7e-a3de-2b1adfd1c86b}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Home Posture
 FUNCTION_BLOCK PUBLIC FB_StateCtrlGraCali EXTENDS FB_MasterArmCtrlBase
@@ -110,7 +110,10 @@ FOR j:=1 TO 7 DO
 startJntPos[j]:=m_graCaliTraj2[i_masterArm.armIdx,j];
 endJntPos[j]:=m_graCaliTraj3[i_masterArm.armIdx,j];
 END_FOR
-m_caliPlanner[3].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntAcc);]]></ST>
+m_caliPlanner[3].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntAcc);
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlGraCali">
@@ -130,6 +133,8 @@ m_caliPlanner[3].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_
       <LineId Id="139" Count="0" />
       <LineId Id="148" Count="5" />
       <LineId Id="147" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="169" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

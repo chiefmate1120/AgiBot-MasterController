@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_HandClutchCheck" Id="{2862370c-9cbe-4e26-a065-d84dc0dc8b05}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_HandClutchCheck
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	m_handClutchSwitch :BOOL;
+	m_handClutchOnCounts :INT;
+	m_handClutchOnCountThres :INT :=20;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="run" Id="{631928bb-17ad-4f7d-bb06-8ffb889b5b39}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	IOValue :UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (IOValue AND 10#3) > 0 THEN
+	m_handClutchOnCounts := MIN(m_handClutchOnCounts +1, m_handClutchOnCountThres);
+ELSE
+	 m_handClutchOnCounts :=0;
+END_IF
+
+m_handClutchSwitch:=m_handClutchOnCounts>=m_handClutchOnCountThres;
+run:=m_handClutchSwitch;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_HandClutchCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_HandClutchCheck.run">
+      <LineId Id="6" Count="5" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

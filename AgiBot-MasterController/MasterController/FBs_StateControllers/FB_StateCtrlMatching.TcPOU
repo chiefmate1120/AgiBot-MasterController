@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_StateCtrlMatching" Id="{886a3c3b-c6fb-4a12-8c63-bddb11202d66}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Orientation Matching
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMatching EXTENDS FB_MasterArmCtrlBase
@@ -18,7 +18,7 @@ VAR
 	
 	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
 	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0];
-	m_maxMatchJntJerk:Vec7d:=[7(4.0)];
+	m_maxMatchJntJerk:Vec7d:=[7(10.0)];
 	
 	m_rotErrAng :LREAL;
 
@@ -59,7 +59,7 @@ END_VAR]]></Declaration>
 	matTranspose(i_masterArm.curCartPose.m_rot, invRot);
 	matMultiply(invRot, m_cmdCartPose.m_rot, rotErr);
 	rot2AngAxis(rotErr, angle=>m_rotErrAng,axis=>);
-	m_isFinished :=( m_timePeriod > m_matchTrajPlanner.duration AND  ABS(m_rotErrAng < g_jntCtrlAngTolHigh));
+	m_isFinished := abs(i_masterArm.curJntPos[6]-m_targetJntPos[6])<g_jntCtrlAngTolHigh AND  ABS(m_rotErrAng < g_jntCtrlAngTolHigh);
 	
 	RETURN;
 END_IF
@@ -84,11 +84,7 @@ END_IF
 
 // try IK with joint4 at minimal limit
 IF NOT m_IKSuccess THEN
-	IF 1=i_masterArm.armIdx THEN
-		q4:= g_minJntPos[1,4];
-	ELSE
-		q4:= g_minJntPos[2,4];
-	END_IF
+	q4:= g_minJntPos[i_masterArm.armIdx,4];
 	
 	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],q4);
 	matTranspose(rot, invRot);
@@ -98,11 +94,7 @@ END_IF
 
 // try IK with joint4 at maximum limit
 IF NOT m_IKSuccess THEN
-	IF 1=i_masterArm.armIdx THEN
-		q4:= g_maxJntPos[1,4];
-	ELSE
-		q4:= g_maxJntPos[2,4];
-	END_IF
+	q4:= g_maxJntPos[i_masterArm.armIdx,4];
 	
 	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],q4);
 	matTranspose(rot, invRot);
@@ -239,7 +231,10 @@ m_jntOPMode[5]:=DriverOPMode_PosTrq;
 m_jntOPMode[6]:=DriverOPMode_PosTrq;
 m_jntOPMode[7]:=DriverOPMode_PosTrq;
 *)
-m_IKSuccess:=false;
+m_IKSuccess:=FALSE;
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -303,8 +298,8 @@ q4:=atan2(s4,c4);
 IF q4> g_minJntPos[1,4] AND q4<g_maxJntPos[1,4] THEN
 	leftWristOptIK:=TRUE;
 	RETURN;
-ELSIF q4< g_minJntPos[1,4] AND q4+2*pi< g_maxJntPos[1,4] THEN
-	q4:=q4+2*PI;
+ELSIF q4> g_maxJntPos[1,4] AND q4-2*pi< g_minJntPos[1,4] THEN
+	q4:=q4-2*PI;
 	leftWristOptIK:=TRUE;
 	RETURN;
 END_IF
@@ -331,8 +326,8 @@ q4:=atan2(s4,c4);
 IF q4> g_minJntPos[1,4] AND q4<g_maxJntPos[1,4] THEN
 	leftWristOptIK:=TRUE;
 	RETURN;
-ELSIF q4< g_minJntPos[1,4] AND q4+2*pi< g_maxJntPos[1,4] THEN
-	q4:=q4+2*PI;
+ELSIF q4> g_maxJntPos[1,4] AND q4-2*pi< g_minJntPos[1,4] THEN
+	q4:=q4-2*PI;
 	leftWristOptIK:=TRUE;
 	RETURN;
 END_IF
@@ -512,14 +507,14 @@ wristIK:=true;
       <LineId Id="264" Count="0" />
       <LineId Id="261" Count="0" />
       <LineId Id="260" Count="0" />
-      <LineId Id="265" Count="1" />
-      <LineId Id="268" Count="1" />
-      <LineId Id="267" Count="0" />
+      <LineId Id="266" Count="0" />
       <LineId Id="262" Count="0" />
       <LineId Id="271" Count="2" />
       <LineId Id="270" Count="0" />
       <LineId Id="263" Count="0" />
-      <LineId Id="275" Count="12" />
+      <LineId Id="275" Count="2" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="283" Count="4" />
       <LineId Id="274" Count="0" />
       <LineId Id="250" Count="1" />
       <LineId Id="288" Count="0" />
@@ -565,6 +560,8 @@ wristIK:=true;
       <LineId Id="92" Count="2" />
       <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="104" Count="1" />
+      <LineId Id="103" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.leftWristOptIK">
@@ -580,7 +577,9 @@ wristIK:=true;
       <LineId Id="234" Count="3" />
       <LineId Id="195" Count="1" />
       <LineId Id="198" Count="17" />
-      <LineId Id="238" Count="10" />
+      <LineId Id="238" Count="5" />
+      <LineId Id="281" Count="0" />
+      <LineId Id="245" Count="3" />
       <LineId Id="59" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.rightWristOptIK">

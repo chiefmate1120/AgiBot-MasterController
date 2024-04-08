@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -11,10 +11,15 @@ VAR
 	// arm index, 1 for left arm, 2 for right arm
 	m_armIdx: INT;
 	
-	// grip angle from hall sensor IO
-	m_gripHallSensorValue AT%I* :UDINT;
+	// grip angle calculator
+	m_gripHallSensorIO AT%I* :UDINT;	
+	m_gripAngleCalc : FB_GripAngleCalc;
 	m_gripAngle :LREAL;
-	m_gripAngLpf : FB_LowPassFilter;
+	
+	//hand clutch switch IO
+	m_handClutchIO AT%I*:UDINT;
+	m_handClutchCheck :FB_HandClutchCheck;
+	m_handClutchSwitch :BOOL;
 	
 	// joints
 	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
@@ -75,37 +80,6 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="calcGripAngle" Id="{1d10bbaa-14df-41ac-8838-f8438ee55415}">
-      <Declaration><![CDATA[// TODO
-METHOD PROTECTED calcGripAngle : LREAL
-VAR_INPUT
-END_VAR
-
-VAR
-	hallSensorValue :LREAL;
-	normHallSensorValue: LREAL;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[// sensor io parse
-hallSensorValue:=(m_gripHallSensorValue/65536) AND 16#0000FFFF; //high 16 bits
-
-// normalize hall sensor value
-normHallSensorValue:=LIMIT(0, (hallSensorValue-g_minHallSensorValue)/g_hallSenorRange, 1);
-
-// grip angle fitting
-calcGripAngle := g_masterGripAngleFitCoeff[1] * EXPT(normHallSensorValue,5)
-			+ g_masterGripAngleFitCoeff[2] * EXPT(normHallSensorValue,4)
-			+ g_masterGripAngleFitCoeff[3] * EXPT(normHallSensorValue,3)
-			+ g_masterGripAngleFitCoeff[4] * EXPT(normHallSensorValue,2)
-			+ g_masterGripAngleFitCoeff[5] * EXPT(normHallSensorValue,1)
-			+ g_masterGripAngleFitCoeff[6];
-	
-// filt and cap the result
-calcGripAngle := m_gripAngLpf.run(calcGripAngle);
-calcGripAngle := LIMIT(g_minGripAngle, calcGripAngle, g_maxGripAngle);]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
       <Declaration><![CDATA[METHOD PUBLIC calcJaco : BOOL
 VAR_IN_OUT CONSTANT
@@ -478,6 +452,17 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Property Name="handClutchSwitch" Id="{0795f1a7-d600-4b6e-a827-c75cf14d164e}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY handClutchSwitch : BOOL]]></Declaration>
+      <Get Name="Get" Id="{52f21347-ac12-4dc6-990c-bcc0a2a6e983}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[handClutchSwitch :=m_handClutchSwitch;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="init" Id="{d7bcc040-c32e-4455-ab43-70de0dc2919e}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_INPUT
@@ -491,7 +476,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// arm statues init
 m_armIdx:=i_armIdx;
 m_gripAngle:=0;
-m_gripAngLpf.init(1, g_gripAngLpfCutoffFreq, g_armCtrlFreq);
+m_gripAngleCalc.init();
 
 // joint init
 FOR i:=1 TO g_mJntNum DO
@@ -904,7 +889,10 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// grip angle
-m_gripAngle :=calcGripAngle();
+m_gripAngle :=m_gripAngleCalc.run(m_gripHallSensorIO);
+
+// check hand clutch
+m_handClutchSwitch :=  m_handClutchCheck.run(m_handClutchIO);
 
 // update joint data
 FOR i:=1 TO g_mJntNum DO
@@ -940,18 +928,6 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
     </LineIds>
     <LineIds Name="FB_MasterArm.armIdx.Get">
       <LineId Id="2" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_MasterArm.calcGripAngle">
-      <LineId Id="10" Count="1" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="35" Count="4" />
-      <LineId Id="42" Count="1" />
-      <LineId Id="40" Count="1" />
     </LineIds>
     <LineIds Name="FB_MasterArm.calcJaco">
       <LineId Id="126" Count="91" />
@@ -1016,6 +992,9 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.gripAngle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.handClutchSwitch.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.init">
@@ -1131,7 +1110,11 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateStatus">
-      <LineId Id="30" Count="2" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="118" Count="0" />
       <LineId Id="14" Count="0" />
       <LineId Id="26" Count="3" />
       <LineId Id="5" Count="0" />

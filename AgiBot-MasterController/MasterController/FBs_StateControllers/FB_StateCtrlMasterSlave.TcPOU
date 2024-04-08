@@ -110,6 +110,9 @@ m_jntOPMode := g_allTrqMode;
 // init controller
 m_redunJntCtrl.init(i_masterArm);
 
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);
+
 
 ]]></ST>
       </Implementation>
@@ -146,6 +149,8 @@ m_redunJntCtrl.init(i_masterArm);
       <LineId Id="115" Count="0" />
       <LineId Id="16" Count="1" />
       <LineId Id="59" Count="0" />
+      <LineId Id="128" Count="1" />
+      <LineId Id="127" Count="0" />
       <LineId Id="89" Count="0" />
       <LineId Id="91" Count="0" />
       <LineId Id="74" Count="0" />

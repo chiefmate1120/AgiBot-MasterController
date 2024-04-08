@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlHome" Id="{ff8ccb3f-4929-4315-b540-e9546f2dbd07}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Home Posture
 FUNCTION_BLOCK PUBLIC FB_StateCtrlHome EXTENDS FB_MasterArmCtrlBase
@@ -65,7 +65,10 @@ startJntPos:=i_masterArm.curJntPos;
 FOR j:=1 TO 7 DO 
 endJntPos[j]:=g_homePosture[i_masterArm.armIdx,j];
 END_FOR
-m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeMaxjntJerk);]]></ST>
+m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeMaxjntJerk);
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlHome">
@@ -93,6 +96,8 @@ m_homePlanner.init(startJntPos,endJntPos,g_homeMaxjntVel,g_homeMaxjntAcc,g_homeM
       <LineId Id="86" Count="0" />
       <LineId Id="99" Count="0" />
       <LineId Id="74" Count="0" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="112" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

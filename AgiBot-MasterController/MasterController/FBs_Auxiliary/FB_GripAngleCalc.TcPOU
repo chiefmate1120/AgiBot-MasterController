@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_GripAngleCalc" Id="{1d1f59c4-2943-4ee4-8e94-d36cfa692bb0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_GripAngleCalc
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// grip angle from hall sensor IO
+	m_gripHallSenorValue :LREAL;
+	m_normHallSensorValue: LREAL;
+	m_gripAngle :LREAL;
+	m_gripAngLpf : FB_LowPassFilter;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="init" Id="{e4f56e13-70f8-4942-94ed-464230d0ebf2}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_gripAngLpf.init(1, g_gripAngLpfCutoffFreq, g_armCtrlFreq);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{55aa24f7-dd28-41ed-8903-b3831602df36}">
+      <Declaration><![CDATA[METHOD run : LREAL
+VAR_INPUT
+	IOValue : UDINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// sensor io parse
+m_gripHallSenorValue:=(IOValue/65536) AND 16#0000FFFF; //high 16 bits
+
+// normalize hall sensor value
+m_normHallSensorValue:=LIMIT(0, (m_gripHallSenorValue-g_minHallSensorValue)/g_hallSenorRange, 1);
+
+// grip angle fitting
+m_gripAngle := g_masterGripAngleFitCoeff[1] * EXPT(m_normHallSensorValue,5)
+			+ g_masterGripAngleFitCoeff[2] * EXPT(m_normHallSensorValue,4)
+			+ g_masterGripAngleFitCoeff[3] * EXPT(m_normHallSensorValue,3)
+			+ g_masterGripAngleFitCoeff[4] * EXPT(m_normHallSensorValue,2)
+			+ g_masterGripAngleFitCoeff[5] * EXPT(m_normHallSensorValue,1)
+			+ g_masterGripAngleFitCoeff[6];
+	
+// filt and cap the result
+m_gripAngle := m_gripAngLpf.run(m_gripAngle);
+m_gripAngle := LIMIT(g_minGripAngle, m_gripAngle, g_maxGripAngle);
+
+run:=m_gripAngle;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_GripAngleCalc">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GripAngleCalc.init">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_GripAngleCalc.run">
+      <LineId Id="6" Count="15" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

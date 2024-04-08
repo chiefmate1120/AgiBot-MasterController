@@ -62,7 +62,7 @@ g_masterArmDH:ARRAY[1..9,1..4] OF LREAL :=[0,	0,		g_d1,	0,
 											
 // master grip angle fitting coefficients(wrt normalized hall sensor value)
 g_masterGripAngleFitCoeff : ARRAY[1..6] OF LREAL :=
-	[-2.76766545, 8.744429877, -10.74377687, 6.69841, -2.449592087, 0.5431400097];
+	[-2.767665451, 8.744429877, -10.74377687, 6.69841, -2.449592087, 0.5188884865];
 g_maxGripAngle : LREAL := 30.0 * g_deg2Rad;
 g_minGripAngle :LREAL  := 0.0;
 

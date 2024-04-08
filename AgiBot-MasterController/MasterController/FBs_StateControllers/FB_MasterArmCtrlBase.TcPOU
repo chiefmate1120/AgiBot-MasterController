@@ -85,6 +85,22 @@ checkToHoldLastCmds := (maxJntErr<g_jntCtrlErrForCmdHold);
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="copyCmds" Id="{e9e5f0a1-1fa4-4d4d-889b-b9e9ec07137a}">
+      <Declaration><![CDATA[METHOD copyCmds : BOOL
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_masterArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
+r_masterArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
+r_masterArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
+r_masterArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
+r_masterArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
+r_masterArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
+r_masterArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
+r_masterArmCtrlCmd.m_jntOPMode:=m_jntOPMode;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{63e02c69-11c3-4e06-9c58-dcaf1b3a881b}">
       <Declaration><![CDATA[// override this function in each exact controller
 // NOTICE: set joint control mode here, and do some initialization if needed
@@ -112,14 +128,7 @@ m_cmdJntAcc:=g_zeroVec7d;
 m_cmdJntTrq:=g_zeroVec7d;
 
 // update commands to arm
-r_masterArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
-r_masterArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
-r_masterArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
-r_masterArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
-r_masterArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
-r_masterArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
-r_masterArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
-r_masterArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+copyCmds(r_masterArmCtrlCmd);
 ]]></ST>
       </Implementation>
     </Method>
@@ -166,7 +175,7 @@ END_IF
 
 // check if arm enabled
 IF FALSE = i_masterArm.isEnabled(m_jntEnableFlag) THEN
-//	RETURN;
+	RETURN;
 END_IF
 
 // calculate command joint position--Motion control
@@ -176,14 +185,7 @@ calcCmdJntPos(i_slaveIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 calcCmdJntTrq(i_slaveIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 
 // update commands to arm
-r_masterArmCtrlCmd.m_jntEnableFlag :=m_jntEnableFlag;
-r_masterArmCtrlCmd.m_cmdCartPose:=m_cmdCartPose;
-r_masterArmCtrlCmd.m_cmdCartTwist:=m_cmdCartTwist;
-r_masterArmCtrlCmd.m_cmdJntPos:=m_cmdJntPos;
-r_masterArmCtrlCmd.m_cmdJntVel:=m_cmdJntVel;
-r_masterArmCtrlCmd.m_cmdJntAcc:=m_cmdJntAcc;
-r_masterArmCtrlCmd.m_cmdJntTrq:=m_cmdJntTrq;
-r_masterArmCtrlCmd.m_jntOPMode:=m_jntOPMode;
+copyCmds(r_masterArmCtrlCmd);
 
 // update time period
 m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
@@ -206,6 +208,10 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterArmCtrlBase.copyCmds">
+      <LineId Id="8" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.init">
       <LineId Id="49" Count="0" />
       <LineId Id="61" Count="0" />
@@ -218,7 +224,8 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
       <LineId Id="50" Count="0" />
       <LineId Id="38" Count="0" />
       <LineId Id="84" Count="0" />
-      <LineId Id="86" Count="8" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="94" Count="0" />
       <LineId Id="83" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCtrlBase.isFinished.Get">
@@ -239,13 +246,8 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
       <LineId Id="17" Count="0" />
       <LineId Id="11" Count="0" />
       <LineId Id="19" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="91" Count="1" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="26" Count="1" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="27" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
       <LineId Id="10" Count="0" />

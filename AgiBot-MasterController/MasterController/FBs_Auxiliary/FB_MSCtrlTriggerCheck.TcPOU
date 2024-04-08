@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MSCtrlTriggerCheck" Id="{636c1ff6-aa47-444d-ac82-ac1207a0e0c5}" SpecialFunc="None">
+    <Declaration><![CDATA[//NOTE：this block would stop checking once a trigger is detected. 
+//	re-init this block if want to start another check
+FUNCTION_BLOCK FB_MSCtrlTriggerCheck
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// flag if master-slave control is enabled
+	m_MSCtrlTrigger :BOOL;
+	
+	// block run time
+	m_timePeriod :LREAL;
+	
+	// gripper state: 0-init, 1-open, 2-close, 3-reopen, 1-2-3 for one grip action
+	m_gripperState :INT;
+	
+	// grip action counts
+	m_gripActionCounts :INT;
+
+	// two grip action within this duration indication to enable master-slave control
+	m_checkDuration : LREAL;
+	
+	// time cycle
+	m_timeCycle :LREAL;
+	
+	// time stamp for first grip
+	m_firstGripTime :LREAL;
+	
+	// angle threshold indicating gripper open
+	m_openAngThres :LREAL := g_maxGripAngle * 0.8;
+	
+	// angle threshold indicating gripper close
+	m_closeAngThres :LREAL := 2.0 *g_deg2rad;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="gripActionCheck" Id="{f4d967c1-2379-40e6-9da8-88bd04c5294b}">
+      <Declaration><![CDATA[METHOD gripActionCheck : BOOL
+VAR_INPUT
+	i_gripAngle :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[gripActionCheck:=false;
+CASE m_gripperState OF 
+	0:
+		IF i_gripAngle > m_openAngThres THEN
+			m_gripperState :=1;
+		END_IF
+		
+	1: IF i_gripAngle < m_openAngThres AND i_gripAngle > m_closeAngThres THEN
+			m_gripperState:=2;
+		END_IF
+		
+	2:
+		IF i_gripAngle < m_closeAngThres THEN
+			m_gripperState :=3;
+		ELSIF i_gripAngle > m_openAngThres THEN
+			m_gripperState :=1;
+		END_IF
+	3:
+		IF i_gripAngle > m_openAngThres THEN
+			m_gripperState :=4;
+		END_IF
+	4:
+		gripActionCheck:=TRUE;
+		m_gripperState:=0;
+END_CASE]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{018ed218-08b5-486a-a90f-59216f36b894}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_timeCycle :LREAL;
+	i_checkDuration :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_timeCycle :=i_timeCycle;
+m_checkDuration := i_checkDuration;
+m_gripperState:=0;
+m_gripActionCounts:=0;
+m_MSCtrlTrigger :=false;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{daea767c-bf3c-41b3-8be1-c82ba8609916}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_gripperState:=0;
+m_gripActionCounts:=0;
+m_MSCtrlTrigger :=FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{81d1deb4-e804-44ce-bcbb-550e871aa806}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+	i_gripAngle :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_MSCtrlTrigger THEN
+	run := TRUE;
+	RETURN;
+END_IF
+
+m_timePeriod := m_timePeriod + m_timeCycle;
+
+// detect one grip action
+IF gripActionCheck(i_gripAngle) THEN
+	m_gripActionCounts:=m_gripActionCounts+1;
+	
+	// first grip
+	IF 1=m_gripActionCounts THEN
+		m_firstGripTime := m_timePeriod;
+	ELSIF m_gripActionCounts>=2 THEN
+		// second grip and trigger success
+		IF m_timePeriod - m_firstGripTime < m_checkDuration THEN
+			m_MSCtrlTrigger :=TRUE;
+		ELSE
+		// set second grip as new first one
+			m_gripActionCounts:=1;
+			m_firstGripTime:=m_timePeriod;
+		END_IF
+	END_IF
+END_IF
+
+
+run :=FALSE;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MSCtrlTriggerCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MSCtrlTriggerCheck.gripActionCheck">
+      <LineId Id="45" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="23" Count="2" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="32" Count="1" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MSCtrlTriggerCheck.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="13" Count="2" />
+    </LineIds>
+    <LineIds Name="FB_MSCtrlTriggerCheck.reset">
+      <LineId Id="6" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MSCtrlTriggerCheck.run">
+      <LineId Id="26" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="36" Count="11" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

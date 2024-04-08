@@ -1015,7 +1015,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{4E488CF9-632D-D2D5-C7C3-C822660F0D36}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{F9838E81-0E26-AE7E-F521-CCF025316A0B}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1026,8 +1026,13 @@
 							<Type GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
-							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorValue</Name>
-							<Comment><![CDATA[ grip angle from hall sensor IO]]></Comment>
+							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorIO</Name>
+							<Comment><![CDATA[ grip angle calculator]]></Comment>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterRobot.m_masterArms[1].m_handClutchIO</Name>
+							<Comment><![CDATA[hand clutch switch IO]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
@@ -1066,8 +1071,13 @@
 							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
 						</Var>
 						<Var>
-							<Name>MasterArmControl.m_masterRobot.m_masterArms[2].m_gripHallSensorValue</Name>
-							<Comment><![CDATA[ grip angle from hall sensor IO]]></Comment>
+							<Name>MasterArmControl.m_masterRobot.m_masterArms[2].m_gripHallSensorIO</Name>
+							<Comment><![CDATA[ grip angle calculator]]></Comment>
+							<Type>UDINT</Type>
+						</Var>
+						<Var>
+							<Name>MasterArmControl.m_masterRobot.m_masterArms[2].m_handClutchIO</Name>
+							<Comment><![CDATA[hand clutch switch IO]]></Comment>
 							<Type>UDINT</Type>
 						</Var>
 						<Var>
@@ -1246,6 +1256,24 @@
 						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterArmControl^MasterArmControl Instance" Type="2">
 							<OwnerB Name="TIPC^MasterArmControl^MasterArmControl Instance">
 								<Link VarA="RobotDynamics.m_masterDynaData" TypeA="ST_MasterDynaData" InOutA="1" GuidA="{CC14C054-64DF-A3DA-F72F-4AF3A03A1CDC}" VarB="PlcTask Inputs^MasterArmControl.m_masterInputDataPool.m_masterDynaData" RestoreInfo="BNotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-04-07T10:01:14">
+						<OwnerA Name="InputDst" Prefix="TIPC^MasterController^MasterController Instance" Type="1">
+							<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint7 (AX58200_MotorControl)">
+								<Link VarA="MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorValue" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+							<OwnerB Name="TIID^RightArm (EtherCAT)^Joint7 (AX58200_MotorControl)">
+								<Link VarA="MasterArmControl.m_masterRobot.m_masterArms[2].m_gripHallSensorValue" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+					<UnrestoredVarLinks ImportTime="2024-04-07T16:06:43">
+						<OwnerA Name="InputDst" Prefix="TIPC^MasterController^MasterController Instance" Type="1">
+							<OwnerB Name="TIID^RightArm (EtherCAT)^Joint7 (AX58200_MotorControl)">
+								<Link VarA="MasterArmControl.m_masterRobot.m_masterArms[2].m_gripAngleCalc.m_gripHallSensorIO" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^analog input" RestoreInfo="ANotFound"/>
+								<Link VarA="MasterArmControl.m_masterRobot.m_masterArms[2].m_handClutchCheck.m_handClutchIO" TypeA="UDINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000008}" VarB="TxPdoMappingCspCsv^digital input" RestoreInfo="ANotFound"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
@@ -4026,7 +4054,6 @@
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[6].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint7 (AX58200_MotorControl)">
-				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_gripHallSensorValue" VarB="TxPdoMappingCspCsv^analog input"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[7].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[7].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[7].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
@@ -4104,9 +4131,9 @@
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[6].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Joint7 (AX58200_MotorControl)">
-				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_gripHallSensorValue" VarB="TxPdoMappingCspCsv^analog input"/>
+				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_gripHallSensorIO" VarB="TxPdoMappingCspCsv^analog input"/>
+				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_handClutchIO" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorInputs^m_driverError" VarB="TxPdoMappingCspCsv^digital input"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[2].m_joints[7].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>

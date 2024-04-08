@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlTest" Id="{0c47bb14-eaef-4d00-89db-6153e5307754}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Test
 FUNCTION_BLOCK PUBLIC FB_StateCtrlTest EXTENDS FB_MasterArmCtrlBase
@@ -82,7 +82,10 @@ m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
 // init
 SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
 
-m_initJntPos := i_masterArm.curJntPos;]]></ST>
+m_initJntPos := i_masterArm.curJntPos;
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlTest">
@@ -113,6 +116,8 @@ m_initJntPos := i_masterArm.curJntPos;]]></ST>
       <LineId Id="67" Count="4" />
       <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="90" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

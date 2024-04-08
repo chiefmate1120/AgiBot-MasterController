@@ -214,6 +214,15 @@
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_GripAngleCalc.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_HandClutchCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_MSCtrlTriggerCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_BasicControllers\FB_boundaryForceFeedback.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -432,6 +441,7 @@
     <Folder Include="FBs_StateControllers" />
     <Folder Include="FBs_Robots" />
     <Folder Include="FBs_Observer" />
+    <Folder Include="FBs_Auxiliary" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

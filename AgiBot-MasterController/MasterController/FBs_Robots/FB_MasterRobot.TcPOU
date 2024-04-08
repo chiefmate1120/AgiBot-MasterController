@@ -29,8 +29,9 @@ VAR
 	m_instruArmState:ARRAY [1..g_mArmNum] OF E_SlaveArmState:=[SlaveArmState_Error, SlaveArmState_Error];
 	m_scopeArmState :E_SlaveArmState := SlaveArmState_Error;
 	
-	// master and slave grip match flag
-	m_gripMatchFlag :ARRAY[1..g_mArmNum] OF BOOL:=[false, false];
+	// flag to enter master-slave control, triggerd by pinching the gripper twice in on second
+	m_MSCtrlTriggerFlag :ARRAY[1..g_mArmNum] OF BOOL:=[FALSE, FALSE];
+	m_MSCtrlTriggerCheck :ARRAY[1..g_mArmNum] OF FB_MSCtrlTriggerCheck;
 	
 	// all arm controller instance 
 	m_armCtrlFactory :ARRAY[1..g_mArmNum,1..MasterArmState_totalNum] OF I_MasterArmCtrl;
@@ -146,17 +147,6 @@ FOR i:=1 TO g_mArmNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
-    <Method Name="gripMatchCheck" Id="{fc0f22fc-348f-4e63-873d-edef8758fcd0}">
-      <Declaration><![CDATA[// check if master and slave grip angle is matched before entring master-slave controller
-METHOD gripMatchCheck : BOOL
-VAR_IN_OUT CONSTANT
-	i_slaveStatus :ST_SlaveStatus;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
-      </Implementation>
-    </Method>
     <Method Name="Init" Id="{610a17f3-34c5-4e3c-bbbc-19f9c2f46946}">
       <Declaration><![CDATA[METHOD PUBLIC Init : BOOL
 VAR_INPUT
@@ -204,8 +194,34 @@ FOR i:=1 TO g_mArmNum DO
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
 	m_armCtrl[i].Init(m_masterArms[i],m_armCtrlCmds[i]);
+	
+	// init master-slave trigger
+	m_MSCtrlTriggerCheck[i].init(g_armCtrlCycleTime, 2);
 END_FOR
 	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="MSCtrlTriggerCheck" Id="{848392d9-479b-4441-b2d2-6aff07409695}">
+      <Declaration><![CDATA[METHOD MSCtrlTriggerCheck : BOOL
+VAR_IN_OUT CONSTANT
+		i_masterInputDataPool:ST_MasterInputDataPool;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_mArmNum DO
+	IF MasterArmState_Ready = m_masterArmState[i] AND SlaveArmState_InstruReady = m_instruArmState[i] 
+		AND SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartStatus.m_surgonReady THEN
+		m_MSCtrlTriggerFlag[i]:=m_MSCtrlTriggerCheck[i].run(m_masterArms[i].gripAngle);
+	END_IF
+	
+	IF  MatchedSlaveArmIdx_NULL =  m_teleSlaveArmIdx[i] OR   NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) 
+		OR 	NOT(i_masterInputDataPool.m_slaveStatus.m_instruStauts[m_teleSlaveArmIdx[i]].m_ready) THEN
+		m_MSCtrlTriggerFlag[i]:=FALSE;
+		m_MSCtrlTriggerCheck[i].reset();
+	END_IF  
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{ed6f787a-4dc0-4602-b386-92a3c3880a23}">
@@ -295,11 +311,11 @@ FOR i:=1 TO g_sArmNum DO
 	END_IF
 END_FOR
 
-// check if master-slave grip angle match
-gripMatchCheck(i_masterInputDataPool.m_slaveStatus);
-
 // Test Code
 m_scopeArmState := SlaveArmState_ScopeReady; 
+
+// check if master-slave grip angle match
+MSCtrlTriggerCheck(i_masterInputDataPool);
 
 // State machine transit 
 FOR i:=1 TO g_mArmNum DO
@@ -332,7 +348,7 @@ FOR i:=1 TO g_mArmNum DO
 			IF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState THEN
 				m_nextMasterArmState[i]:=MasterArmState_Matching;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -358,14 +374,14 @@ FOR i:=1 TO g_mArmNum DO
 			IF SlaveArmState_InstruReady <> m_instruArmState[i] OR SlaveArmState_ScopeReady <> m_scopeArmState THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
 				m_nextMasterArmState[i] := MasterArmState_Cart;
 			// to master-slave
 			ELSIF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
-					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_gripMatchFlag[i] THEN
+					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_MSCtrlTriggerFlag[i] THEN
 				m_nextMasterArmState[i] := MasterArmState_MasterSlave;
 			END_IF
 		
@@ -376,7 +392,7 @@ FOR i:=1 TO g_mArmNum DO
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch THEN
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -386,7 +402,7 @@ FOR i:=1 TO g_mArmNum DO
 		//Clutch
 		MasterArmState_Clutch:
 			// to standby
-			IF NOT(i_masterInputDataPool.m_cartStatus.m_clutchSwitch) THEN
+			IF NOT(i_masterInputDataPool.m_cartStatus.m_clutchSwitch) AND NOT(m_masterArms[i].handClutchSwitch) THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			END_IF
 		
@@ -396,6 +412,9 @@ FOR i:=1 TO g_mArmNum DO
 			IF NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) OR SlaveArmState_ScopeReady <> m_scopeArmState
 						OR SlaveArmState_EndoScope <> m_scopeArmState THEN
 				m_nextMasterArmState[i] := MasterArmState_Standby;
+			// to clutch
+			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
+				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
 				m_nextMasterArmState[i] := MasterArmState_Cart;
@@ -494,9 +513,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="40" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
-    <LineIds Name="FB_MasterRobot.gripMatchCheck">
-      <LineId Id="5" Count="0" />
-    </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
       <LineId Id="116" Count="0" />
       <LineId Id="118" Count="0" />
@@ -515,8 +531,18 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="101" Count="0" />
+      <LineId Id="125" Count="2" />
       <LineId Id="13" Count="0" />
       <LineId Id="61" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.MSCtrlTriggerCheck">
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="10" Count="3" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.run">
       <LineId Id="78" Count="0" />
@@ -567,12 +593,10 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="205" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="202" Count="0" />
-      <LineId Id="280" Count="0" />
+      <LineId Id="299" Count="2" />
+      <LineId Id="297" Count="0" />
       <LineId Id="251" Count="0" />
       <LineId Id="281" Count="0" />
-      <LineId Id="283" Count="0" />
-      <LineId Id="250" Count="0" />
-      <LineId Id="249" Count="0" />
       <LineId Id="252" Count="0" />
       <LineId Id="189" Count="0" />
       <LineId Id="5" Count="0" />
@@ -634,6 +658,8 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="173" Count="0" />
       <LineId Id="228" Count="0" />
       <LineId Id="175" Count="0" />
+      <LineId Id="293" Count="1" />
+      <LineId Id="292" Count="0" />
       <LineId Id="275" Count="1" />
       <LineId Id="274" Count="0" />
       <LineId Id="170" Count="0" />
