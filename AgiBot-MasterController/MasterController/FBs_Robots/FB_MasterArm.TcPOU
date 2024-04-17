@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 // NOTICE: all joints are the ture active joints, not DH ones!
@@ -839,6 +839,7 @@ FOR i:=1 TO g_mJntNum DO
 		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSIF i_armCtrlCmd.m_jntOPMode[i]=DriverOPMode_Trq THEN
 		// gravity feedforward
+		m_jntPIDCtrl[i].reset();
 		m_cmdJntTrq[i]:=m_cmdJntTrq[i]+m_jntGravity[i];
 		m_joints[i].updateCmds(DriverOPMode_Trq,i_armCtrlCmd.m_cmdJntPos[i],m_cmdJntTrq[i]);
 	ELSE
@@ -1089,6 +1090,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
       <LineId Id="25" Count="0" />
       <LineId Id="16" Count="0" />
       <LineId Id="23" Count="0" />
+      <LineId Id="100" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="21" Count="0" />
