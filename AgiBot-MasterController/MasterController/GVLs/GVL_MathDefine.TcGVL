@@ -7,6 +7,7 @@
 	g_largeNum: LREAL :=1E16;
 	g_deg2Rad :LREAL := pi/180.0;
 	g_rad2Deg :LREAL := 180.0/pi;
+	g_2pi :LREAL := 2*PI;
 	
 	g_eye3d :Mat3d:=[1, 0, 0,
 					 0, 1, 0,

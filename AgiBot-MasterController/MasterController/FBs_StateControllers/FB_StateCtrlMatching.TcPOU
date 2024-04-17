@@ -45,6 +45,7 @@ var
 	
 	wristRotInJnt3, wristRotInJnt4 :Mat3d;
 	rot, invRot :Mat3d;
+	cycleNum:INT;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF m_IKSuccess THEN 
@@ -108,7 +109,14 @@ IF m_IKSuccess THEN
 	m_targetJntPos[4]:=i_masterArm.jnt4LinkToMotor(m_targetJntPos[2],m_targetJntPos[3],q4);
 	m_targetJntPos[5]:=q5;
 	m_targetJntPos[6]:=q6;
-	m_targetJntPos[7]:=q7;
+	
+	// handle multiple cycles of joint7
+	IF ABS(i_masterArm.curJntPos[7] - q7) > PI THEN
+		cycleNum := LREAL_TO_INT((i_masterArm.curJntPos[7]-q7)/g_2pi);
+		m_targetJntPos[7] := cycleNum * g_2pi + q7;
+	ELSE
+		m_targetJntPos[7]:= q7;
+	END_IF
 
 	m_matchTrajPlanner.init(m_cmdJntPos,m_targetJntPos,m_maxMatchJntVel,m_maxMatchJntAcc,m_maxMatchJntJerk);
 	m_timePeriod :=0;
@@ -519,7 +527,12 @@ wristIK:=true;
       <LineId Id="250" Count="1" />
       <LineId Id="288" Count="0" />
       <LineId Id="252" Count="0" />
-      <LineId Id="256" Count="3" />
+      <LineId Id="256" Count="2" />
+      <LineId Id="389" Count="3" />
+      <LineId Id="396" Count="0" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="397" Count="0" />
+      <LineId Id="393" Count="0" />
       <LineId Id="255" Count="0" />
       <LineId Id="249" Count="0" />
       <LineId Id="327" Count="0" />
