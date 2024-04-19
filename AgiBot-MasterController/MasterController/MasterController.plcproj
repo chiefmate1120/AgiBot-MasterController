@@ -220,6 +220,9 @@
     <Compile Include="FBs_Auxiliary\FB_HandClutchCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Auxiliary\FB_MSCtrlTriggerCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -266,6 +269,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_RobotDynamics\FB_MasterFriciton.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_ArmJoint.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_CartJoint.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_JointBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Robots\FB_MasterCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlClutch.TcPOU">
@@ -376,9 +391,6 @@
     <Compile Include="AgiMaths\cot.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_Robots\FB_Joint.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="FBs_Robots\FB_MasterArm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -397,6 +409,9 @@
     <Compile Include="FBs_StateControllers\I_MasterArmCtrl.TcIO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mains\CartControl.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -413,6 +428,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\RobotDynamics.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskCartControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskDynamic.TcTTO">
@@ -461,10 +479,17 @@
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Utilities">
       <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_Module">
       <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="UML State Chart Types">
+      <DefaultResolution>UML Statechart Types, 4.1.1.0 (3S - Smart Software Solutions GmbH)</DefaultResolution>
+      <Namespace>UML_SC</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+      <ResolverGuid>d9a6b70a-92f0-4827-8ca3-8ce8a61652d9</ResolverGuid>
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>
@@ -492,7 +517,10 @@
         <o>
           <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
           <d n="SubKeys" t="Hashtable" />
-          <d n="Values" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>CurrentUmlCompilerVersion</v>
+            <v>4.2.1.0</v>
+          </d>
         </o>
         <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
         <o>

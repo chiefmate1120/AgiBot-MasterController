@@ -1,11 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_Joint" Id="{9ce08388-a134-4497-8af1-f051329728ca}" SpecialFunc="None">
-    <Declaration><![CDATA[FUNCTION_BLOCK FB_Joint
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
+  <POU Name="FB_JointBase" Id="{d8c9f825-5b86-4a03-beb2-3c59a05d0ecd}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR
 	// motor IO
 	m_motorInputs AT%I*	:ST_MotorInputs;
@@ -74,10 +70,10 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Folder Name="property" Id="{cdcb62c8-2a8b-4700-ad38-db65527ef407}" />
-    <Property Name="cmdCurrent" Id="{f0454860-a96c-4f8b-8a2f-46843af60044}" FolderPath="property\">
+    <Folder Name="property" Id="{95c0305c-339a-4d95-855c-4413a0aebc8f}" />
+    <Property Name="cmdCurrent" Id="{173172df-0e5b-4333-807a-75f8add03a8c}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY cmdCurrent : LREAL]]></Declaration>
-      <Get Name="Get" Id="{e9954b3f-6116-4864-8a9d-3960b55dc914}">
+      <Get Name="Get" Id="{622d61ec-8f25-40ae-92da-2a191978d587}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -86,7 +82,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="disable" Id="{e31df8a7-8ce0-47c3-be01-feb458684c41}">
+    <Method Name="disable" Id="{ad749ca6-4714-48bd-a30b-4d4e8603c40a}">
       <Declaration><![CDATA[METHOD PUBLIC disable : BOOL
 VAR_INPUT
 END_VAR
@@ -96,7 +92,7 @@ END_VAR
 disable:=true;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="enable" Id="{cf1e8549-8fbc-49c1-a41e-ead1f2db1255}">
+    <Method Name="enable" Id="{6d70def1-f06e-43d8-afe9-899b00355623}">
       <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
 VAR_INPUT
 END_VAR
@@ -116,9 +112,9 @@ ELSIF DriverStatusWord_OP = m_motorInputs.m_statusWord THEN
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <Property Name="filtCurrent" Id="{311cc4f0-6471-4110-900a-4f36251b16c7}" FolderPath="property\">
+    <Property Name="filtCurrent" Id="{ac72073d-44b1-48b0-ab2d-61d5ffdeb02e}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY filtCurrent : LREAL]]></Declaration>
-      <Get Name="Get" Id="{48a0d0d5-f074-4a51-82e8-46c72739adae}">
+      <Get Name="Get" Id="{661b547a-c5a5-463e-960d-5d6105a67ddf}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -127,74 +123,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="init" Id="{9b72c880-30e6-407f-a349-f349818eddee}">
-      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
-VAR_INPUT
-	i_armIdx :INT;
-	i_jntIdx :INT;
-	i_controlCycleTime :LREAL;
-END_VAR
-]]></Declaration>
-      <Implementation>
-        <ST><![CDATA[m_cycleTime := i_controlCycleTime;
-
-// hardware parameters
-m_motorEncoderRes :=g_incEncoderRes[i_jntIdx];
-m_linkEncoderRes :=g_absEncoderRes[i_jntIdx];
-m_motorReduction :=g_motorReduction[i_jntIdx];
-m_linkEncoderReduction :=g_absEncoderReduction[i_jntIdx];
-m_trqConst :=g_motorTrqConst[i_jntIdx];
-m_maxCurrent :=g_motorMaxCurrent[i_jntIdx];
-m_motorDir :=g_motorDir[i_armIdx,i_jntIdx];								
-m_linkEncoderDir :=g_asbEncoderDir[i_armIdx,i_jntIdx];
-m_minJntPos	:=g_minJntPos[i_armIdx,i_jntIdx];
-m_maxJntPos	:=g_maxJntPos[i_armIdx,i_jntIdx];
-
-//link encoder calibartion data
-m_minLinkEncoder :=g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
-m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
-m_caliLinkEncoder :=g_caliLinkEncoder[i_armIdx, i_jntIdx];
-m_linkEncCaliJntPos :=g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
-m_linkEncZeroCross :=g_linkEncZeroCross[i_armIdx, i_jntIdx];
-m_multiCycles :=g_multipleCyclesJoint[i_armIdx,i_jntIdx];
-
-// convert cali link encoder if joint cross zero
-IF 1=m_linkEncZeroCross THEN
-	IF 1=m_linkEncoderDir AND m_caliLinkEncoder < m_minLinkEncoder THEN
-		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
-	ELSIF -1=m_linkEncoderDir AND m_caliLinkEncoder < m_maxLinkEncoder THEN
-		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
-	END_IF
-END_IF
-
-// macro data
-m_trq2CurrentRatio:=m_motorDir * 1000.0/(m_trqConst*m_motorReduction);
-m_current2TrqRatio:=m_motorDir * (m_trqConst*m_motorReduction)/1000.0;
-m_linkEnc2PosRatio := 2*PI*m_linkEncoderDir/(m_linkEncoderReduction*m_linkEncoderRes);
-m_motorEnc2PosRatio := 2*PI * m_motorDir/(m_motorReduction * m_motorEncoderRes);
-
-// motor data init
-m_curJntVel:=0;
-m_curJntTrq :=0;
-m_rawCurrent :=0;
-m_filtCurrent :=0;
-m_cmdJntVel :=0.0;
-m_cmdJntTrq :=0.0;
-m_cmdCurrent := 0.0;
-
-// filter init
-m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
-m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armCtrlFreq);
-m_curTrqLpf.init(1, g_curJntTrqLpfCutoffFreq, g_armCtrlFreq);
-
-// driver init value
-m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
-m_motorOutputs.m_opMode:=INT_TO_SINT(DriverOPMode_Pos);
-m_motorOutputs.m_cmdCurrent:=0;
-m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
-      </Implementation>
-    </Method>
-    <Method Name="initJntPos" Id="{c1110436-e250-45fb-8008-63b89ff1e4a3}">
+    <Method Name="initJntPos" Id="{44325581-66bf-4b7f-ae95-0986911664d7}">
       <Declaration><![CDATA[METHOD initJntPos : BOOL
 VAR_INPUT
 END_VAR
@@ -211,9 +140,9 @@ m_cmdJntPos :=m_curJntPos;
 m_lastJntPos :=m_curJntPos;]]></ST>
       </Implementation>
     </Method>
-    <Property Name="initLinkPos" Id="{d7776925-1122-4a68-9f90-f18c7af4e629}" FolderPath="property\">
+    <Property Name="initLinkPos" Id="{44b4f2ab-df65-46ae-a9da-78e6fae813b9}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY initLinkPos : lreal]]></Declaration>
-      <Get Name="Get" Id="{d7e38c99-fc3b-4588-a2f6-017421dc91a7}">
+      <Get Name="Get" Id="{4765a258-8c27-462c-af74-e88bfaf067cd}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -221,7 +150,7 @@ END_VAR
           <ST><![CDATA[initLinkPos:=m_initLinkPos;]]></ST>
         </Implementation>
       </Get>
-      <Set Name="Set" Id="{36303120-5670-4aa9-aa7e-461e087d0eb8}">
+      <Set Name="Set" Id="{a4dc08b5-742c-4d91-87a0-75c535bffb79}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -230,7 +159,7 @@ END_VAR
         </Implementation>
       </Set>
     </Property>
-    <Method Name="isEnabled" Id="{6575d317-fe99-4038-982b-c3651c898873}">
+    <Method Name="isEnabled" Id="{ef8652db-efc2-4f19-bb06-dffbae71dbfe}">
       <Declaration><![CDATA[METHOD isEnabled : BOOL
 VAR_INPUT
 END_VAR
@@ -239,9 +168,9 @@ END_VAR
         <ST><![CDATA[isEnabled :=(DriverStatusWord_OP = m_motorInputs.m_statusWord);]]></ST>
       </Implementation>
     </Method>
-    <Property Name="jntPos" Id="{7c60c4ea-0665-427c-81ff-ecca027383e5}" FolderPath="property\">
+    <Property Name="jntPos" Id="{710c06d7-c3e0-43f1-89a5-5d2271bc9b9b}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntPos : LREAL]]></Declaration>
-      <Get Name="Get" Id="{0999bfb4-2d73-48db-9f0b-eb60a7757215}">
+      <Get Name="Get" Id="{180417ab-04b5-4aa8-b772-9f0fca44e8c0}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -250,9 +179,9 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="jntTrq" Id="{24f2edfa-7ea0-460c-b46c-37e80340999b}" FolderPath="property\">
+    <Property Name="jntTrq" Id="{75f58262-4c2b-44f3-a02a-bfcf4ec43d50}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntTrq : LREAL]]></Declaration>
-      <Get Name="Get" Id="{a73a2159-96f0-4307-8408-692459f39004}">
+      <Get Name="Get" Id="{c05974d4-7b27-4329-a7ec-4e5bc9d6f334}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -261,9 +190,9 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Property Name="jntVel" Id="{9f6c9647-33be-4e59-a761-fc40f97a604f}" FolderPath="property\">
+    <Property Name="jntVel" Id="{99a9b005-1252-4b7b-9832-2bc5e92fb6f4}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY jntVel : LREAL]]></Declaration>
-      <Get Name="Get" Id="{dda73f9b-c1f5-4fa7-a73f-7b4550e82f69}">
+      <Get Name="Get" Id="{17bcbf18-0fc2-4664-a8ea-4b2fdbe7d8a9}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -272,7 +201,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="linkEnc2Pos" Id="{ee202f01-7eae-4c96-9148-de033a227f8f}">
+    <Method Name="linkEnc2Pos" Id="{1babb0d9-b052-4482-908e-558cec3ca1c1}">
       <Declaration><![CDATA[METHOD PROTECTED linkEnc2Pos : LREAL
 VAR_INPUT
 END_VAR
@@ -308,9 +237,9 @@ incLinkPos := (newLinkEnc-m_caliLinkEncoder)*m_linkEnc2PosRatio;
 linkEnc2Pos := incLinkPos + m_linkEncCaliJntPos + 2*PI* m_linkEncCycles;]]></ST>
       </Implementation>
     </Method>
-    <Property Name="linkPos" Id="{e503da77-c373-4ba2-b314-228646ff52c0}" FolderPath="property\">
+    <Property Name="linkPos" Id="{ef5f9c7b-997d-49be-98f0-b4309ebf3fc8}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY PUBLIC linkPos : LREAL]]></Declaration>
-      <Get Name="Get" Id="{057e650e-064f-4e5d-ae71-67363977daff}">
+      <Get Name="Get" Id="{7822cfcb-1af6-4f7d-8bbc-d8a669424203}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -319,7 +248,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="motorEnc2Pos" Id="{5111dbab-73a3-4041-b0b2-3d1b70394152}">
+    <Method Name="motorEnc2Pos" Id="{51346d89-1ca9-440c-9afc-a69c362399f6}">
       <Declaration><![CDATA[METHOD PUBLIC motorEnc2Pos : LREAL
 VAR_INPUT
 END_VAR
@@ -329,9 +258,9 @@ END_VAR
 ]]></ST>
       </Implementation>
     </Method>
-    <Property Name="motorPos" Id="{257e5d05-bbd2-45b4-a27c-60112e2ac416}" FolderPath="property\">
+    <Property Name="motorPos" Id="{b7e36d0d-1ff3-466e-ae1e-db4d90e0aa2e}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY PUBLIC motorPos : LREAL]]></Declaration>
-      <Get Name="Get" Id="{5c2a1542-7420-4542-ba4a-8202be5bc4e5}">
+      <Get Name="Get" Id="{df3e8bef-6702-46f2-b883-3d81026e490f}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -340,7 +269,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="motorPos2Enc" Id="{5927a17d-d8e9-40fc-9c34-e6793775a7fc}">
+    <Method Name="motorPos2Enc" Id="{f21d0d5f-3864-4fbc-8aa0-fddd94d40011}">
       <Declaration><![CDATA[METHOD PROTECTED motorPos2Enc : DINT
 VAR_INPUT
 	i_jntPos :LREAL;
@@ -352,9 +281,9 @@ END_VAR]]></Declaration>
         <ST><![CDATA[motorPos2Enc := LREAL_TO_DINT((i_jntPos-m_initLinkPos)/m_motorEnc2PosRatio + m_initMotorEnc);]]></ST>
       </Implementation>
     </Method>
-    <Property Name="rawCurrent" Id="{29700c1a-0c89-4de7-9040-f5ad478f605c}" FolderPath="property\">
+    <Property Name="rawCurrent" Id="{30580090-0453-4b5f-9eaa-883cf79e6314}" FolderPath="property\">
       <Declaration><![CDATA[PROPERTY rawCurrent : LREAL]]></Declaration>
-      <Get Name="Get" Id="{efca7981-2ed8-4e66-9338-eb89f6555374}">
+      <Get Name="Get" Id="{da71f073-1443-4014-af48-d020182f2e5a}">
         <Declaration><![CDATA[VAR
 END_VAR
 ]]></Declaration>
@@ -363,7 +292,7 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
-    <Method Name="updateCmds" Id="{a4f5fe94-40e9-4f77-a4d8-a2af848a52e6}">
+    <Method Name="updateCmds" Id="{3643a846-86f9-4ba8-be08-be93db2a9ad6}">
       <Declaration><![CDATA[METHOD PUBLIC updateCmds : BOOL
 VAR_INPUT
 	i_opMode : E_DriverOPMode;
@@ -379,7 +308,7 @@ END_VAR]]></Declaration>
 IF i_opMode = DriverOPMode_Pos THEN
 	m_motorOutputs.m_cmdCurrent:=0;
 	m_cmdTrqLpf.reset();
-	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
+//	i_cmdPos:=LIMIT(m_minJntPos, i_cmdPos, m_maxJntPos);
 	m_motorOutputs.m_cmdMotorEncoder :=motorPos2Enc(i_cmdPos);
 ELSIF i_opMode = DriverOPMode_Trq THEN
 	filtCmdTrq:=m_cmdTrqLpf.run(i_cmdTrq);
@@ -389,7 +318,7 @@ END_IF
 m_cmdCurrent:=m_motorOutputs.m_cmdCurrent;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="updateStatus" Id="{77cc6f91-59d3-42a9-8d8a-2f8d584653fb}">
+    <Method Name="updateStatus" Id="{1b75c8fa-77be-4152-8f53-48c4c6be9ac4}">
       <Declaration><![CDATA[METHOD PUBLIC updateStatus : BOOL
 VAR_INPUT
 END_VAR
@@ -411,16 +340,16 @@ m_filtCurrent := m_curTrqLpf.run(m_rawCurrent);
 m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_Joint">
+    <LineIds Name="FB_JointBase">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.cmdCurrent.Get">
+    <LineIds Name="FB_JointBase.cmdCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.disable">
+    <LineIds Name="FB_JointBase.disable">
       <LineId Id="5" Count="1" />
     </LineIds>
-    <LineIds Name="FB_Joint.enable">
+    <LineIds Name="FB_JointBase.enable">
       <LineId Id="5" Count="1" />
       <LineId Id="14" Count="0" />
       <LineId Id="8" Count="1" />
@@ -429,51 +358,34 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="7" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.filtCurrent.Get">
+    <LineIds Name="FB_JointBase.filtCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.init">
-      <LineId Id="160" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="89" Count="28" />
-      <LineId Id="122" Count="6" />
-      <LineId Id="130" Count="1" />
-      <LineId Id="152" Count="0" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="133" Count="1" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="136" Count="1" />
-      <LineId Id="150" Count="0" />
-      <LineId Id="138" Count="4" />
-      <LineId Id="39" Count="0" />
-    </LineIds>
-    <LineIds Name="FB_Joint.initJntPos">
+    <LineIds Name="FB_JointBase.initJntPos">
       <LineId Id="23" Count="4" />
       <LineId Id="32" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="33" Count="1" />
     </LineIds>
-    <LineIds Name="FB_Joint.initLinkPos.Get">
+    <LineIds Name="FB_JointBase.initLinkPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.initLinkPos.Set">
+    <LineIds Name="FB_JointBase.initLinkPos.Set">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.isEnabled">
+    <LineIds Name="FB_JointBase.isEnabled">
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.jntPos.Get">
+    <LineIds Name="FB_JointBase.jntPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.jntTrq.Get">
+    <LineIds Name="FB_JointBase.jntTrq.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.jntVel.Get">
+    <LineIds Name="FB_JointBase.jntVel.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.linkEnc2Pos">
+    <LineIds Name="FB_JointBase.linkEnc2Pos">
       <LineId Id="6" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="16" Count="0" />
@@ -493,23 +405,23 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="36" Count="0" />
       <LineId Id="38" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.linkPos.Get">
+    <LineIds Name="FB_JointBase.linkPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.motorEnc2Pos">
+    <LineIds Name="FB_JointBase.motorEnc2Pos">
       <LineId Id="6" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.motorPos.Get">
+    <LineIds Name="FB_JointBase.motorPos.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.motorPos2Enc">
+    <LineIds Name="FB_JointBase.motorPos2Enc">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.rawCurrent.Get">
+    <LineIds Name="FB_JointBase.rawCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.updateCmds">
+    <LineIds Name="FB_JointBase.updateCmds">
       <LineId Id="31" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="28" Count="1" />
@@ -521,7 +433,7 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="30" Count="0" />
       <LineId Id="61" Count="0" />
     </LineIds>
-    <LineIds Name="FB_Joint.updateStatus">
+    <LineIds Name="FB_JointBase.updateStatus">
       <LineId Id="18" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="16" Count="1" />

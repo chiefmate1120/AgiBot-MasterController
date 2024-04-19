@@ -17,7 +17,11 @@ VAR
 	// boundary limit force feedback
 	m_boundaryForce : FB_boundaryForceFeedback;
 	
+	// joint torque for master-slave error
 	m_boundaryTrq :Vec7d;
+	
+	// friction compensation scale
+	m_frictionCompScale :LREAL :=0.8;
 
 END_VAR
 ]]></Declaration>
@@ -83,7 +87,7 @@ END_IF
 
 // add friction compensation
 FOR i:=1 TO g_mJntNum DO 
-	m_cmdJntTrq[i] := m_cmdJntTrq[i] + i_masterArm.jntFriction[i] + m_boundaryTrq[i];
+	m_cmdJntTrq[i] := m_cmdJntTrq[i] +m_frictionCompScale * i_masterArm.jntFriction[i] + m_boundaryTrq[i];
 END_FOR
 ]]></ST>
       </Implementation>

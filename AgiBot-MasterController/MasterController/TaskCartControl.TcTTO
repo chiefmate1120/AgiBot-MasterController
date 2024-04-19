@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <Task Name="TaskCartControl" Id="{94b445a5-3697-41a7-b2bf-f397fabfd39e}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>4</Priority>
+    <PouCall>
+      <Name>CartControl</Name>
+    </PouCall>
+    <TaskFBGuid>{76384f5f-6951-476b-b283-c2817f3b2127}</TaskFBGuid>
+    <Fb_init>{07a43413-99be-4e4a-81cf-52745d2cbcad}</Fb_init>
+    <Fb_exit>{79f7e1f8-56dd-4fab-be41-6010b1232929}</Fb_exit>
+    <CycleUpdate>{e72e21f4-6a35-4940-94dc-66266f0bb6f0}</CycleUpdate>
+    <PostCycleUpdate>{87baa285-57fe-4561-9334-8bbd19b9ab7d}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

@@ -3,28 +3,28 @@
   <GVL Name="GVL_JointEncoderCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
     <Declaration><![CDATA[VAR_GLOBAL CONSTANT
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 5000;
+	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[8989196, 4134520, 15344624, 1912720, 16331520, 14419696, 0,
-		 4601956, 7055232, 13478704, 926160,129104 , 13766096, 0];
+		[3330608, 6592612, 11754876, 8357648, 7032320, 3206208, 0,
+		 14145556, 9942668, 4526812, 4839456,3252816 , 11705152, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[14678512, 15070764, 1808188, 7240592, 12225952, 1889888, 16777216,
-		 15627720, 1237132, 1095444, 6402464, 12833456, 1296400, 16777216];
+		[9148752, 724532, 16056044, 13808640, 2987504, 7442528, 16777216,
+		 3137384, 4088172, 8898876, 10199744, 15896032, 16050256, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[11841020, 1344500, 110836, 11640160, 5911600, 16609560, 9605344,
-		 1725928, 4148544, 14925640, 13330944, 6479808, 15889824, 7933056];
+		[6250820, 3668632, 13311308, 1419280, 13415264, 5208832, 11610128,
+		 236924, 7059956, 5977404, 566400, 9673872, 13718496, 14927904];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
 	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
-		[0, 1, 1, 1, 1, 1, 0,
-		 1, 0, 1, 1, 0, 1, 0];
+		[0, 0, 0, 1, 1, 0, 1,
+		 1, 0, 0, 1, 0, 0, 1];
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
@@ -37,9 +37,8 @@
 		 0.0, -PI/2, 0.0, 0.0, pi, PI/2, 0.0];
 		 
 	// limit value of gripper hall sensor
-	g_minHallSensorValue :DINT:=50;
-	g_maxHallSensorValue :DINT :=700;
-	g_hallSenorRange :DINT :=g_maxHallSensorValue-g_minHallSensorValue;
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3801219,2818152];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[45023889,41878148];
 
 END_VAR]]></Declaration>
   </GVL>

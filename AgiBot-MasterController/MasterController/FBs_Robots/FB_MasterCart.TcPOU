@@ -1,0 +1,246 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
+VAR
+	//  IO and check
+	m_endoScopePedalIO AT%I* :BOOL;
+	m_endoScopeIOCheck :FB_IOCheck;
+	
+	m_clutchPedalIO AT%I* :BOOL;
+	m_clutchIOCheck :FB_IOCheck;
+	
+	m_surgonHeadInIO AT%I* :BOOL;
+	m_headInCheck:FB_IOCheck;
+	
+	// cart status
+	m_cartStatus  : ST_CartStatus;
+	
+	// cart joints
+	// [monitor lift, monitor rotate, armset, pedal]
+	m_cartJoints:ARRAY[1..4] OF FB_CartJoint;
+	
+	// cart joint status data
+	m_curMotorPos :Vec4d;
+	m_curLinkPos :Vec4d;
+	m_curJntPos :Vec4d;
+	m_curJntVel :Vec4d;
+	m_curJntTrq :Vec4d;
+	m_rawJntCurrent :Vec4d;
+	m_filtJntCurrent :Vec4d;
+	m_cmdJntCurrent : Vec4d;
+	
+	// cart joint control data
+	m_jntSwitchDir :Vec4i;
+	m_cmdJntTrq :Vec4d;
+	m_cmdJntPos :Vec4d;
+	m_cmdJntVel :Vec4d;
+	m_jntEnableFlag :Vec4i;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{37b9f91a-fbe1-4cae-807d-574d49e247d7}" />
+    <Method Name="init" Id="{a9830b95-e937-4a29-b70e-785e20452d37}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*// joint init
+FOR i:=1 TO 4 DO
+	m_cartJoints[i].init(i,g_cartCtrlCycleTime);
+	m_cartJoints[i].initJntPos();
+END_FOR*)
+
+// init commands
+FOR i:=1 TO 4 DO
+	m_jntEnableFlag[i]:=0;
+	m_jntSwitchDir[i]:=0;
+	m_cmdJntTrq[i]:=0;
+	m_cmdJntVel[i]:=0;
+	m_cmdJntPos[i]:=m_cartJoints[i].jntPos;
+END_FOR
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{5adedbe6-c484-4199-b427-bc8af7c6d1b0}">
+      <Declaration><![CDATA[METHOD run : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update cart status
+updateStatus();
+
+(*// update controller and command
+updateCmds();
+
+// send command to joint driver
+FOR i:=1 TO 4 DO
+	// joint enable
+	IF m_jntEnableFlag[i]=1 THEN
+		m_cartJoints[i].enable();
+	ELSE
+		m_cartJoints[i].disable();
+	END_IF
+	
+	// set command position
+	m_cartJoints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
+END_FOR*)]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="status" Id="{cd2a750f-147a-42a5-85cd-a7d5a815c963}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY status : ST_CartStatus]]></Declaration>
+      <Get Name="Get" Id="{c1788322-40e1-4e3e-a26b-a8239c1e1e6d}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[status := m_cartStatus;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="updateCmds" Id="{a083537e-6f52-4b88-8b83-3c9a5d0db87a}">
+      <Declaration><![CDATA[METHOD updateCmds : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// update joint enable flag
+FOR i:= 1 TO 4 DO
+	IF m_jntSwitchDir[i] <> 0 THEN
+		m_jntEnableFlag[i] := 1;
+	ELSE
+		m_jntEnableFlag[i] :=0; 
+	END_IF
+END_FOR
+
+
+// update joint command positon
+FOR i:=1 TO 4 DO
+	//only update command after joints is truly enabled
+	IF m_jntEnableFlag[i]=1 AND m_cartJoints[i].isEnabled() THEN
+		// TODO: update command joint velocity
+		m_cmdJntVel[i]:=0;
+		
+		m_cmdJntPos[i]:= m_cmdJntPos[i]+ m_cmdJntVel[i]*g_cartCtrlCycleTime;
+	ELSE
+		m_cmdJntVel[i]:=0;
+		m_cmdJntPos[i] := m_cartJoints[i].jntPos;
+	END_IF
+END_FOR ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
+      <Declaration><![CDATA[METHOD updateStatus : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*// update cart joints status
+FOR i:=1  TO 4 DO
+	m_cartJoints[i].updateStatus();
+END_FOR
+
+// get joint data
+FOR i:=1 TO 4 DO
+	m_curMotorPos[i]:=m_cartJoints[i].motorPos;
+	m_curLinkPos[i]:=m_cartJoints[i].linkPos;
+	m_curJntPos[i]:=m_cartJoints[i].jntPos;
+	m_curJntVel[i]:=m_cartJoints[i].jntVel;
+	m_curJntTrq[i]:=m_cartJoints[i].jntTrq;
+	m_rawJntCurrent[i]:=m_cartJoints[i].rawCurrent;
+	m_filtJntCurrent[i]:=m_cartJoints[i].filtCurrent;
+	m_cmdJntCurrent[i]:=m_cartJoints[i].cmdCurrent;
+END_FOR *)
+
+// updata IO signals
+m_cartStatus.m_clutchSwitch:= m_clutchIOCheck.check(m_clutchPedalIO);
+m_cartStatus.m_endoscopeSwitch := m_endoScopeIOCheck.check(m_endoScopePedalIO);
+m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
+
+
+//TODO: update cart joint control switch]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterCart">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.init">
+      <LineId Id="9" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.run">
+      <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="1" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="25" Count="2" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.status.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.updateCmds">
+      <LineId Id="5" Count="1" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="21" Count="2" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="20" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.updateStatus">
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="24" Count="10" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="35" Count="5" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

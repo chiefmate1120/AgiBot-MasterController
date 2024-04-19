@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM CartControl
+VAR
+	// cart instance
+	m_masterCart :FB_MasterCart;
+	
+	// Output cart status
+	m_cartStatus AT%Q* : ST_CartStatus;
+	
+	// wait time before cart init for ethercat to be statble 
+	m_cartInitWaitTime : LREAL:=0;
+	
+	// cart init flag
+	m_cartInit :BOOL :=FALSE;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// wait communication to be stable
+IF(m_cartInitWaitTime<g_robotInitWaitTime) THEN
+	m_cartInitWaitTime := m_cartInitWaitTime+g_armCtrlCycleTime;
+	RETURN;
+END_IF
+
+// cart init
+IF m_cartInit =FALSE THEN
+	m_masterCart.Init();
+	m_cartInit:=TRUE;
+END_IF
+
+// cart run
+m_masterCart.run();
+m_cartStatus := m_masterCart.status;
+]]></ST>
+    </Implementation>
+    <LineIds Name="CartControl">
+      <LineId Id="16" Count="11" />
+      <LineId Id="31" Count="1" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1,12 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
-// NOTICE: all joints are the ture active joints, not DH ones!
-VAR_INPUT
-END_VAR
-VAR_OUTPUT
-END_VAR
 VAR
 	// arm index, 1 for left arm, 2 for right arm
 	m_armIdx: INT;
@@ -22,7 +17,8 @@ VAR
 	m_handClutchSwitch :BOOL;
 	
 	// joints
-	m_joints :ARRAY[1..g_mJntNum] OF FB_Joint;
+	// NOTICE: all joints are the ture active joints, not DH ones!
+	m_joints :ARRAY[1..g_mJntNum] OF FB_ArmJoint;
 	
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
@@ -476,7 +472,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// arm statues init
 m_armIdx:=i_armIdx;
 m_gripAngle:=0;
-m_gripAngleCalc.init();
+m_gripAngleCalc.init(m_armIdx);
 
 // joint init
 FOR i:=1 TO g_mJntNum DO

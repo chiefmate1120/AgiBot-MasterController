@@ -10,7 +10,7 @@ STRUCT
 	m_clutchSwitch:BOOL := FALSE;
 	m_endoscopeSwitch:BOOL := FALSE;
 	m_instrumentPowerSwitch:BOOL := FALSE;
-	m_surgonReady :BOOL :=TRUE;// TODO: set to false
+	m_surgonReady :BOOL :=false;
 	m_consoleInAdjust:BOOL := FALSE;
 END_STRUCT
 END_TYPE

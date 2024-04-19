@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="SafetyCheck" Id="{54e6e883-3f22-4a40-9066-2b433bf8009c}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SafetyCheck
 VAR

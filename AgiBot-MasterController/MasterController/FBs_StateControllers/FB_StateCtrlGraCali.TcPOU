@@ -11,17 +11,17 @@ VAR
 	// cali trajectory
 	m_caliMotionSegs :INT :=3;
 	m_graCaliTraj1:ARRAY [1..g_mArmNum, 1..g_mJntNum] OF LREAL:=
-		[0.0, -PI/2, 0, -PI, PI-pi/2, -PI/2, 0,
-		 0.0, -PI/2, 0, 0, PI-pi/2,  PI/2, 0];
+		[0.0,  -PI/2+pi/6 , 0+pi/12 , -PI+pi/3,  PI+pi/2, -PI/2+pi/6, 0,
+		 0.0,  -PI/2+pi/6,  0+pi/12,  0-pi/3,     PI-pi/2,  PI/2-pi/6, 0];
 	m_graCaliTraj2:ARRAY [1..g_mArmNum, 1..g_mJntNum] OF LREAL:=
-		[0.0, -pi/2, 0, -pi, Pi+pi/2, -pi/2, 0,
-		 0.0, -pi/2, 0, 0, Pi+pi/2,  pi/2, 0];
+		[0.0, -pi/2-pi/6,  0-pi/12,  -pi-pi/3, Pi-pi/2, -pi/2-pi/6, 0,
+		 0.0, -pi/2-pi/6,  0-pi/12,  0+pi/3,    Pi+pi/2,  pi/2+pi/6, 0];
 	m_graCaliTraj3:ARRAY [1..g_mArmNum, 1..g_mJntNum] OF LREAL:=
-		[0.0, -PI/2, 0, -PI, PI-pi/2, -PI/2, 0,
-		 0.0, -PI/2, 0, 0, PI-pi/2,  PI/2, 0];						 			  			
+		[0.0,  -PI/2+pi/6 , 0+pi/12 , -PI+pi/3,  PI+pi/2, -PI/2+pi/6, 0,
+		 0.0,  -PI/2+pi/6,  0+pi/12,  0-pi/3,     PI-pi/2,  PI/2-pi/6, 0];	 			  			
 
-	m_caliMaxjntVel:Vec7d:=[7(0.02)];
-	m_caliMaxjntAcc:Vec7d:=[7(0.5)];
+	m_caliMaxjntVel:Vec7d:=[7(2.5*g_deg2rad)];
+	m_caliMaxjntAcc:Vec7d:=[7(1.0)];
 	m_caliMaxjntJerk:Vec7d:=[7(2.0)];
 	
 	m_caliTrajIdx: INT := 1;

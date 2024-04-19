@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_IOCheck" Id="{6ce8e7bd-4d6b-4a88-8a6e-3da90f88b0bc}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_IOCheck
+VAR
+	// IO type, 0- normally-opend IO; 1- normally-closed IO
+	m_IOType :INT :=0;
+	
+	// counts after IO  is triggerd
+	m_IOOnCounts :INT;
+	
+	// counts threshold indicating IO is trully triggerd
+	m_IOOnCountThres :INT :=100;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{4e34991d-7dc5-4050-80a7-9caa87d9a137}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_INPUT
+	IOValue :BOOL;
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (0=m_IOType and IOValue) OR (1=m_IOType AND NOT(IOValue)) THEN
+	m_IOOnCounts := MIN(m_IOOnCounts +1, m_IOOnCountThres);
+ELSE
+	 m_IOOnCounts :=0;
+END_IF
+
+check:=m_IOOnCounts>=m_IOOnCountThres;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{0f59de9a-f90e-4419-9ab5-6eb093b5be4b}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_IOType :INT;
+	i_triggerCounts:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_IOType:=i_IOType;
+m_IOOnCountThres := i_triggerCounts;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_IOCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IOCheck.check">
+      <LineId Id="9" Count="6" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IOCheck.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

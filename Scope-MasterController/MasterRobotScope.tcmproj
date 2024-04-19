@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{e0459b88-ec99-4c20-b390-f2f5d9677804}</ProjectGuid>
+    <AssemblyName>Scope-MasterArmState</AssemblyName>
+    <Name>MasterRobotScope</Name>
+    <RootNamespace>Scope-MasterArmState</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="GravityCaliData.tcscopex">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="RobotJointData.tcscopex">
+      <SubType>Content</SubType>
+    </Content>
+  </ItemGroup>
+</Project>

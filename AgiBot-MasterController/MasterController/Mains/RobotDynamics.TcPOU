@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="RobotDynamics" Id="{798b314f-0a53-4e08-997d-5fefed426c86}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM RobotDynamics
 
@@ -61,11 +61,11 @@ FOR i:=1 TO g_mArmNum DO
 	// run friction model
 	m_masterDynaData.m_friction[i] := m_frictionModel[i].run(m_masterDynaData.m_gravity[i],m_masterJointsData.m_curJntVel[i]);
 	
-	// run DOB
+(*	// run DOB
 	 m_masterDynaData.m_jntExtTrq[i] := m_jntDOB[i].run(m_masterJointsData.m_curJntTrq[i], m_masterJointsData.m_curJntPos[i], m_masterDynaData.m_massMat[i]);
 	// remove gravity and friction from external torque
 	vecSelfAdd(m_masterDynaData.m_jntExtTrq[i], m_masterDynaData.m_gravity[i]);
-	vecSelfAdd(m_masterDynaData.m_jntExtTrq[i], m_masterDynaData.m_friction[i]);
+	vecSelfAdd(m_masterDynaData.m_jntExtTrq[i], m_masterDynaData.m_friction[i]);*)
 	
 END_FOR
 

@@ -7,6 +7,11 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// limit value
+	m_minHallSensorValue :LREAL;
+	m_maxHallSensorValue:LREAL;
+	m_hallSensorRange:LREAL;
+	
 	// grip angle from hall sensor IO
 	m_gripHallSenorValue :LREAL;
 	m_normHallSensorValue: LREAL;
@@ -20,10 +25,17 @@ END_VAR
     <Method Name="init" Id="{e4f56e13-70f8-4942-94ed-464230d0ebf2}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_INPUT
+	i_armIdx:INT;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[m_gripAngLpf.init(1, g_gripAngLpfCutoffFreq, g_armCtrlFreq);]]></ST>
+        <ST><![CDATA[// init limit value
+m_minHallSensorValue:=(g_minHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
+m_maxHallSensorValue:=(g_maxHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
+m_hallSensorRange := m_maxHallSensorValue-m_minHallSensorValue;
+
+// init filter
+m_gripAngLpf.init(1, g_gripAngLpfCutoffFreq, g_armCtrlFreq);]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{55aa24f7-dd28-41ed-8903-b3831602df36}">
@@ -37,7 +49,7 @@ END_VAR
 m_gripHallSenorValue:=(IOValue/65536) AND 16#0000FFFF; //high 16 bits
 
 // normalize hall sensor value
-m_normHallSensorValue:=LIMIT(0, (m_gripHallSenorValue-g_minHallSensorValue)/g_hallSenorRange, 1);
+m_normHallSensorValue:=LIMIT(0, (m_gripHallSenorValue-m_minHallSensorValue)/m_hallSensorRange, 1);
 
 // grip angle fitting
 m_gripAngle := g_masterGripAngleFitCoeff[1] * EXPT(m_normHallSensorValue,5)
@@ -58,6 +70,10 @@ run:=m_gripAngle;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_GripAngleCalc.init">
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="2" />
+      <LineId Id="10" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_GripAngleCalc.run">

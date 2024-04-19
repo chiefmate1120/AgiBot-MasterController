@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_MotorParameters" Id="{cf487053-15bb-46bd-a4ed-bbb1df690beb}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 VAR_GLOBAL CONSTANT
@@ -8,8 +8,7 @@ VAR_GLOBAL CONSTANT
 	g_absEncoderRes :ARRAY[1..7] OF DINT :=[7(16777216)];
 	
 	// reduction ratio
-	//g_motorReduction :ARRAY[1..7] OF LREAL :=[43.9658,26.859,26.8018,(66.0/10)*3,4554.0/130, 4554.0/130,5625.0/361];
-	g_motorReduction :ARRAY[1..7] OF LREAL :=[43.9658,26.859,26.8018,(66.0/10)*3,52.546,52.546,23.37];// temp version
+	g_motorReduction :ARRAY[1..7] OF LREAL :=[43.9658,26.859,26.8018,(66.0/10)*3,4554.0/130, 4554.0/130,5625.0/361];
 	g_absEncoderReduction :ARRAY[1..7] OF LREAL :=[7(1.0)];
 	
 	// motor parameters
