@@ -229,9 +229,6 @@
     <Compile Include="FBs_BasicControllers\FB_boundaryForceFeedback.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="FBs_BasicControllers\FB_PID.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -260,6 +257,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Observer\FB_JntObserver.TcPOU">
