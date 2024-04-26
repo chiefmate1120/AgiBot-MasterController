@@ -65,8 +65,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// TODO: update teleSlaveArmIndex based on UI and Cart information
-m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_NULL;
-m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_1;]]></ST>
+m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_1;
+m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_3;]]></ST>
       </Implementation>
     </Method>
     <Method Name="controllerTransit" Id="{43db9dd9-8e13-4a66-a84f-800b29862df6}">
@@ -306,9 +306,6 @@ FOR i:=1 TO g_sArmNum DO
 		EXIT;
 	END_IF
 END_FOR
-
-// Test Code
-m_scopeArmState := SlaveArmState_ScopeReady; 
 
 // check if master-slave grip angle match
 MSCtrlTriggerCheck(i_masterInputDataPool);
@@ -590,7 +587,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="205" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="202" Count="0" />
-      <LineId Id="299" Count="2" />
       <LineId Id="297" Count="0" />
       <LineId Id="251" Count="0" />
       <LineId Id="281" Count="0" />
@@ -637,7 +633,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="278" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="95" Count="2" />
-      <LineId Id="309" Count="0" />
+      <LineId Id="317" Count="0" />
       <LineId Id="219" Count="1" />
       <LineId Id="279" Count="0" />
       <LineId Id="221" Count="0" />

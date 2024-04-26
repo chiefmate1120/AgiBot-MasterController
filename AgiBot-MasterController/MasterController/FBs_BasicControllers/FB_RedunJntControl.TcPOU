@@ -13,9 +13,12 @@ VAR
 	m_joint4Backlash :LREAL :=10*g_deg2rad;
 	
 	// control paramters for redundant joint4 position control
-	m_redunJntKp: LREAL:=8.0;
+(*	m_redunJntKp: LREAL:=8.0;
 	m_redunJntKd:LREAL:=0.2;
-	m_redunJntKi:LREAL:=100;
+	m_redunJntKi:LREAL:=100; *)
+	m_redunJntKp: LREAL:=3.0;
+	m_redunJntKd:LREAL:=0.1;
+	m_redunJntKi:LREAL:=10;
 	m_redunJntKiLimit: LREAL:=200;
 	m_redunJntCtrlLimit:LREAL:=1000;
 	
@@ -56,7 +59,7 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Method Name="calcRedunPos" Id="{3c615aea-9f05-4654-a255-32bd4f9794aa}">
-      <Declaration><![CDATA[METHOD PROTECTED calcRedunPos : LREAL
+      <Declaration><![CDATA[METHOD PROTECTED calcRedunPos : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterArm :FB_MasterArm;
 END_VAR
@@ -64,7 +67,7 @@ END_VAR
 VAR 
 	j6Bias,j5Bias :LREAL;
 	curJntPos : Vec7d;
-	jnt4LinkPos :LREAL;
+	jnt4LinkPos, jnt4TargetLinkPos :LREAL;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -84,16 +87,17 @@ ELSIF j6Bias< -m_joint4Backlash THEN
 	j6Bias := j6Bias + m_joint4Backlash;
 ELSE
 	j6Bias :=0;
+	RETURN;
 END_IF
 
 // scale track motion near redundant singularity
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
-calcRedunPos := LIMIT(g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
+jnt4TargetLinkPos := LIMIT(g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
 			jnt4LinkPos-j6Bias,g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); 
 			
 // convert from link position to motor position
-calcRedunPos:=i_masterArm.jnt4LinkToMotor(curJntPos[2], curJntPos[3], calcRedunPos);]]></ST>
+m_jnt4TargetPos:=i_masterArm.jnt4LinkToMotor(curJntPos[2], curJntPos[3], jnt4TargetLinkPos);]]></ST>
       </Implementation>
     </Method>
     <Method Name="init" Id="{5103b443-21cf-4df9-b774-fea3cd2a7afe}">
@@ -174,9 +178,9 @@ IF i_followEnable THEN
 		m_cmdJntVel:=0;
 		m_jntPIDCtrl.reset();
 		m_trajFilter.init(m_cmdJntPos,m_cmdJntVel,m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,g_armCtrlCycleTime);
+	// update target redundant joint position
 	ELSE
-	// redundant cotnrol
-		m_jnt4TargetPos:=calcRedunPos(i_masterArm);
+		calcRedunPos(i_masterArm);
 	END_IF
 END_IF
 	
@@ -214,6 +218,7 @@ run:=m_jntCtrlTrq;
       <LineId Id="101" Count="0" />
       <LineId Id="103" Count="0" />
       <LineId Id="105" Count="3" />
+      <LineId Id="124" Count="0" />
       <LineId Id="104" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="52" Count="0" />
@@ -254,8 +259,8 @@ run:=m_jntCtrlTrq;
       <LineId Id="383" Count="2" />
       <LineId Id="388" Count="0" />
       <LineId Id="381" Count="0" />
+      <LineId Id="403" Count="0" />
       <LineId Id="380" Count="0" />
-      <LineId Id="391" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="345" Count="0" />
       <LineId Id="387" Count="0" />

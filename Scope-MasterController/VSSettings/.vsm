@@ -6,7 +6,7 @@
     <Node>
       <Title>GravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterArmState\GravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -274,7 +274,7 @@
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -414,7 +414,7 @@
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -557,14 +557,65 @@
     </Node>
     <Node>
       <Title>RobotJointData</Title>
-      <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterArmState\RobotJointData.tcscopex</FileName>
+      <Expanded>True</Expanded>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
-          <Children />
+          <Children>
+            <Node>
+              <Title>m_cmdJntPos[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntPos[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_jnt4TargetPos</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+          </Children>
+        </Node>
+        <Node>
+          <Title>YT Chart</Title>
+          <Expanded>True</Expanded>
+          <FileName></FileName>
+          <Children>
+            <Node>
+              <Title>Axis Group</Title>
+              <Expanded>True</Expanded>
+              <FileName></FileName>
+              <Children>
+                <Node>
+                  <Title>m_jnt4TargetPos</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntPos[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_curJntPos[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+              </Children>
+            </Node>
+          </Children>
         </Node>
         <Node>
           <Title>Trigger</Title>
