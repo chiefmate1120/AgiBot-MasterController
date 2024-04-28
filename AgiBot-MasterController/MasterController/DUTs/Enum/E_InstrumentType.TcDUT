@@ -4,9 +4,18 @@
     <Declaration><![CDATA[TYPE E_InstrumentType :
 (
 	InstruType_UNKNOWM := 0,
-	InstruType_endoscope := 1,
-	InstruType_NeedleGripper := 2,
-	InstruType_Energy :=3
+	InstruType_Endoscope := 1,
+	InstruType_CadiereForceps :=2,
+	InstruType_NeedleDriver :=3,
+	InstruType_SCNeedleDriver :=4, // suture-cut needle driver
+	InstruType_MegaSCNeedleDriver :=5,// mega suture-cut needle driver
+	InstruType_RoundTipScissors :=6,
+	InstruType_ProGraspForceps :=7,
+	InstruType_MarylandForceps :=8, // Maryland bipolar forceps
+	InstruType_FenestratedForceps :=9, // Fnestrated bipolar forceps
+	InstruType_CurvedScissors :=10, // monopolar curved scissors
+	InstruType_CauteryHook :=11,
+	InstruType_CauterySpatula :=12
 );
 END_TYPE
 ]]></Declaration>
