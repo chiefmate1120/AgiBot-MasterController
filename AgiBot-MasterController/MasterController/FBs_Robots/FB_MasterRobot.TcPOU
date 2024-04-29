@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -380,7 +380,6 @@ FOR i:=1 TO g_mArmNum DO
 		
 		//MasterSlave
 		MasterArmState_MasterSlave:
-			CONTINUE;
 			// to standdy
 			IF (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) THEN
@@ -633,7 +632,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="278" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="95" Count="2" />
-      <LineId Id="317" Count="0" />
       <LineId Id="219" Count="1" />
       <LineId Id="279" Count="0" />
       <LineId Id="221" Count="0" />

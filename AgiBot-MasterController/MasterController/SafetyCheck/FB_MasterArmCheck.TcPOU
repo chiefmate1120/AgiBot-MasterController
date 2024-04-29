@@ -12,15 +12,19 @@ VAR
 	
 	// cartesian pose error flag
 	m_cartPoseErrFlag :ARRAY[1..g_mArmNum] OF BOOL;
+	m_cartPoseErrCounts:ARRAY[1..g_mArmNum] OF INT;
 	
 	// joint control error flag
 	m_jntCtrlErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	m_jntCtrlErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
 	
 	// joint encoder error flag
 	m_jntEncErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	m_jntEncErrCounts :ARRAY[1..g_mArmNum] OF Vec7i ;
 	
 	// joint velocity error flag
 	m_jntVelErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	m_jntVelErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
 	
 	// cartesian position error
 	m_cartPosErr :ARRAY[1..g_mArmNum] OF Vec3d;
@@ -63,15 +67,15 @@ FOR i:=1 TO g_mArmNum DO
 	// NOT check cartesion pose error
 	m_cartPoseErrFlag[i]:=FALSE;
 	//m_cartPoseErrFlag[i]:=poseErrCheck(i_masterStatus.m_cmdArmPose[i],  i_masterStatus.m_curArmPose[i],
-	//									o_posErr=>m_cartPosErr[i], o_oriErr=>m_cartOriErr[i]);
+	//										m_cartPoseErrCounts[i], m_cartPosErr[i], m_cartOriErr[i]);
 	
 	// joint control error
 	m_jntCtrlErrFlag[i]:=jntCtrlErrCheck(i_masterJointData.m_cmdJntPos[i], i_masterJointData.m_curJntPos[i],
-										o_jntCtrlErr=>m_jntCtrlErr[i]);
+										m_jntCtrlErrCounts[i], m_jntCtrlErr[i]);
 	
 	// encoder error
 	m_jntEncErrFlag[i]:=jntEncErrCheck(i_masterJointData.m_curMotorPos[i], i_masterJointData.m_curLinkPos[i],
-										o_jntEncErr=>m_jntEncErr[i]);
+										m_jntEncErrCounts[i], m_jntEncErr[i]);
 										
 	// final arm error status check
 	IF  TRUE = m_cartPoseErrFlag[i] THEN
@@ -97,21 +101,28 @@ VAR_INput
 	i_cmdJntPos : Vec7d;
 	i_curJntPos : Vec7d;
 END_VAR
-VAR_OUTPUT
-	o_jntCtrlErr :Vec7d;
+VAR_IN_OUT
+	r_errCount:Vec7i;
+	r_jntCtrlErr :Vec7d;
 END_VAR
 
 VAR
 	i :INT;
+	err:Vec7d;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  o_jntCtrlErr);
+        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  err);
+r_jntCtrlErr:=err;
 
 // joint error check
-//NOTE: only check the first three joints.
-FOR i:=1 TO 3 DO 
-	jntCtrlErrCheck[i]:= ABS(o_jntCtrlErr[i]) > g_maxJntCtrlErr;
+FOR i:=1 TO g_mJntNum DO 
+	IF  ABS(r_jntCtrlErr[i]) > g_maxJntCtrlErr THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;	
+	END_IF
+	jntCtrlErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
 END_FOR
 	]]></ST>
       </Implementation>
@@ -122,22 +133,29 @@ VAR_INput
 	i_motorJntPos : Vec7d;
 	i_linkJntPos : Vec7d;
 END_VAR
-VAR_OUTPUT
-	o_jntEncErr :Vec7d;
+VAR_IN_OUT
+	r_errCount:Vec7i;
+	r_jntEncErr :Vec7d;
 END_VAR
 
 VAR
 	i :INT;
+	err:Vec7d;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  o_jntEncErr);
+        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  err);
+r_jntEncErr:=err;
 
 // joint error check
 FOR i:=1 TO g_mJntNum DO 
-	jntEncErrCheck[i]:= ABS(o_jntEncErr[i]) > g_maxJntEncErr;
-END_FOR
-	]]></ST>
+	IF  ABS(r_jntEncErr[i]) > g_maxJntEncErr THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;
+	END_IF
+	jntEncErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="poseErrCheck" Id="{9fe210b5-ecf0-4498-8364-258d193de1ff}">
@@ -146,26 +164,36 @@ VAR_INPUT
 	i_cmdPose : ST_Frame;
 	i_curPose :ST_Frame;
 END_VAR
-VAR_OUTPUT
-	o_posErr :Vec3d;
-	o_oriErr :Vec3d;
+VAR_IN_OUT
+	r_errCount:INT;
+	r_posErr :Vec3d;
+	r_oriErr :Vec3d;
 END_VAR
 
 VAR
+	posErr,oriErr:Vec3d;
 	matT,rotErr:Mat3d;
 	errAngle :LREAL;
 	errAxis :Vec3d;
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[	vecSub(i_cmdPose.m_pos, i_curPose.m_pos,o_posErr);
+        <ST><![CDATA[
+vecSub(i_cmdPose.m_pos, i_curPose.m_pos,posErr);
+r_posErr:=posErr;
 
-	matTranspose(i_cmdPose.m_rot, matT);
-	matMultiply(matT,i_curPose.m_rot, rotErr);
-	rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxis);
-	vecMultiNum(errAxis, errAngle,o_oriErr);
+matTranspose(i_cmdPose.m_rot, matT);
+matMultiply(matT,i_curPose.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxis);
+vecMultiNum(errAxis, errAngle,oriErr);
+r_oriErr:=oriErr;
 	
-	poseErrCheck:= (norm(o_posErr)>g_maxCartPosErr OR norm(o_oriErr)> g_maxCartOriErr);
+IF  norm(posErr)>g_maxCartPosErr OR norm(oriErr)> g_maxCartOriErr THEN
+	r_errCount:= r_errCount +1;
+ELSE 
+	r_errCount:=0;
+END_IF
+poseErrCheck:= r_errCount >= g_faultTriggerCounts;
 	]]></ST>
       </Implementation>
     </Method>
@@ -177,7 +205,8 @@ END_VAR
       <LineId Id="5" Count="0" />
       <LineId Id="80" Count="4" />
       <LineId Id="102" Count="1" />
-      <LineId Id="105" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="145" Count="0" />
       <LineId Id="35" Count="1" />
       <LineId Id="109" Count="1" />
       <LineId Id="38" Count="1" />
@@ -190,26 +219,20 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_MasterArmCheck.jntCtrlErrCheck">
       <LineId Id="25" Count="0" />
+      <LineId Id="68" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="44" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="45" Count="1" />
-      <LineId Id="43" Count="0" />
+      <LineId Id="72" Count="7" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCheck.jntEncErrCheck">
-      <LineId Id="25" Count="0" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="44" Count="2" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="5" Count="0" />
+      <LineId Id="69" Count="10" />
+      <LineId Id="67" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCheck.poseErrCheck">
-      <LineId Id="8" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="10" Count="3" />
-      <LineId Id="25" Count="1" />
       <LineId Id="5" Count="0" />
+      <LineId Id="48" Count="14" />
+      <LineId Id="47" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
