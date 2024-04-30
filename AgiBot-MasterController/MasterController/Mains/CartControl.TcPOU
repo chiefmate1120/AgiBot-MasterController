@@ -9,6 +9,9 @@ VAR
 	// Output cart status
 	m_cartStatus AT%Q* : ST_CartStatus;
 	
+	// Cart  joint data
+	m_cartJointData AT %Q* :ST_CartJointData;
+	
 	// wait time before cart init for ethercat to be statble 
 	m_cartInitWaitTime : LREAL:=0;
 	
@@ -32,12 +35,16 @@ END_IF
 
 // cart run
 m_masterCart.run();
-m_cartStatus := m_masterCart.status;
+
+// status/joint data output
+m_masterCart.getStatus(m_cartStatus, m_cartJointData);
 ]]></ST>
     </Implementation>
     <LineIds Name="CartControl">
       <LineId Id="16" Count="11" />
       <LineId Id="31" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>

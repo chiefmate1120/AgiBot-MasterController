@@ -24,31 +24,31 @@ END_VAR
         <ST><![CDATA[m_cycleTime := i_controlCycleTime;
 
 // hardware parameters
-m_motorEncoderRes :=g_incEncoderRes[i_jntIdx];
-m_linkEncoderRes :=g_absEncoderRes[i_jntIdx];
-m_motorReduction :=g_motorReduction[i_jntIdx];
-m_linkEncoderReduction :=g_absEncoderReduction[i_jntIdx];
-m_trqConst :=g_motorTrqConst[i_jntIdx];
-m_maxCurrent :=g_motorMaxCurrent[i_jntIdx];
-m_motorDir :=g_motorDir[i_armIdx,i_jntIdx];								
-m_linkEncoderDir :=g_asbEncoderDir[i_armIdx,i_jntIdx];
-m_minJntPos	:=g_minJntPos[i_armIdx,i_jntIdx];
-m_maxJntPos	:=g_maxJntPos[i_armIdx,i_jntIdx];
+m_motorEncoderRes :=GVL_ArmJointParameters.g_incEncoderRes[i_jntIdx];
+m_linkEncoderRes :=GVL_ArmJointParameters.g_absEncoderRes[i_jntIdx];
+m_motorReduction :=GVL_ArmJointParameters.g_motorReduction[i_jntIdx];
+m_linkEncoderReduction :=GVL_ArmJointParameters.g_absEncoderReduction[i_jntIdx];
+m_trqConst :=GVL_ArmJointParameters.g_motorTrqConst[i_jntIdx];
+m_maxCurrent :=GVL_ArmJointParameters.g_motorMaxCurrent[i_jntIdx];
+m_motorDir :=GVL_ArmJointParameters.g_motorDir[i_armIdx,i_jntIdx];								
+m_linkEncoderDir :=GVL_ArmJointParameters.g_asbEncoderDir[i_armIdx,i_jntIdx];
+m_minJntPos	:=GVL_ArmJointParameters.g_minJntPos[i_armIdx,i_jntIdx];
+m_maxJntPos	:=GVL_ArmJointParameters.g_maxJntPos[i_armIdx,i_jntIdx];
 
 //link encoder calibartion data
-m_minLinkEncoder :=g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
-m_maxLinkEncoder :=g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*g_linkEncLimitBuffer; // expand limit
-m_caliLinkEncoder :=g_caliLinkEncoder[i_armIdx, i_jntIdx];
-m_linkEncCaliJntPos :=g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
-m_linkEncZeroCross :=g_linkEncZeroCross[i_armIdx, i_jntIdx];
-m_multiCycles :=g_multipleCyclesJoint[i_armIdx,i_jntIdx];
+m_minLinkEncoder :=GVL_ArmJointCaliData.g_minLinkEncoder[i_armIdx, i_jntIdx] - m_linkEncoderDir*GVL_ArmJointCaliData.g_linkEncLimitBuffer; // expand limit
+m_maxLinkEncoder :=GVL_ArmJointCaliData.g_maxLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderDir*GVL_ArmJointCaliData.g_linkEncLimitBuffer; // expand limit
+m_caliLinkEncoder :=GVL_ArmJointCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx];
+m_linkEncCaliJntPos :=GVL_ArmJointCaliData.g_linkEncCaliJntPos[i_armIdx, i_jntIdx];
+m_linkEncZeroCross :=GVL_ArmJointCaliData.g_linkEncZeroCross[i_armIdx, i_jntIdx];
+m_multiCycles :=GVL_ArmJointCaliData.g_multipleCyclesJoint[i_armIdx,i_jntIdx];
 
 // convert cali link encoder if joint cross zero
 IF 1=m_linkEncZeroCross THEN
 	IF 1=m_linkEncoderDir AND m_caliLinkEncoder < m_minLinkEncoder THEN
-		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
+		m_caliLinkEncoder := GVL_ArmJointCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
 	ELSIF -1=m_linkEncoderDir AND m_caliLinkEncoder < m_maxLinkEncoder THEN
-		m_caliLinkEncoder := g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
+		m_caliLinkEncoder := GVL_ArmJointCaliData.g_caliLinkEncoder[i_armIdx, i_jntIdx] + m_linkEncoderRes;
 	END_IF
 END_IF
 

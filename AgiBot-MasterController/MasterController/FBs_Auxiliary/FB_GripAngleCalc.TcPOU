@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_GripAngleCalc" Id="{1d1f59c4-2943-4ee4-8e94-d36cfa692bb0}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_GripAngleCalc
 VAR_INPUT
@@ -30,8 +30,8 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[// init limit value
-m_minHallSensorValue:=(g_minHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
-m_maxHallSensorValue:=(g_maxHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
+m_minHallSensorValue:=(GVL_ArmJointCaliData.g_minHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
+m_maxHallSensorValue:=(GVL_ArmJointCaliData.g_maxHallSensorValue[i_armIdx]/65536) AND 16#0000FFFF; 
 m_hallSensorRange := m_maxHallSensorValue-m_minHallSensorValue;
 
 // init filter

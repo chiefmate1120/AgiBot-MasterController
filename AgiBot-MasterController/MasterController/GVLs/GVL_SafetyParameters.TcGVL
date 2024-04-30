@@ -20,6 +20,13 @@ VAR_GLOBAL CONSTANT
 	
 	// joint velocity limit for safety check
 	g_jntVelSafetyLimit :ARRAY[1..g_mJntNum] OF LREAL :=[7(2*pi)];
+	
+	// cart joint safety error
+	g_cartMaxJntCtrlErr :LREAL := 2*g_deg2Rad;
+	g_cartMaxJntEncErr :LREAL := 2.0*g_deg2Rad;
+	
+	// cart joint velocity limit
+	g_cartMaxJntVel :ARRAY[1..4] OF LREAL :=[0.03, 4*g_deg2Rad,0.02,0.015];
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

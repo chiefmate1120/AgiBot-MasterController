@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MSCtrlTriggerCheck" Id="{636c1ff6-aa47-444d-ac82-ac1207a0e0c5}" SpecialFunc="None">
     <Declaration><![CDATA[//NOTE：this block would stop checking once a trigger is detected. 
 //	re-init this block if want to start another check
@@ -31,10 +31,10 @@ VAR
 	m_firstGripTime :LREAL;
 	
 	// angle threshold indicating gripper open
-	m_openAngThres :LREAL := g_maxGripAngle * 0.8;
+	m_openAngThres :LREAL := g_maxGripAngle * 0.7;
 	
 	// angle threshold indicating gripper close
-	m_closeAngThres :LREAL := 2.0 *g_deg2rad;
+	m_closeAngThres :LREAL := 5.0 *g_deg2rad;
 END_VAR
 ]]></Declaration>
     <Implementation>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_CartJointData" Id="{e6b69d59-7625-4adf-8a66-e96cc179bff5}">
+    <Declaration><![CDATA[TYPE ST_CartJointData :
+STRUCT
+	// joint position compute with motor encoder
+	m_curMotorPos : Vec4d;
+	
+	// joint position compute with link/abs encoder
+	m_curLinkPos : Vec4d;
+	
+	// target joint position 
+	m_cmdJntPos : Vec4d;
+	
+	// current joint position 
+	m_curJntPos : Vec4d;
+	
+	// target joint velocity 
+	m_cmdJntVel : Vec4d;
+	
+	// current joint position 
+	m_curJntVel : Vec4d;
+	
+	// command joint torque 
+	m_cmdJntTrq : Vec4d;
+	
+	// current joint torque 
+	m_curJntTrq : Vec4d;
+	
+	// raw joint current  
+	m_rawJntCurrent : Vec4d;
+	
+	// filtd  joint current  
+	m_filtJntCurrent : Vec4d;
+	
+	// command joint current 
+	m_cmdJntCurrent : Vec4d;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

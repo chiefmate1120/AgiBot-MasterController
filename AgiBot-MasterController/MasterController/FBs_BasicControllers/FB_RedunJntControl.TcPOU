@@ -83,8 +83,8 @@ END_IF
 // scale track motion near redundant singularity
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
-jnt4TargetLinkPos := LIMIT(g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
-			jnt4LinkPos-j6Bias,g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); 
+jnt4TargetLinkPos := LIMIT(GVL_ArmJointParameters.g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
+			jnt4LinkPos-j6Bias,GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); 
 			
 // convert from link position to motor position
 m_jnt4TargetPos:=i_masterArm.jnt4LinkToMotor(curJntPos[2], curJntPos[3], jnt4TargetLinkPos);]]></ST>
@@ -104,7 +104,7 @@ m_jnt4TargetPos:=m_cmdJntPos;
 m_cmdJntVel:=0;
 
 // init controller
-currentRatioMotor2Jnt:=g_motorTrqConst[4]*g_motorReduction[4]/1000;
+currentRatioMotor2Jnt:=GVL_ArmJointParameters.g_motorTrqConst[4]*GVL_ArmJointParameters.g_motorReduction[4]/1000;
 m_jntPIDCtrl.init(g_armCtrlCycleTime,m_redunJntKp,m_redunJntKd,m_redunJntKi,
 		m_redunJntKiLimit* currentRatioMotor2Jnt,	m_redunJntCtrlLimit*currentRatioMotor2Jnt);
 

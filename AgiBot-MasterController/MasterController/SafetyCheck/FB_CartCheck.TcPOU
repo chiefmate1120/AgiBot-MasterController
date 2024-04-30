@@ -7,13 +7,178 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// joint error flag
+	m_jointErrFlag :ARRAY[1..4] OF BOOL:=[4(FALSE)];
+	
+	// joint control error flag
+	m_jntCtrlErrFlag :vec4b;
+	m_jntCtrlErrCounts :Vec4i;
+	m_jntEncErr :Vec7d;
+	
+	// joint encoder error flag
+	m_jntEncErrFlag :vec4b;
+	m_jntEncErrCounts :Vec4i;
+	m_jntCtrlErr : Vec4d;
+	
+	// joint velocity error flag
+	m_jntVelErrFlag :vec4b;
+	m_jntVelErrCounts  :Vec4i;
+	
+
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="check" Id="{bef3b6ff-c9e8-4fbc-b2db-c79fe876dc97}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartJointData :ST_CartJointData;
+END_VAR
+VAR_OUTPUT
+	o_errorFlag :ARRAY[1..4] OF BOOL ;
+END_VAR
+
+VAR
+	i ,j:INT ;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO 4 DO 
+	// stop check if arm is already in error state
+	IF TRUE = m_jointErrFlag[i] THEN 
+		CONTINUE;
+	END_IF
+	
+	// joint control error
+	m_jntCtrlErrFlag:=jntCtrlErrCheck(i_cartJointData.m_cmdJntPos, i_cartJointData.m_curJntPos);
+	
+	// encoder error
+	m_jntEncErrFlag:=jntEncErrCheck(i_cartJointData.m_curMotorPos, i_cartJointData.m_curLinkPos);
+	
+	// joint velocity error
+	m_jntVelErrFlag:=jntVelCheck(i_cartJointData.m_curJntVel);
+										
+	// final arm error status check
+	IF m_jntCtrlErrFlag[i] OR  m_jntEncErrFlag[i] OR m_jntVelErrFlag[i] THEN
+		m_jointErrFlag[i]:=TRUE;
+		EXIT;
+	END_IF
+	
+END_FOR
+
+o_errorFlag:=m_jointErrFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntCtrlErrCheck" Id="{b4d4ba72-29e3-4420-ae1e-373c74cf8376}">
+      <Declaration><![CDATA[METHOD jntCtrlErrCheck : Vec4b
+VAR_INput
+	i_cmdJntPos : Vec4d;
+	i_curJntPos : Vec4d;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_cmdJntPos,i_curJntPos,  m_jntEncErr);
+
+// joint error check
+FOR i:=1 TO 4 DO 
+	IF  ABS(m_jntEncErr[i]) > g_cartMaxJntCtrlErr THEN
+		m_jntCtrlErrCounts[i]:=m_jntCtrlErrCounts[i]+1;
+	ELSE
+		m_jntCtrlErrCounts[i] :=0;	
+	END_IF
+	jntCtrlErrCheck[i]:= m_jntCtrlErrCounts[i]>=g_faultTriggerCounts;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntEncErrCheck" Id="{01e25a9a-c621-44bd-8eb0-9ef81dee62f4}">
+      <Declaration><![CDATA[METHOD jntEncErrCheck : Vec4b
+VAR_INput
+	i_motorJntPos : Vec4d;
+	i_linkJntPos : Vec4d;
+END_VAR
+
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(i_motorJntPos,i_linkJntPos,  m_jntCtrlErr);
+
+// joint error check
+FOR i:=1 TO g_mJntNum DO 
+	IF  ABS(m_jntCtrlErr[i]) > g_cartMaxJntEncErr THEN
+		m_jntEncErrCounts[i]:=m_jntEncErrCounts[i]+1;
+	ELSE
+		m_jntEncErrCounts[i] :=0;
+	END_IF
+	jntEncErrCheck[i]:= m_jntEncErrCounts[i]>=g_faultTriggerCounts;
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="jntVelCheck" Id="{2e8b7dd4-14fe-4751-887c-4c0610d0cb5e}">
+      <Declaration><![CDATA[METHOD jntVelCheck : Vec4b
+VAR_INPUT
+	i_curJntVel : Vec4d;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint error check
+FOR i:=1 TO 4 DO 
+	IF  ABS(i_curJntVel[i]) > g_cartMaxJntVel[i] THEN
+		m_jntVelErrCounts[i]:=m_jntVelErrCounts[i]+1;
+	ELSE
+		m_jntVelErrCounts[i] :=0;
+	END_IF
+	jntVelCheck[i]:= m_jntVelErrCounts[i]>=g_faultTriggerCounts;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_CartCheck">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCheck.check">
+      <LineId Id="159" Count="0" />
+      <LineId Id="80" Count="4" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="160" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="125" Count="3" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCheck.jntCtrlErrCheck">
+      <LineId Id="25" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="72" Count="7" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCheck.jntEncErrCheck">
+      <LineId Id="69" Count="0" />
+      <LineId Id="71" Count="8" />
+      <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCheck.jntVelCheck">
+      <LineId Id="9" Count="7" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -172,6 +172,9 @@
     <Compile Include="DUTs\Structure\ST_MasterInputDataPool.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_CartJointData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec7b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -211,6 +214,9 @@
     <Compile Include="DUTs\Type\Vec6i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec4b.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -221,6 +227,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_IOToggleCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_MSCtrlTriggerCheck.TcPOU">
@@ -349,31 +358,35 @@
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GVLs\GVLs_ArmDynamics.TcGVL">
+    <Compile Include="GVLs\Arms\GVLs_ArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_ArmKinematic.TcGVL">
+    <Compile Include="GVLs\Arms\GVL_ArmKinematic.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_CartParameters.TcGVL">
+    <Compile Include="GVLs\Arms\GVL_ControlParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_ControlParameters.TcGVL">
+    <Compile Include="GVLs\Arms\GVL_ArmJointCaliData.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_JointEncoderCaliData.TcGVL">
+    <Compile Include="GVLs\Arms\GVL_ArmJointParameters.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Cart\GVL_CartJointCaliData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Cart\GVL_CartJointParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\GVL_MathDefine.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
-    <Compile Include="GVLs\GVL_MotorParameters.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -460,6 +473,8 @@
     <Folder Include="FBs_Robots" />
     <Folder Include="FBs_Observer" />
     <Folder Include="FBs_Auxiliary" />
+    <Folder Include="GVLs\Arms" />
+    <Folder Include="GVLs\Cart" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

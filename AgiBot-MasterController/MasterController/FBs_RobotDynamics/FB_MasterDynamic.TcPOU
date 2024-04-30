@@ -129,7 +129,7 @@ FOR i:=1 TO 9 DO
 END_FOR
 
 FOR i:=1 TO 7 DO
-	m_motorInertia[i]:=g_motorInertia[i]*g_motorReduction[i]*g_motorReduction[i];
+	m_motorInertia[i]:=g_motorInertia[i]*GVL_ArmJointParameters.g_motorReduction[i]*GVL_ArmJointParameters.g_motorReduction[i];
 END_FOR
 ]]></ST>
       </Implementation>

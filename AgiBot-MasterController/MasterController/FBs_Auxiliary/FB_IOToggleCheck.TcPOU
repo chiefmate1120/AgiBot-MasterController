@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_IOToggleCheck" Id="{7ee96876-d402-4755-8a4c-673d3024915f}" SpecialFunc="None">
+    <Declaration><![CDATA[// return true if IO is triggerd for a set time period
+// only return ture for one cycle, waiting for IO to be released and check for next time
+FUNCTION_BLOCK FB_IOToggleCheck
+VAR
+	// IO type, 0- normally-opend IO; 1- normally-closed IO
+	m_IOType :INT :=0;
+	
+	// counts after IO  is triggerd
+	m_IOOnCounts :INT;
+	
+	// counts threshold indicating IO is trully triggerd
+	m_IOOnCountThres :INT :=100;
+	
+	// flag if already triggered
+	m_isTrig : BOOL :=false;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{ddaf28f6-b7c8-41b8-8d5d-b180b564124e}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_INPUT
+	IOValue :BOOL;
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF (0=m_IOType and IOValue) OR (1=m_IOType AND NOT(IOValue)) THEN
+	m_IOOnCounts := MIN(m_IOOnCounts +1, m_IOOnCountThres);
+ELSE
+	 m_IOOnCounts :=0;
+	 m_isTrig :=FALSE;
+END_IF
+
+IF NOT(m_isTrig) AND m_IOOnCounts>=m_IOOnCountThres THEN
+	check :=TRUE; 
+	m_isTrig := TRUE;
+ELSE
+	check :=FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{c6e64de0-80ba-4161-8947-1e90294297fc}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_INPUT
+	i_IOType :INT;
+	i_triggerCounts:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_IOType:=i_IOType;
+m_IOOnCountThres := i_triggerCounts;
+m_isTrig :=false;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_IOToggleCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IOToggleCheck.check">
+      <LineId Id="9" Count="3" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="2" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_IOToggleCheck.init">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

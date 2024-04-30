@@ -114,7 +114,6 @@ END_VAR
 r_masterStatus.m_armState:=m_masterArmState;
 r_masterStatus.m_teleSlaveArmIdx := m_teleSlaveArmIdx;
 
-// TODO: project cartesion data to monitor coordinate
 FOR i:=1 TO g_mArmNum DO
 	// current info
 	r_masterStatus.m_gripAngle[i]:=m_masterArms[i].gripAngle;
@@ -483,7 +482,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
     <LineIds Name="FB_MasterRobot.getStatus">
       <LineId Id="29" Count="0" />
       <LineId Id="23" Count="1" />
-      <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="32" Count="0" />

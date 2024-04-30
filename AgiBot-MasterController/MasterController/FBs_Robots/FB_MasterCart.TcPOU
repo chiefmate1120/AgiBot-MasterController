@@ -1,8 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
+	// safety information, import from safety check task
+	m_jntErrFlag AT %I*: Vec4b;
+	
 	//  IO and check
 	m_endoScopePedalIO AT%I* :BOOL;
 	m_endoScopeIOCheck :FB_IOCheck;
@@ -13,12 +16,27 @@ VAR
 	m_surgonHeadInIO AT%I* :BOOL;
 	m_headInCheck:FB_IOCheck;
 	
+	m_armSwitchIO AT%I* :BOOL;
+	m_armSwitchCheck:FB_IOToggleCheck;
+	
 	// cart status
 	m_cartStatus  : ST_CartStatus;
 	
 	// cart joints
 	// [monitor lift, monitor rotate, armset, pedal]
 	m_cartJoints:ARRAY[1..4] OF FB_CartJoint;
+	
+	// cart joint motion control IO
+	//[monitor_up, monitor_down, monitor_cwRotate, monitor_ccwRotate, armset_up, armset_down, pedal_in, pedal_out]
+	m_cartJointCtrlIO AT%I* :ARRAY[1..8] OF BOOL ;
+	m_cartJointCtrlIOCheck :ARRAY[1..8] OF FB_IOCheck;
+	
+	// cart joint control data
+	m_jntCmdMotionDir :Vec4i;
+	m_cmdJntTrq :Vec4d;
+	m_cmdJntPos :Vec4d;
+	m_cmdJntVel :Vec4d;
+	m_jntEnableFlag :Vec4i;
 	
 	// cart joint status data
 	m_curMotorPos :Vec4d;
@@ -30,12 +48,6 @@ VAR
 	m_filtJntCurrent :Vec4d;
 	m_cmdJntCurrent : Vec4d;
 	
-	// cart joint control data
-	m_jntSwitchDir :Vec4i;
-	m_cmdJntTrq :Vec4d;
-	m_cmdJntPos :Vec4d;
-	m_cmdJntVel :Vec4d;
-	m_jntEnableFlag :Vec4i;
 	
 END_VAR
 ]]></Declaration>
@@ -43,6 +55,39 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="property" Id="{37b9f91a-fbe1-4cae-807d-574d49e247d7}" />
+    <Method Name="getStatus" Id="{3f39e291-1358-48a2-aa04-62d9bb4689e3}">
+      <Declaration><![CDATA[METHOD PUBLIC getStatus : BOOL
+VAR_IN_OUT
+	// cart status data
+	r_cartStatus :ST_CartStatus;
+	
+	// cart joint data
+	r_cartJointData :ST_CartJointData;
+	
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[r_cartStatus := m_cartStatus;
+
+
+	// current joint data
+	r_cartJointData.m_curMotorPos:=m_curMotorPos;
+	r_cartJointData.m_curLinkPos:=m_curLinkPos;
+	r_cartJointData.m_curJntPos:=m_curJntPos;
+	r_cartJointData.m_curJntVel:=m_curJntVel;
+	r_cartJointData.m_curJntTrq:=m_curJntVel;
+	r_cartJointData.m_rawJntCurrent:=m_rawJntCurrent;
+	r_cartJointData.m_filtJntCurrent:=m_filtJntCurrent;
+	
+	// command joint data
+	r_cartJointData.m_cmdJntPos:=m_cmdJntPos;
+	r_cartJointData.m_cmdJntVel:=m_cmdJntVel;
+	r_cartJointData.m_cmdJntTrq:=m_cmdJntTrq;
+	r_cartJointData.m_cmdJntCurrent:=m_cmdJntCurrent;
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="init" Id="{a9830b95-e937-4a29-b70e-785e20452d37}">
       <Declaration><![CDATA[METHOD init : BOOL
 VAR_INPUT
@@ -52,22 +97,79 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[(*// joint init
+        <ST><![CDATA[// joint init
 FOR i:=1 TO 4 DO
 	m_cartJoints[i].init(i,g_cartCtrlCycleTime);
 	m_cartJoints[i].initJntPos();
-END_FOR*)
+END_FOR
 
 // init commands
 FOR i:=1 TO 4 DO
 	m_jntEnableFlag[i]:=0;
-	m_jntSwitchDir[i]:=0;
+	m_jntCmdMotionDir[i]:=0;
 	m_cmdJntTrq[i]:=0;
 	m_cmdJntVel[i]:=0;
 	m_cmdJntPos[i]:=m_cartJoints[i].jntPos;
 END_FOR
 
 ]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="monitorAngLink2Motor" Id="{be375282-cfa2-4973-91da-b3215777ab52}">
+      <Declaration><![CDATA[// TODO
+METHOD monitorAngLink2Motor : LREAL
+VAR_INPUT
+	i_linkPos:LREAL;
+END_VAR
+VAR
+	A,B,C,D,E,F,G,H,I,X0,X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,X11,X12,Z0:LREAL;	
+	offset :LREAL := 0.8877;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+X0:=i_linkPos+offset;  //监视器旋转
+
+A:=227; B:=216; C:=159.285; D:=150.297; E:=195; F:=130; G:=137; H:=40; I:=99;
+X4:=ATAN(H/I); X5:=ATAN(F/G);
+X8:=SQRT(F*F+G*G);
+X12:=sqrt(H*H+I*I);
+X9:=sqrt(E*E+X12*X12-2*E*X12*cos(X0));
+X6:=acos((B*B+X8*X8-X9*X9)/(2*B*X8));
+X10:=acos((B*B+X9*X9-X8*X8)/(2*B*X9));
+X11:=acos((X9*X9+X12*X12-E*E)/(2*X9*X12));
+X7:=X10+X11;
+X2:=X5-X6;
+X3:=pi-X7+X2;
+X1:=X3-X4;
+
+monitorAngLink2Motor:=-X2;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="monitorAngMotor2Link" Id="{5a608b24-1792-4091-9318-b2f1f860af4d}">
+      <Declaration><![CDATA[//TODO
+METHOD monitorAngMotor2Link : LREAL
+VAR_INPUT
+	i_motorPos:LREAL;
+END_VAR
+VAR
+	A,B,C,D,E,F,G,H,I,X0,X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,X11,X12,Z0:LREAL;	
+	offset :LREAL := 0.8877;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[X2:=-i_motorPos;
+
+A:=227; B:=216; C:=159.285; D:=150.297; E:=195; F:=130; G:=137; H:=40; I:=99;
+X5:=atan(F/G);
+X6:=X5-X2;
+X8:=sqrt(F*F+G*G);
+X9:=sqrt(B*B+X8*X8-2*B*X8*cos(X6));
+X12:=SQRT(H*H+I*I);
+X0:=ACOS((E*E+X12*X12-X9*X9)/(2*E*X12));
+
+monitorAngMotor2Link:=X0-offset;]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{5adedbe6-c484-4199-b427-bc8af7c6d1b0}">
@@ -81,13 +183,13 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// update cart status
 updateStatus();
 
-(*// update controller and command
+// update controller and command
 updateCmds();
 
 // send command to joint driver
 FOR i:=1 TO 4 DO
 	// joint enable
-	IF m_jntEnableFlag[i]=1 THEN
+	IF NOT(m_jntErrFlag[i]) AND m_jntEnableFlag[i]=1 THEN
 		m_cartJoints[i].enable();
 	ELSE
 		m_cartJoints[i].disable();
@@ -95,7 +197,7 @@ FOR i:=1 TO 4 DO
 	
 	// set command position
 	m_cartJoints[i].updateCmds(DriverOPMode_Pos,m_cmdJntPos[i],m_cmdJntTrq[i]);
-END_FOR*)]]></ST>
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Property Name="status" Id="{cd2a750f-147a-42a5-85cd-a7d5a815c963}" FolderPath="property\">
@@ -119,7 +221,7 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// update joint enable flag
 FOR i:= 1 TO 4 DO
-	IF m_jntSwitchDir[i] <> 0 THEN
+	IF m_jntCmdMotionDir[i] <> 0 THEN
 		m_jntEnableFlag[i] := 1;
 	ELSE
 		m_jntEnableFlag[i] :=0; 
@@ -132,14 +234,42 @@ FOR i:=1 TO 4 DO
 	//only update command after joints is truly enabled
 	IF m_jntEnableFlag[i]=1 AND m_cartJoints[i].isEnabled() THEN
 		// TODO: update command joint velocity
-		m_cmdJntVel[i]:=0;
-		
+		m_cmdJntVel[i]:=m_jntCmdMotionDir[i]*GVL_CartJointParameters.g_jntCtrlMotionVel[i];
 		m_cmdJntPos[i]:= m_cmdJntPos[i]+ m_cmdJntVel[i]*g_cartCtrlCycleTime;
 	ELSE
 		m_cmdJntVel[i]:=0;
 		m_cmdJntPos[i] := m_cartJoints[i].jntPos;
 	END_IF
-END_FOR ]]></ST>
+END_FOR 
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="updateIO" Id="{2eedbee2-a8d4-4513-b19a-4a2795c7d360}">
+      <Declaration><![CDATA[METHOD updateIO : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	i:INT;
+	idxOffset:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// updata IO signals
+m_cartStatus.m_clutchSwitch:= m_clutchIOCheck.check(m_clutchPedalIO);
+m_cartStatus.m_endoscopeSwitch := m_endoScopeIOCheck.check(m_endoScopePedalIO);
+m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
+m_cartStatus.m_armSwitch :=m_armSwitchCheck.check(m_armSwitchIO);
+
+//update cart joint control switch
+FOR i:=1 TO 4 DO 
+	idxOffset:= 2*(i-1);
+	IF m_cartJointCtrlIOCheck[1+idxOffset].check(m_cartJointCtrlIO[1+idxOffset]) THEN
+		m_jntCmdMotionDir[i]:=1;
+	ELSIF  m_cartJointCtrlIOCheck[2+idxOffset].check(m_cartJointCtrlIO[2+idxOffset]) THEN
+		m_jntCmdMotionDir[i]:=-1;
+	ELSE
+		m_jntCmdMotionDir[i]:=0;
+	END_IF
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
@@ -150,7 +280,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[(*// update cart joints status
+        <ST><![CDATA[// update cart joints status
 FOR i:=1  TO 4 DO
 	m_cartJoints[i].updateStatus();
 END_FOR
@@ -165,19 +295,40 @@ FOR i:=1 TO 4 DO
 	m_rawJntCurrent[i]:=m_cartJoints[i].rawCurrent;
 	m_filtJntCurrent[i]:=m_cartJoints[i].filtCurrent;
 	m_cmdJntCurrent[i]:=m_cartJoints[i].cmdCurrent;
-END_FOR *)
+END_FOR 
 
-// updata IO signals
-m_cartStatus.m_clutchSwitch:= m_clutchIOCheck.check(m_clutchPedalIO);
-m_cartStatus.m_endoscopeSwitch := m_endoScopeIOCheck.check(m_endoScopePedalIO);
-m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
+// transfer monitor angle from link side to motor side
+m_curLinkPos[2]:= monitorAngLink2Motor(m_curLinkPos[2]);
 
+// get monitor angle
+m_cartStatus.m_monitorAngle:= m_cartJoints[2].linkPos;
 
-//TODO: update cart joint control switch]]></ST>
+// check if cart in motion
+m_cartStatus.m_consoleInAdjust:=FALSE;
+FOR i:=1 TO 4 DO
+	IF m_cartJoints[i].isEnabled() THEN
+		m_cartStatus.m_consoleInAdjust:=TRUE;
+		EXIT;
+	END_IF
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_MasterCart">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.getStatus">
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="57" Count="5" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.init">
       <LineId Id="9" Count="2" />
@@ -192,6 +343,16 @@ m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
       <LineId Id="36" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.monitorAngLink2Motor">
+      <LineId Id="6" Count="17" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.monitorAngMotor2Link">
+      <LineId Id="6" Count="7" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.run">
       <LineId Id="5" Count="0" />
@@ -226,11 +387,25 @@ m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
       <LineId Id="19" Count="0" />
       <LineId Id="21" Count="2" />
       <LineId Id="25" Count="0" />
-      <LineId Id="30" Count="0" />
       <LineId Id="29" Count="0" />
       <LineId Id="26" Count="2" />
       <LineId Id="24" Count="0" />
       <LineId Id="20" Count="0" />
+      <LineId Id="72" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterCart.updateIO">
+      <LineId Id="6" Count="3" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.updateStatus">
       <LineId Id="9" Count="0" />
@@ -238,9 +413,18 @@ m_cartStatus.m_surgonReady := m_headInCheck.check(m_surgonHeadInIO);
       <LineId Id="14" Count="1" />
       <LineId Id="24" Count="10" />
       <LineId Id="23" Count="0" />
-      <LineId Id="35" Count="5" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="16" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="52" Count="2" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="59" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

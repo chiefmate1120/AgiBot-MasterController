@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_StateCtrlClutch" Id="{093bd9ec-6cc6-4389-91e4-f8586e50bb1f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Clutch
 FUNCTION_BLOCK PUBLIC FB_StateCtrlClutch EXTENDS FB_MasterArmCtrlBase
@@ -127,8 +127,8 @@ j6Bias := j6Bias * ABS(COS(j5Bias));
 calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);
 
 // joint limit
-IF (calcRedunVel > 0 AND jnt4LinkPos+calcRedunVel * g_armCtrlCycleTime > g_maxJntPos[i_masterArm.armIdx,4])
-	 OR ( calcRedunVel <0 AND  jnt4LinkPos +calcRedunVel * g_armCtrlCycleTime< g_minJntPos[i_masterArm.armIdx,4]) THEN
+IF (calcRedunVel > 0 AND jnt4LinkPos+calcRedunVel * g_armCtrlCycleTime > GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4])
+	 OR ( calcRedunVel <0 AND  jnt4LinkPos +calcRedunVel * g_armCtrlCycleTime< GVL_ArmJointParameters.g_minJntPos[i_masterArm.armIdx,4]) THEN
 	 calcRedunVel :=0;
 END_IF]]></ST>
       </Implementation>

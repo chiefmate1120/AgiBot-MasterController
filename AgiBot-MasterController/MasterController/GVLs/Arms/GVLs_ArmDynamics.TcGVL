@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVLs_ArmDynamics" Id="{df4fb32e-58eb-444d-823e-cc22793fbc57}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 VAR_GLOBAL CONSTANT

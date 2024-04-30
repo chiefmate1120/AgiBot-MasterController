@@ -7,7 +7,7 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
-	// cartesian pose error flag
+	// whole arm error flag
 	m_armErrFlag :ARRAY[1..g_mArmNum] OF BOOL:=[2(FALSE)];
 	
 	// cartesian pose error flag
@@ -219,7 +219,7 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
     </LineIds>
     <LineIds Name="FB_MasterArmCheck.jntCtrlErrCheck">
       <LineId Id="25" Count="0" />
-      <LineId Id="68" Count="0" />
+      <LineId Id="94" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="44" Count="0" />
       <LineId Id="72" Count="7" />
