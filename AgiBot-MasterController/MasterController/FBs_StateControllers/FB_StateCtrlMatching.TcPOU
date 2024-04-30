@@ -306,7 +306,7 @@ q4:=atan2(s4,c4);
 IF q4> g_minJntPos[1,4] AND q4<g_maxJntPos[1,4] THEN
 	leftWristOptIK:=TRUE;
 	RETURN;
-ELSIF q4> g_maxJntPos[1,4] AND q4-2*pi< g_minJntPos[1,4] THEN
+ELSIF q4> g_maxJntPos[1,4] AND q4-2*pi> g_minJntPos[1,4] THEN
 	q4:=q4-2*PI;
 	leftWristOptIK:=TRUE;
 	RETURN;
