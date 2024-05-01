@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 VAR
@@ -497,6 +497,7 @@ VAR_INPUT
 END_VAR
 VAR
 	i:INT ;
+	initLinkPos:LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// joint init
@@ -505,8 +506,8 @@ FOR i:=1 TO g_mJntNum DO
 END_FOR
 
 // link position of joint4 is influenced by joint2 and joint3, need to handle seperately
-//q4DH=q4motor+q8-q2-90;  
-m_joints[4].initLinkPos:= m_joints[4].initLinkPos-m_joints[3].initLinkPos+m_joints[2].initLinkPos+PI/2;
+initLinkPos:=jnt4LinkToMotor(m_joints[2].initLinkPos,m_joints[3].initLinkPos, m_joints[4].initLinkPos);
+m_joints[4].initJntPosReset(initLinkPos);
 
 // update arm status after joint position is re-init
 updateStatus();
@@ -1017,8 +1018,7 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
       <LineId Id="7" Count="3" />
       <LineId Id="22" Count="0" />
       <LineId Id="21" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="23" Count="0" />
+      <LineId Id="39" Count="1" />
       <LineId Id="32" Count="1" />
       <LineId Id="31" Count="0" />
       <LineId Id="25" Count="0" />

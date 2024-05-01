@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_JointBase" Id="{d8c9f825-5b86-4a03-beb2-3c59a05d0ecd}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR
@@ -137,7 +137,27 @@ m_initMotorEnc :=m_motorInputs.m_motorEncoder;
 m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
 m_cmdJntPos :=m_curJntPos;	
-m_lastJntPos :=m_curJntPos;]]></ST>
+m_lastJntPos :=m_curJntPos;
+// filter init
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="initJntPosReset" Id="{67d9eb27-7f10-499f-96e0-41fedf8efea0}">
+      <Declaration><![CDATA[// reset the initial joint position with input value
+METHOD initJntPosReset : BOOL
+VAR_INPUT
+	i_initLinkPos:LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_initLinkPos:=i_initLinkPos;
+m_initMotorEnc :=m_motorInputs.m_motorEncoder;
+m_curMotorPos:=motorEnc2Pos();
+m_curJntPos := m_curMotorPos;
+m_cmdJntPos :=m_curJntPos;	
+m_lastJntPos :=m_curJntPos;
+// filter init
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
       </Implementation>
     </Method>
     <Property Name="initLinkPos" Id="{44b4f2ab-df65-46ae-a9da-78e6fae813b9}" FolderPath="property\">
@@ -366,6 +386,14 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="32" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="33" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_JointBase.initJntPosReset">
+      <LineId Id="11" Count="4" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.initLinkPos.Get">
       <LineId Id="2" Count="0" />

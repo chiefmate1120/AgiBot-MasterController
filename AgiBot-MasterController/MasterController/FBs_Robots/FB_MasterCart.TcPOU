@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
@@ -47,8 +47,7 @@ VAR
 	m_rawJntCurrent :Vec4d;
 	m_filtJntCurrent :Vec4d;
 	m_cmdJntCurrent : Vec4d;
-	
-	
+
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -94,6 +93,7 @@ VAR_INPUT
 END_VAR
 VAR
 	i:INT;
+	initLinkPos :LREAl;
 END_VAR
 ]]></Declaration>
       <Implementation>
@@ -102,6 +102,11 @@ FOR i:=1 TO 4 DO
 	m_cartJoints[i].init(i,g_cartCtrlCycleTime);
 	m_cartJoints[i].initJntPos();
 END_FOR
+
+// motor and link encoder of  monitor rotation are on different  joints
+// transfer monitor angle from link side to motor side
+initLinkPos:= monitorAngLink2Motor(m_cartJoints[2].initLinkPos);
+m_cartJoints[2].initJntPosReset(initLinkPos);
 
 // init commands
 FOR i:=1 TO 4 DO
@@ -180,7 +185,10 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// update cart status
+        <ST><![CDATA[// update IO signals
+updateIO();
+
+// update cart status
 updateStatus();
 
 // update controller and command
@@ -233,9 +241,10 @@ END_FOR
 FOR i:=1 TO 4 DO
 	//only update command after joints is truly enabled
 	IF m_jntEnableFlag[i]=1 AND m_cartJoints[i].isEnabled() THEN
-		// TODO: update command joint velocity
+		//  update command joint velocity
 		m_cmdJntVel[i]:=m_jntCmdMotionDir[i]*GVL_CartJointParameters.g_jntCtrlMotionVel[i];
 		m_cmdJntPos[i]:= m_cmdJntPos[i]+ m_cmdJntVel[i]*g_cartCtrlCycleTime;
+		m_cmdJntPos[i]:= LIMIT(GVL_CartJointParameters.g_minJntPos[i], m_cmdJntPos[i], GVL_CartJointParameters.g_maxJntPos[i]);
 	ELSE
 		m_cmdJntVel[i]:=0;
 		m_cmdJntPos[i] := m_cartJoints[i].jntPos;
@@ -334,6 +343,10 @@ END_FOR]]></ST>
       <LineId Id="9" Count="2" />
       <LineId Id="18" Count="0" />
       <LineId Id="12" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="54" Count="1" />
       <LineId Id="33" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="34" Count="0" />
@@ -355,6 +368,9 @@ END_FOR]]></ST>
       <LineId Id="18" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.run">
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="34" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="9" Count="0" />
       <LineId Id="11" Count="0" />
@@ -388,7 +404,9 @@ END_FOR]]></ST>
       <LineId Id="21" Count="2" />
       <LineId Id="25" Count="0" />
       <LineId Id="29" Count="0" />
-      <LineId Id="26" Count="2" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="27" Count="1" />
       <LineId Id="24" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="72" Count="0" />

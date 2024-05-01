@@ -1146,7 +1146,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{366C36CE-BB8F-4E61-9E01-5413E401CB92}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{9FBFC109-3E16-DA33-4CC2-77F16611BD41}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

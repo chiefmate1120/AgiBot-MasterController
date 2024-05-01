@@ -441,10 +441,11 @@ FOR i:=1 TO g_mArmNum DO
 END_FOR
 
 // To Endoscope Control 
-IF SlaveArmState_EndoScope = m_scopeArmState AND
+IF SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch AND
   (MasterArmState_Standby = m_masterArmState[1] OR MasterArmState_Ready = m_masterArmState[1] OR MasterArmState_MasterSlave = m_masterArmState[1]) AND 
   (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
-  m_nextMasterArmState[1] := MasterArmState_Endoscope;
+	m_nextMasterArmState[1] := MasterArmState_Endoscope;
+	m_nextMasterArmState[2] := MasterArmState_Endoscope;
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -460,7 +461,7 @@ END_VAR]]></Declaration>
 monitorRot := rotY( -m_monitorAngle);
 
 // shoulder pose in current monitor frame
-matMultiply(monitorRot,g_shoulderRotInMonitor, m_shoulderPoseInMonitor[1].m_rot);
+matMultiply(g_shoulderRotInMonitor,monitorRot, m_shoulderPoseInMonitor[1].m_rot);
 m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
 ]]></ST>
       </Implementation>
@@ -673,6 +674,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="248" Count="0" />
       <LineId Id="224" Count="0" />
       <LineId Id="227" Count="0" />
+      <LineId Id="305" Count="0" />
       <LineId Id="225" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.updateShoulderPose">

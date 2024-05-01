@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_CartJointCaliData" Id="{c1ded796-4909-477e-b6e1-d92088709fd2}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL CONSTANT
@@ -7,13 +7,13 @@ VAR_GLOBAL CONSTANT
 	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// absolute encoder value at minimal joint positon
-	g_minLinkEncoder :ARRAY[1..4] OF DINT :=[55146056, 12890812, 50227236,48935748];
+	g_minLinkEncoder :ARRAY[1..4] OF DINT :=[54146051, 12890812, 50227236,48935748];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..4] OF DINT :=[52631155, 15542320,49285521,48159780];
 	
 	// absolute encoder value at calibrated positon
-	g_caliLinkEncoder :ARRAY[1..4] OF DINT :=[55146056, 12890812, 50227236, 48935748];
+	g_caliLinkEncoder :ARRAY[1..4] OF DINT :=[54146051, 12890812, 50227236, 48935748];
 	
 	// if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..4] OF INT :=[0, 0, 0, 0];
