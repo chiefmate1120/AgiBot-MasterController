@@ -301,6 +301,9 @@
     <Compile Include="FBs_StateControllers\FB_StateCtrlCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_StateControllers\FB_StateCtrlDisable.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlGraCali.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -518,6 +521,7 @@
     <PinnedGlobalDataType Include="MSCommu_MasterStatus" />
     <PinnedGlobalDataType Include="MSCommu_Mat3d" />
     <PinnedGlobalDataType Include="MSCommu_SlaveStatus" />
+    <PinnedGlobalDataType Include="MSCommu_SlaveUIData" />
     <PinnedGlobalDataType Include="MSCommu_Vec3d" />
     <PinnedGlobalDataType Include="MSCommu_Vec6d" />
   </ItemGroup>

@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_StateCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
+  <POU Name="FB_StateCtrlDisable" Id="{cdb57e54-fa38-4cad-b467-29f4110c1ee2}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Error Hold
-FUNCTION_BLOCK PUBLIC FB_StateCtrlError EXTENDS FB_MasterArmCtrlBase
+FUNCTION_BLOCK PUBLIC FB_StateCtrlDisable EXTENDS FB_MasterArmCtrlBase
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
@@ -13,7 +13,7 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
-    <Method Name="calcCmdJntPos" Id="{21009f04-392c-40dd-b309-e4b806a2cda5}">
+    <Method Name="calcCmdJntPos" Id="{89de411a-bd80-47a9-a64c-96ec6b6393ef}">
       <Declaration><![CDATA[// override this function in each exact controller
 METHOD PROTECTED calcCmdJntPos : BOOL
 
@@ -33,7 +33,7 @@ END_VAR]]></Declaration>
 m_cmdJntVel := g_zeroVec7d;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="init" Id="{e6a6f329-eae4-4e64-b8ba-0dd027b37a8e}">
+    <Method Name="init" Id="{7ec4f7df-df49-4afd-a16c-f71bb7ca37e5}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterArm	:FB_MasterArm;
@@ -54,14 +54,14 @@ m_jntEnableFlag :=g_zeroVec7i;
 ]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_StateCtrlError">
+    <LineIds Name="FB_StateCtrlDisable">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_StateCtrlError.calcCmdJntPos">
+    <LineIds Name="FB_StateCtrlDisable.calcCmdJntPos">
       <LineId Id="105" Count="0" />
       <LineId Id="215" Count="0" />
     </LineIds>
-    <LineIds Name="FB_StateCtrlError.init">
+    <LineIds Name="FB_StateCtrlDisable.init">
       <LineId Id="67" Count="0" />
       <LineId Id="60" Count="0" />
       <LineId Id="36" Count="0" />

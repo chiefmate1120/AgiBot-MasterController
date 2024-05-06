@@ -21,8 +21,9 @@
 	SlaveArmState_Test := 16,
 	SlaveArmState_InstruRetract :=17,
 	SlaveArmState_InstruInvasion :=18,
+	SlaveArmState_Disable :=19,
 	
-	SlaveArmState_totalNum :=SlaveArmState_InstruInvasion
+	SlaveArmState_totalNum :=SlaveArmState_Disable
 );
 END_TYPE
 ]]></Declaration>

@@ -5,6 +5,15 @@
 VAR
 	// slave robot data, input from slave controller box
 	m_slaveRobotData AT %I* : MSCommu_slaveStatus;
+	
+	// all data from other tasks and controller 
+	m_masterInputDataPool : ST_MasterInputDataPool;
+	
+	// master robot information, including arm status and cartesian data, output to other tasks
+	m_masterStatus AT %Q* :ST_MasterStatus;
+	
+	// master robot joint data, output to other tasks
+	m_masterJointsData AT %Q* :ST_MasterJointData;
 		
 	// master robot data, ouput to slave controller box
 	m_masterRobotData AT %Q* :MSCommu_MasterStatus;
@@ -17,15 +26,6 @@ VAR
 	
 	// master robot
 	m_masterRobot:FB_MasterRobot;
-	
-	// master robot information, including arm status and cartesian data
-	m_masterStatus AT %Q* :ST_MasterStatus;
-	
-	// master robot joint data
-	m_masterJointsData AT %Q* :ST_MasterJointData;
-	
-	// all data from other tasks and controller 
-	m_masterInputDataPool : ST_MasterInputDataPool;
 	
 	// code execute time measure
 	m_codeTime : Profiler;
@@ -57,18 +57,18 @@ m_masterRobot.run(m_masterInputDataPool);
 m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 
 // master output data cast
-masterOutputDataCast(shoulderPose:=m_masterRobot.shoulderPose, m_masterStatus, m_masterRobotData);
+masterOutputDataCast(m_masterRobot.m_shoulderPoseInMonitor, m_masterStatus, m_masterRobotData);
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
     <Method Name="masterOutputDataCast" Id="{688f8323-8b5a-4cc7-b4b2-cb5f74424c3f}">
       <Declaration><![CDATA[// convert from local ST_MasterStatus for control to MSCommu_MasterStatus for master-slave communication
 METHOD masterOutputDataCast : BOOL
-VAR_INPUT
+VAR_IN_OUT CONSTANT
 	shoulderPose :ARRAY[1..2] OF ST_Frame;
+	masterStatus :ST_MasterStatus;
 END_VAR
 VAR_IN_OUT
-	masterStatus :ST_MasterStatus;
 	masterOutputData:MSCommu_MasterStatus;
 END_VAR
 
@@ -109,8 +109,10 @@ END_FOR
     <Method Name="slaveInputDataCast" Id="{110717ec-abfc-4dc8-a3ed-d3c3fbcf321b}">
       <Declaration><![CDATA[// convert from MSCommu_Slavetatus for master-slave communication to local ST_SlaveStatus for control
 METHOD slaveInputDataCast : BOOL
+VAR_IN_OUT CONSTANT
+		slaveInputData : MSCommu_SlaveStatus; 
+END_VAR
 VAR_IN_OUT
-	slaveInputData : MSCommu_SlaveStatus; 
 	slaveStatus :ST_SlaveStatus;
 END_VAR
 

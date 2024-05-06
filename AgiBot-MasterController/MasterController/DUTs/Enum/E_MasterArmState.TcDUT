@@ -17,8 +17,9 @@ TYPE E_MasterArmState :
 	MasterArmState_Cart := 10,
 	MasterArmState_GravityCali := 11,
 	MasterArmState_Test :=12,
+	MasterArmState_Disable :=13,
 	
-	MasterArmState_totalNum :=MasterArmState_Test
+	MasterArmState_totalNum :=MasterArmState_Disable
 );
 END_TYPE
 ]]></Declaration>
