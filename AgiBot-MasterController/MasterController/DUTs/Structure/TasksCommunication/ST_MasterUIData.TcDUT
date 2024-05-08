@@ -6,7 +6,7 @@
 TYPE ST_MasterUIData :
 STRUCT
 	m_motionScale:LREAL := 1.5;
-	m_faultClearFlag:BOOL := FALSE;
+	m_selfCheckFlag:BOOL := FALSE;
 	m_masterArmDisableFlag :ARRAY[1..2] OF BOOL:=[2(FALSE)];
 END_STRUCT
 END_TYPE

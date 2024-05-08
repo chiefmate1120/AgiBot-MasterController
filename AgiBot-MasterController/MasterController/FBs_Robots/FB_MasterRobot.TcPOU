@@ -16,9 +16,9 @@ VAR
 	m_masterArms :ARRAY[1..g_mArmNum] OF FB_MasterArm;
 	
 	// arm state
-	m_masterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Init];
-	m_lastMasterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Init];
-	m_nextMasterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Init];
+	m_masterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Error];
+	m_lastMasterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Error];
+	m_nextMasterArmState:ARRAY[1..g_mArmNum] OF E_masterArmState:=[E_masterArmState.MasterArmState_Init,E_masterArmState.MasterArmState_Error];
 	
 	// index(1 to 4) of slave arm which is tele-linked to master arm
 	m_teleSlaveArmIdx:ARRAY[1..g_mArmNum] OF E_MatchedSlaveArmIdx:=[MatchedSlaveArmIdx_NULL, MatchedSlaveArmIdx_null];
@@ -251,6 +251,7 @@ FOR i:=1 TO g_mArmNum DO
 	m_armCtrlFactory[i,MasterArmState_Cart] := m_armCart[i];
 	m_armCtrlFactory[i,MasterArmState_GravityCali] := m_armGravityCali[i];
 	m_armCtrlFactory[i,MasterArmState_Test] := m_armTest[i];
+	m_armCtrlFactory[i,MasterArmState_Disable] := m_armDisable[i];
 
 	// assign controller
 	m_armCtrl[i]:=m_armCtrlFactory[i,m_masterArmState[i]];
@@ -389,7 +390,8 @@ FOR i:=1 TO g_mArmNum DO
 			
 		// init
 		MasterArmState_Init:
-			IF m_armCtrl[i].isFinished  THEN
+			// to home(self-check)
+			IF m_armCtrl[i].isFinished AND i_masterInputDataPool.m_UIData.m_selfCheckFlag  THEN
 				// NOTICE: multiple cycles joints back to center during initialization
 				// 			need to reset joints encoder data again
 				m_masterArms[i].initJntPos();
@@ -513,7 +515,7 @@ FOR i:=1 TO g_mArmNum DO
 	END_CASE
 	
 	// arm disable
-	IF i_masterInputDataPool.m_UIData.m_masterArmDisableFlag[i] THEN
+	IF i_masterInputDataPool.m_UIData.m_masterArmDisableFlag[i] AND m_masterArmState[i] <> MasterArmState_Init THEN
 		m_nextMasterArmState[i] := MasterArmState_Disable;
 	// error check
 	ELSIF i_masterInputDataPool.m_safetyData.m_masterErrFlag[i] THEN
@@ -636,6 +638,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="62" Count="9" />
       <LineId Id="108" Count="0" />
       <LineId Id="115" Count="0" />
+      <LineId Id="145" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="12" Count="0" />
@@ -717,6 +720,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="259" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="343" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="75" Count="2" />
       <LineId Id="29" Count="1" />

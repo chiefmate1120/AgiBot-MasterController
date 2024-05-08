@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_CartCheck" Id="{d1534ad2-2f8c-4055-becf-7fdf37e415fb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_CartCheck
 VAR_INPUT
@@ -24,6 +24,10 @@ VAR
 	m_jntVelErrFlag :vec4b;
 	m_jntVelErrCounts  :Vec4i;
 	
+	// joint position limit error flag
+	m_jntLimitErrFlag :Vec4b;
+	m_jntLimitErrCounts :Vec4i;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -32,6 +36,7 @@ END_VAR
     <Method Name="check" Id="{bef3b6ff-c9e8-4fbc-b2db-c79fe876dc97}">
       <Declaration><![CDATA[METHOD check : BOOL
 VAR_IN_OUT CONSTANT
+	i_cartStatus : ST_CartStatus;
 	i_cartJointData :ST_CartJointData;
 END_VAR
 VAR_OUTPUT
@@ -43,7 +48,12 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// joint control error
+        <ST><![CDATA[// return if cart not init
+IF NOT(i_cartStatus.m_initFlag) THEN
+	RETURN;
+END_IF
+
+// joint control error
 jntCtrlErrCheck(i_cartJointData.m_cmdJntPos, i_cartJointData.m_curJntPos);
 
 // encoder error
@@ -51,6 +61,9 @@ jntEncErrCheck(i_cartJointData.m_curMotorPos, i_cartJointData.m_curLinkPos);
 
 // joint velocity error
 jntVelCheck(i_cartJointData.m_curJntVel);
+
+// joint limit 
+jntLimitCheck(i_cartJointData.m_curJntVel);
 	
 FOR i:=1 TO 4 DO 
 	// stop check if arm is already in error state
@@ -59,7 +72,7 @@ FOR i:=1 TO 4 DO
 	END_IF
 	
 	// final arm error status check
-	IF m_jntCtrlErrFlag[i] OR  m_jntEncErrFlag[i] OR m_jntVelErrFlag[i] THEN
+	IF m_jntCtrlErrFlag[i] OR  m_jntEncErrFlag[i] OR m_jntVelErrFlag[i] OR m_jntLimitErrFlag[i] THEN
 		m_jointErrFlag[i]:=TRUE;
 		EXIT;
 	END_IF
@@ -135,6 +148,35 @@ FOR i:=1 TO 4 DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="jntLimitCheck" Id="{cd785ed3-1bd5-43af-9d92-dd40cbaa425b}">
+      <Declaration><![CDATA[METHOD jntLimitCheck : bool
+VAR_INPUT
+	i_curJntPos : Vec4d;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// joint position limit check
+FOR i:=1 TO 4 DO 
+	// stop check if arm is already in error state
+	IF m_jointErrFlag[i] THEN 
+		CONTINUE;
+	END_IF
+	
+	// check
+	IF  i_curJntPos[i] > GVL_CartJointParameters.g_maxJntPos[i] + g_cartJntPosLimitBuffer[i] OR
+		i_curJntPos[i] < GVL_CartJointParameters.g_minJntPos[i] - g_cartJntPosLimitBuffer[i] THEN
+		m_jntLimitErrCounts[i]:=m_jntLimitErrCounts[i]+1;
+	ELSE
+		m_jntLimitErrCounts[i] :=0;	
+	END_IF
+	m_jntLimitErrFlag[i]:= m_jntLimitErrCounts[i]>=g_faultTriggerCounts;
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="jntVelCheck" Id="{2e8b7dd4-14fe-4751-887c-4c0610d0cb5e}">
       <Declaration><![CDATA[METHOD jntVelCheck : bool
 VAR_INPUT
@@ -145,7 +187,7 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// joint error check
+        <ST><![CDATA[// joint velocity check
 FOR i:=1 TO 4 DO 
 	// stop check if arm is already in error state
 	IF m_jointErrFlag[i] THEN 
@@ -167,8 +209,13 @@ END_FOR
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCheck.check">
+      <LineId Id="224" Count="3" />
+      <LineId Id="223" Count="0" />
       <LineId Id="200" Count="6" />
       <LineId Id="198" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="221" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="159" Count="0" />
       <LineId Id="80" Count="2" />
@@ -201,6 +248,16 @@ END_FOR
       <LineId Id="95" Count="4" />
       <LineId Id="74" Count="5" />
       <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_CartCheck.jntLimitCheck">
+      <LineId Id="9" Count="1" />
+      <LineId Id="36" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="55" Count="4" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartCheck.jntVelCheck">
       <LineId Id="9" Count="1" />

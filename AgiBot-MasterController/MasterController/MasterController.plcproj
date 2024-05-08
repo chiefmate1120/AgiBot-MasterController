@@ -175,6 +175,27 @@
     <Compile Include="DUTs\Structure\TasksCommunication\ST_CartJointData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_arm_distribution.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_DH.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_energy_data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_Ergonomic_control.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_ergonomic_data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_instrument_info.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\UICommunication\ST_scope_info.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec7b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -227,6 +248,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_RiseEdgeCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_IOToggleCheck.TcPOU">
@@ -389,6 +413,10 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\GVL_MathDefine.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -461,6 +489,7 @@
     <Folder Include="AgiMaths\MatrixLib" />
     <Folder Include="DUTs" />
     <Folder Include="DUTs\Enum" />
+    <Folder Include="DUTs\Structure\UICommunication" />
     <Folder Include="DUTs\Structure\TasksCommunication" />
     <Folder Include="DUTs\Structure\MasterSlaveCommunication" />
     <Folder Include="DUTs\Type" />

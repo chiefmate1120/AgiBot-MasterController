@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArmCheck" Id="{7fa43d5a-568e-4b76-ad81-6c5cf7c4ee74}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCheck
 VAR_INPUT
@@ -13,30 +13,27 @@ VAR
 	// cartesian pose error flag
 	m_cartPoseErrFlag :ARRAY[1..g_mArmNum] OF BOOL;
 	m_cartPoseErrCounts:ARRAY[1..g_mArmNum] OF INT;
+	m_cartPosErr :ARRAY[1..g_mArmNum] OF Vec3d;		// cartesian position error
+	m_cartOriErr:ARRAY[1..g_mArmNum] OF  Vec3d;	// cartesian rotation angle (angle  * axis)
 	
 	// joint control error flag
 	m_jntCtrlErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
 	m_jntCtrlErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
+	m_jntCtrlErr:ARRAY[1..g_mArmNum]  OF Vec7d;		// joint position control error
 	
 	// joint encoder error flag
 	m_jntEncErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
 	m_jntEncErrCounts :ARRAY[1..g_mArmNum] OF Vec7i ;
+	m_jntEncErr:ARRAY[1..g_mArmNum]  OF Vec7d;		// motor and joint encoder error
 	
 	// joint velocity error flag
 	m_jntVelErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
 	m_jntVelErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
 	
-	// cartesian position error
-	m_cartPosErr :ARRAY[1..g_mArmNum] OF Vec3d;
+	// joint position limit error flag
+	m_jntLimitErrFlag :ARRAY[1..g_sArmNum] OF Vec7b;
+	m_jntLimitErrCounts :ARRAY[1..g_sArmNum] OF Vec7i;
 	
-	// cartesian rotation angle (angle  * axis)
-	m_cartOriErr:ARRAY[1..g_mArmNum] OF  Vec3d;
-
-	// joint position control error
-	m_jntCtrlErr:ARRAY[1..g_mArmNum]  OF Vec7d;
-	
-	// motor and joint encoder error
-	m_jntEncErr:ARRAY[1..g_mArmNum]  OF Vec7d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -60,7 +57,7 @@ END_VAR
         <ST><![CDATA[// calculate error
 FOR i:=1 TO g_mArmNum DO 
 	// stop check if arm is already in error state
-	IF m_armErrFlag[i] THEN 
+	IF m_armErrFlag[i] OR i_masterStatus.m_armState[i] = MasterArmState_Error THEN 
 		CONTINUE;
 	END_IF
 	
@@ -76,6 +73,9 @@ FOR i:=1 TO g_mArmNum DO
 	// encoder error
 	m_jntEncErrFlag[i]:=jntEncErrCheck(i_masterJointData.m_curMotorPos[i], i_masterJointData.m_curLinkPos[i],
 										m_jntEncErrCounts[i], m_jntEncErr[i]);
+	
+	// joint limit error
+	m_jntLimitErrFlag[i]:=jntLimitErrCheck(i,i_masterJointData.m_curJntPos[i],m_jntLimitErrCounts[i]);
 										
 	// final arm error status check
 	IF  m_cartPoseErrFlag[i] THEN
@@ -84,7 +84,7 @@ FOR i:=1 TO g_mArmNum DO
 	END_IF
 	
 	FOR j:=1 TO g_mJntNum DO 
-		IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] THEN
+		IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
 			m_armErrFlag[i]:=TRUE;
 			EXIT;
 		END_IF
@@ -158,6 +158,36 @@ FOR i:=1 TO g_mJntNum DO
 END_FOR]]></ST>
       </Implementation>
     </Method>
+    <Method Name="jntLimitErrCheck" Id="{a4da3795-73c8-472d-94c8-3533763f2a83}">
+      <Declaration><![CDATA[METHOD jntLimitErrCheck : Vec7b
+VAR_INPUT
+	i_armIdx:INT;
+	i_curJntPos : Vec7d;
+END_VAR
+VAR_IN_OUT
+	r_errCount:Vec7i;
+END_VAR
+
+VAR
+	i :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[i_curJntPos[4]:=i_curJntPos[4]+i_curJntPos[3]-i_curJntPos[2]-pi/2;//q4DH=q4motor+q8-q2-90;  
+
+// joint limit check
+FOR i:=1 TO 7 DO 
+	IF  i_curJntPos[i] > GVL_ArmJointParameters.g_maxJntPos[i_armIdx,i] + g_armJntPosLimitBuffer[i] OR
+		i_curJntPos[i] < GVL_ArmJointParameters.g_minJntPos[i_armIdx,i] - g_armJntPosLimitBuffer[i] THEN
+		r_errCount[i]:=r_errCount[i]+1;
+	ELSE
+		r_errCount[i] :=0;	
+	END_IF
+	jntLimitErrCheck[i]:= r_errCount[i]>=g_faultTriggerCounts;
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="poseErrCheck" Id="{9fe210b5-ecf0-4498-8364-258d193de1ff}">
       <Declaration><![CDATA[METHOD poseErrCheck : BOOL
 VAR_INPUT
@@ -210,7 +240,9 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="35" Count="1" />
       <LineId Id="109" Count="1" />
       <LineId Id="38" Count="1" />
-      <LineId Id="111" Count="2" />
+      <LineId Id="111" Count="1" />
+      <LineId Id="159" Count="2" />
+      <LineId Id="113" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="119" Count="11" />
       <LineId Id="114" Count="0" />
@@ -228,6 +260,16 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
     <LineIds Name="FB_MasterArmCheck.jntEncErrCheck">
       <LineId Id="69" Count="10" />
       <LineId Id="67" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCheck.jntLimitErrCheck">
+      <LineId Id="104" Count="1" />
+      <LineId Id="44" Count="2" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArmCheck.poseErrCheck">
       <LineId Id="5" Count="0" />

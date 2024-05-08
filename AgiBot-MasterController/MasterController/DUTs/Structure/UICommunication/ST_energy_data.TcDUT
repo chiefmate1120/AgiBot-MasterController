@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_energy_data" Id="{fa671342-fe57-47cb-88a7-b56aa8e17451}">
+    <Declaration><![CDATA[TYPE ST_energy_data :
+STRUCT
+	coag_mode:UINT;
+	cut_mode:UINT;
+	bipolar_mode:UINT;
+	bipolar_power:UINT;
+	coag_power:UINT;
+	cut_power:UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

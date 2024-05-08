@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
+
 	// safety information, import from safety check task
 	m_jntErrFlag AT %I*: Vec4b;
 	
@@ -70,20 +71,20 @@ END_VAR
         <ST><![CDATA[r_cartStatus := m_cartStatus;
 
 
-	// current joint data
-	r_cartJointData.m_curMotorPos:=m_curMotorPos;
-	r_cartJointData.m_curLinkPos:=m_curLinkPos;
-	r_cartJointData.m_curJntPos:=m_curJntPos;
-	r_cartJointData.m_curJntVel:=m_curJntVel;
-	r_cartJointData.m_curJntTrq:=m_curJntVel;
-	r_cartJointData.m_rawJntCurrent:=m_rawJntCurrent;
-	r_cartJointData.m_filtJntCurrent:=m_filtJntCurrent;
-	
-	// command joint data
-	r_cartJointData.m_cmdJntPos:=m_cmdJntPos;
-	r_cartJointData.m_cmdJntVel:=m_cmdJntVel;
-	r_cartJointData.m_cmdJntTrq:=m_cmdJntTrq;
-	r_cartJointData.m_cmdJntCurrent:=m_cmdJntCurrent;
+// current joint data
+r_cartJointData.m_curMotorPos:=m_curMotorPos;
+r_cartJointData.m_curLinkPos:=m_curLinkPos;
+r_cartJointData.m_curJntPos:=m_curJntPos;
+r_cartJointData.m_curJntVel:=m_curJntVel;
+r_cartJointData.m_curJntTrq:=m_curJntVel;
+r_cartJointData.m_rawJntCurrent:=m_rawJntCurrent;
+r_cartJointData.m_filtJntCurrent:=m_filtJntCurrent;
+
+// command joint data
+r_cartJointData.m_cmdJntPos:=m_cmdJntPos;
+r_cartJointData.m_cmdJntVel:=m_cmdJntVel;
+r_cartJointData.m_cmdJntTrq:=m_cmdJntTrq;
+r_cartJointData.m_cmdJntCurrent:=m_cmdJntCurrent;
 ]]></ST>
       </Implementation>
     </Method>
@@ -116,6 +117,8 @@ FOR i:=1 TO 4 DO
 	m_cmdJntVel[i]:=0;
 	m_cmdJntPos[i]:=m_cartJoints[i].jntPos;
 END_FOR
+
+m_cartStatus.m_initFlag :=true;
 
 ]]></ST>
       </Implementation>
@@ -354,6 +357,8 @@ END_FOR]]></ST>
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="2" />
       <LineId Id="36" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="63" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>

@@ -47,6 +47,9 @@ IF m_robotInit =FALSE THEN
 	m_robotInit:=TRUE;
 END_IF
 
+// input from UI
+UIInputProcess();
+
 // slave input data cast
 slaveInputDataCast(m_slaveRobotData, m_masterInputDataPool.m_slaveStatus);
 
@@ -58,6 +61,9 @@ m_masterRobot.getStatus(m_masterStatus,m_masterJointsData);
 
 // master output data cast
 masterOutputDataCast(m_masterRobot.m_shoulderPoseInMonitor, m_masterStatus, m_masterRobotData);
+
+// output to UI
+UIOutputProcess();
 
 m_codeTime(START:=FALSE);]]></ST>
     </Implementation>
@@ -139,6 +145,45 @@ END_FOR
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="UIInputProcess" Id="{9dd02246-5151-482e-a090-b6247e0a96d4}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// master-slave control scale
+IF 2 = GVL_com_upper_PC.master_slave_scaling THEN
+	m_masterInputDataPool.m_UIData.m_motionScale := 2;
+ELSIF 3 = GVL_com_upper_PC.master_slave_scaling THEN
+	m_masterInputDataPool.m_UIData.m_motionScale := 3;
+ELSE
+	m_masterInputDataPool.m_UIData.m_motionScale := 1.5;
+END_IF
+
+// self-check
+m_masterInputDataPool.m_UIData.m_selfCheckFlag := GVL_com_upper_PC.slaver_systemcheck_enable;
+
+// arm disable
+m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[1]:=FALSE;
+m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[2]:=FALSE;
+IF 1=GVL_com_upper_PC.arm_disable OR 2=GVL_com_upper_PC.arm_disable THEN
+	m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[GVL_com_upper_PC.arm_disable] := TRUE;
+END_IF
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="UIOutputProcess" Id="{d0fa8c54-c1d5-4f7b-80a8-06c5ca1c6dd6}">
+      <Declaration><![CDATA[METHOD UIOutputProcess : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//TODO]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="MasterArmControl">
       <LineId Id="85" Count="0" />
       <LineId Id="117" Count="0" />
@@ -150,7 +195,10 @@ END_FOR
       <LineId Id="8" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="9" Count="0" />
-      <LineId Id="172" Count="1" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="173" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="174" Count="0" />
       <LineId Id="15" Count="0" />
@@ -160,6 +208,8 @@ END_FOR
       <LineId Id="64" Count="0" />
       <LineId Id="175" Count="1" />
       <LineId Id="88" Count="0" />
+      <LineId Id="215" Count="1" />
+      <LineId Id="214" Count="0" />
       <LineId Id="177" Count="0" />
       <LineId Id="87" Count="0" />
     </LineIds>
@@ -198,6 +248,25 @@ END_FOR
       <LineId Id="13" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="MasterArmControl.UIInputProcess">
+      <LineId Id="13" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="8" Count="4" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="22" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+    <LineIds Name="MasterArmControl.UIOutputProcess">
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_RiseEdgeCheck" Id="{54f969e7-bfb8-4c92-8c48-75d0e1f9ed72}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_RiseEdgeCheck
+VAR
+	// last value
+	m_lastValue :BOOL:=false;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{980b320f-3ebe-4bf1-98f5-ddf6a02c6d3f}">
+      <Declaration><![CDATA[METHOD check : BOOL
+VAR_INPUT
+	input :BOOL;
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT(m_lastValue) AND input THEN
+	check := TRUE;
+ELSE
+	check :=FALSE;
+END_IF
+
+m_lastValue := input;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{d17487e9-29ea-4ea4-bd4c-f5339a37b6fc}">
+      <Declaration><![CDATA[METHOD reset : BOOL
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_lastValue := false;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_RiseEdgeCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RiseEdgeCheck.check">
+      <LineId Id="5" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RiseEdgeCheck.reset">
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

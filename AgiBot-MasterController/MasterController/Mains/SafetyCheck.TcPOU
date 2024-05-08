@@ -9,6 +9,9 @@ VAR
 	// master robot joint data
 	m_masterJointData AT %I* :ST_masterJointData;
 	
+	//cart status
+	m_cartStatus AT %I* :ST_CartStatus;
+	
 	//cart joint data
 	m_cartJointData AT %I* :ST_cartJointData;
 	
@@ -36,7 +39,7 @@ END_IF
 
 m_masterArmCheck.check(m_masterStatus,m_masterJointData, o_errorFlag=>m_safetyCheckData.m_masterErrFlag);
 
-m_cartCheck.check(m_cartJointData, o_errorFlag=>m_safetyCheckData.m_cartErrFlag);]]></ST>
+m_cartCheck.check(m_cartStatus, m_cartJointData, o_errorFlag=>m_safetyCheckData.m_cartErrFlag);]]></ST>
     </Implementation>
     <LineIds Name="SafetyCheck">
       <LineId Id="25" Count="0" />

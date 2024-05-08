@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_scope_info" Id="{60a07ad3-869b-4fdd-acd6-46198f3ed385}">
+    <Declaration><![CDATA[TYPE ST_scope_info :
+STRUCT
+	is_connected:BOOL;
+	is_ready:BOOL;
+	id:UINT;
+	scope_deg:UINT;
+	scope_up_down:UINT;
+	scope_gravity_angle:UINT;
+	scope_name:STRING;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

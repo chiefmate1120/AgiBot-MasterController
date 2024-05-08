@@ -152,50 +152,6 @@
 			</Hides>
 		</DataType>
 		<DataType>
-			<Name GUID="{DF890EFF-B43B-2402-500B-FF71468F0384}" AutoDeleteType="true">ST_MasterUIData</Name>
-			<Comment><![CDATA[ Output from UI controller
- Input to master arm control task and cart control task  ]]></Comment>
-			<BitSize>128</BitSize>
-			<SubItem>
-				<Name>m_motionScale</Name>
-				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
-				<BitSize>64</BitSize>
-				<BitOffs>0</BitOffs>
-				<Default>
-					<Value>1.5</Value>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_faultClearFlag</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<BitSize>8</BitSize>
-				<BitOffs>64</BitOffs>
-				<Default>
-					<Bool>false</Bool>
-				</Default>
-			</SubItem>
-			<SubItem>
-				<Name>m_masterArmDisableFlag</Name>
-				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
-				<ArrayInfo>
-					<LBound>1</LBound>
-					<Elements>2</Elements>
-				</ArrayInfo>
-				<BitSize>16</BitSize>
-				<BitOffs>72</BitOffs>
-				<Default>
-					<SubItem>
-						<Name>[1]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-					<SubItem>
-						<Name>[2]</Name>
-						<Bool>false</Bool>
-					</SubItem>
-				</Default>
-			</SubItem>
-		</DataType>
-		<DataType>
 			<Name GUID="{D3FC0E71-E966-7642-BFEE-4268915B4346}" AutoDeleteType="true">Vec4b</Name>
 			<BitSize>32</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
@@ -255,15 +211,24 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{11031441-2019-F43E-1019-D9383C62ABA9}" AutoDeleteType="true">ST_CartStatus</Name>
+			<Name GUID="{162166D7-3FBC-E24C-ECAF-8F4F0A5E1C99}" AutoDeleteType="true">ST_CartStatus</Name>
 			<Comment><![CDATA[ Output from cart control task
  Input to master arm control task  ]]></Comment>
-			<BitSize>128</BitSize>
+			<BitSize>192</BitSize>
+			<SubItem>
+				<Name>m_initFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>0</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
 			<SubItem>
 				<Name>m_monitorAngle</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
 				<BitSize>64</BitSize>
-				<BitOffs>0</BitOffs>
+				<BitOffs>64</BitOffs>
 				<Default>
 					<Value>0</Value>
 				</Default>
@@ -272,7 +237,7 @@
 				<Name>m_armSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>64</BitOffs>
+				<BitOffs>128</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -281,7 +246,7 @@
 				<Name>m_clutchSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>72</BitOffs>
+				<BitOffs>136</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -290,7 +255,7 @@
 				<Name>m_endoscopeSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>80</BitOffs>
+				<BitOffs>144</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -299,7 +264,7 @@
 				<Name>m_instrumentPowerSwitch</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>88</BitOffs>
+				<BitOffs>152</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -308,7 +273,7 @@
 				<Name>m_surgonReady</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>96</BitOffs>
+				<BitOffs>160</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -317,7 +282,7 @@
 				<Name>m_consoleInAdjust</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
 				<BitSize>8</BitSize>
-				<BitOffs>104</BitOffs>
+				<BitOffs>168</BitOffs>
 				<Default>
 					<Bool>false</Bool>
 				</Default>
@@ -1227,11 +1192,6 @@
 							<Type GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
-							<Name>MasterArmControl.m_masterInputDataPool.m_UIData</Name>
-							<Comment><![CDATA[ UI information, import from UI controller]]></Comment>
-							<Type GUID="{DF890EFF-B43B-2402-500B-FF71468F0384}">ST_MasterUIData</Type>
-						</Var>
-						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_safetyData</Name>
 							<Comment><![CDATA[ safety information, import from safety check task]]></Comment>
 							<Type GUID="{7E2B5564-187F-D309-7B6F-4A31D33DF718}">ST_SafetyData</Type>
@@ -1239,7 +1199,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_cartStatus</Name>
 							<Comment><![CDATA[ cart information, import from other task]]></Comment>
-							<Type GUID="{11031441-2019-F43E-1019-D9383C62ABA9}">ST_CartStatus</Type>
+							<Type GUID="{162166D7-3FBC-E24C-ECAF-8F4F0A5E1C99}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_masterDynaData</Name>
@@ -1440,6 +1400,11 @@
 							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
 						</Var>
 						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[cart status]]></Comment>
+							<Type GUID="{162166D7-3FBC-E24C-ECAF-8F4F0A5E1C99}">ST_CartStatus</Type>
+						</Var>
+						<Var>
 							<Name>SafetyCheck.m_cartJointData</Name>
 							<Comment><![CDATA[cart joint data]]></Comment>
 							<Type GUID="{B09070B0-7D71-A6A7-E97E-969B283AF690}">ST_CartJointData</Type>
@@ -1525,7 +1490,7 @@
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
 							<Comment><![CDATA[ Output cart status]]></Comment>
-							<Type GUID="{11031441-2019-F43E-1019-D9383C62ABA9}">ST_CartStatus</Type>
+							<Type GUID="{162166D7-3FBC-E24C-ECAF-8F4F0A5E1C99}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartJointData</Name>
@@ -4171,7 +4136,7 @@
 		<MappingInfo Identifier="{00000000-2004-0850-0320-500811000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="04000000040000000400000004000000"/>
-		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030090" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030080" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x02030070" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterController^MasterController Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1">
@@ -4399,6 +4364,7 @@
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_jntErrFlag" VarB="TaskSafetyCheck Outputs^SafetyCheck.m_safetyCheckData^m_cartErrFlag"/>
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointData" VarB="TaskCartControl Outputs^CartControl.m_cartJointData"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterJointData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" VarB="TaskArmControl Outputs^MasterArmControl.m_masterStatus"/>
 			</OwnerB>

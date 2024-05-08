@@ -6,7 +6,7 @@ TYPE ST_MasterInputDataPool :
 STRUCT
 		
 	// UI information, import from UI controller
-	m_UIData AT %I*:ST_MasterUIData;
+	m_UIData :ST_MasterUIData;
 	
 	// safety information, import from safety check task
 	m_safetyData AT %I*: ST_SafetyData;

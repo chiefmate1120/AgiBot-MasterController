@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_Ergonomic_control" Id="{a38163c8-97f6-4276-a969-fa396dc7b1fa}">
+    <Declaration><![CDATA[TYPE ST_Ergonomic_control :
+STRUCT
+	recovery_Ergonomics:BOOL;  //恢复人体工学
+	recovery_Ergonomics_finished:BOOL;  //恢复人体工学完成	
+	
+	cancel_recovery_Ergonomics:BOOL;  //取消恢复人体工学
+	cancel_recovery_Ergonomics_finished:BOOL;  //取消恢复人体工学完成
+	
+	ergonomic_info_modify:BOOL;  //人体工学信息修改
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
