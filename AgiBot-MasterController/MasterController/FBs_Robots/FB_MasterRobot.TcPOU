@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -46,8 +46,8 @@ VAR
 	m_armEndoscope :ARRAY[1..g_mArmNum] OF FB_StateCtrlEndoscope;
 	m_armCart :ARRAY[1..g_mArmNum] OF FB_StateCtrlCart;
 	m_armGravityCali :ARRAY[1..g_mArmNum] OF FB_StateCtrlGraCali;
-	m_armTest :ARRAY[1..g_sArmNum] OF FB_StateCtrlTest;
-	m_armDisable :ARRAY[1..g_sArmNum] OF FB_StateCtrlDisable;
+	m_armTest :ARRAY[1..g_mArmNum] OF FB_StateCtrlTest;
+	m_armDisable :ARRAY[1..g_mArmNum] OF FB_StateCtrlDisable;
 	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;

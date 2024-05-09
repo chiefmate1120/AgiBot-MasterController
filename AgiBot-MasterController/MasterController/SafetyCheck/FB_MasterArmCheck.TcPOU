@@ -31,8 +31,8 @@ VAR
 	m_jntVelErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
 	
 	// joint position limit error flag
-	m_jntLimitErrFlag :ARRAY[1..g_sArmNum] OF Vec7b;
-	m_jntLimitErrCounts :ARRAY[1..g_sArmNum] OF Vec7i;
+	m_jntLimitErrFlag :ARRAY[1..g_mArmNum] OF Vec7b;
+	m_jntLimitErrCounts :ARRAY[1..g_mArmNum] OF Vec7i;
 	
 END_VAR
 ]]></Declaration>
