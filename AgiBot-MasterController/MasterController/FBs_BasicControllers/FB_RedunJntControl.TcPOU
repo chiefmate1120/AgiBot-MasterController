@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_RedunJntControl" Id="{d0b0d8e9-bad5-4551-a3a8-7016dc443775}" SpecialFunc="None">
     <Declaration><![CDATA[// Author: Feijian Ni
 // Date: 2023.11.22

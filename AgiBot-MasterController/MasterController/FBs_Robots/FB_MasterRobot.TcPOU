@@ -3,6 +3,10 @@
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
+	// flag if slave are connected
+	m_slaveOnLine :BOOL :=FALSE;
+	m_slaveOnLineCheck :FB_slaveConnectionCheck;
+	
 	// master-slave motion scale
 	m_motionScale :LREAL;
 	
@@ -62,7 +66,7 @@ END_VAR
     </Implementation>
     <Folder Name="property" Id="{8f86633f-3f94-408a-ac9b-8ee0ebd6bdac}" />
     <Method Name="checkTeleSlaveArmIdx" Id="{e877542b-f696-4449-b007-3e9fbc5ffaab}">
-      <Declaration><![CDATA[METHOD checkTeleSlaveArmIdx : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED checkTeleSlaveArmIdx : BOOL
 VAR_IN_OUT CONSTANT
 	i_masterInputDataPool:ST_MasterInputDataPool;
 END_VAR
@@ -132,7 +136,7 @@ m_teleSlaveArmIdx:= nextTeleSlaveArmIdx;]]></ST>
       </Implementation>
     </Method>
     <Method Name="controllerTransit" Id="{43db9dd9-8e13-4a66-a84f-800b29862df6}">
-      <Declaration><![CDATA[METHOD controllerTransit : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED controllerTransit : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -264,7 +268,7 @@ END_FOR
       </Implementation>
     </Method>
     <Method Name="MSCtrlTriggerCheck" Id="{848392d9-479b-4441-b2d2-6aff07409695}">
-      <Declaration><![CDATA[METHOD MSCtrlTriggerCheck : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED MSCtrlTriggerCheck : BOOL
 VAR_IN_OUT CONSTANT
 		i_masterInputDataPool:ST_MasterInputDataPool;
 END_VAR
@@ -297,6 +301,9 @@ END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_motionScale := i_masterInputDataPool.m_UIData.m_motionScale;
 m_monitorAngle := i_masterInputDataPool.m_cartStatus.m_monitorAngle;
+
+// check slave connection
+m_slaveOnLine := m_slaveOnLineCheck.check(i_masterInputDataPool.m_slaveStatus.m_slaveHeartBeat);
 
 // update shoulder pose
 updateShoulderPose();
@@ -534,7 +541,7 @@ END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateShoulderPose" Id="{fb1a54a0-df1a-4720-ac59-3d297fc90e27}">
-      <Declaration><![CDATA[METHOD updateShoulderPose : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateShoulderPose : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -659,6 +666,9 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
     <LineIds Name="FB_MasterRobot.run">
       <LineId Id="78" Count="0" />
       <LineId Id="80" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="140" Count="0" />
       <LineId Id="121" Count="0" />
       <LineId Id="120" Count="0" />
       <LineId Id="122" Count="0" />

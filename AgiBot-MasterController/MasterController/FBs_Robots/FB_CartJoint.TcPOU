@@ -67,9 +67,10 @@ m_cmdJntTrq :=0.0;
 m_cmdCurrent := 0.0;
 
 // filter init
-m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
-m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armCtrlFreq);
-m_curTrqLpf.init(1, g_curJntTrqLpfCutoffFreq, g_armCtrlFreq);
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_cartCtrlFreq);
+m_linkVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_cartCtrlFreq);
+m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_cartCtrlFreq);
+m_curTrqLpf.init(1, g_curJntTrqLpfCutoffFreq, g_cartCtrlFreq);
 
 // driver init value
 m_motorOutputs.m_controlWord:=DriverCtrlWord_INIT;
@@ -82,7 +83,9 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_CartJoint.init">
-      <LineId Id="166" Count="54" />
+      <LineId Id="166" Count="47" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="214" Count="6" />
       <LineId Id="39" Count="0" />
     </LineIds>
   </POU>

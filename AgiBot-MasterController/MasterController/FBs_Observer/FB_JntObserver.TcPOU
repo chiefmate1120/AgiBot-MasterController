@@ -26,7 +26,7 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Method Name="init" Id="{6ba658a3-4670-43e2-8738-8c7bf398145d}">
-      <Declaration><![CDATA[METHOD init : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_INPUT
 	i_armIdx :INT;
 	i_jntPos:Vec7d;
@@ -48,7 +48,7 @@ m_jntDamp := g_jntObvDamp;
       </Implementation>
     </Method>
     <Method Name="run" Id="{09d44c6e-1e82-4079-8773-aed7ad3fd95c}">
-      <Declaration><![CDATA[METHOD run : vec7d
+      <Declaration><![CDATA[METHOD PUBLIC run : vec7d
 VAR_IN_OUT CONSTANT
 	i_jntTrq :Vec7d;
 	i_jntPos :Vec7d;

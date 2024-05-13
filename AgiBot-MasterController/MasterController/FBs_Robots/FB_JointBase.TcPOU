@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_JointBase" Id="{d8c9f825-5b86-4a03-beb2-3c59a05d0ecd}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_JointBase
 VAR
@@ -49,6 +49,7 @@ VAR
 	m_curLinkPos :LREAL;
 	m_curJntPos	:LREAL;
 	m_curJntVel :LREAL;
+	m_curLinkVel :LREAL;
 	m_curJntTrq :	LREAL;
 	m_rawCurrent : LREAL;
 	m_filtCurrent : LREAL;
@@ -57,9 +58,11 @@ VAR
 	m_cmdJntTrq :LREAL;
 	m_cmdCurrent : LREAL;
 	m_lastJntPos :LREAL;
+	m_lastLinkPos: LREAL;
 	
 	// velocity filter
 	m_jntVelLpf :FB_LowPassFilter;
+	m_linkVelLpf :FB_LowPassFilter;
 	
 	// current and command torque filter
 	m_curTrqLpf : FB_LowPassFilter;
@@ -124,7 +127,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="initJntPos" Id="{44325581-66bf-4b7f-ae95-0986911664d7}">
-      <Declaration><![CDATA[METHOD initJntPos : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC initJntPos : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -138,13 +141,16 @@ m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
 m_cmdJntPos :=m_curJntPos;	
 m_lastJntPos :=m_curJntPos;
+m_lastLinkPos := m_curLinkPos;
+
 // filter init
-m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
+m_linkVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
       </Implementation>
     </Method>
     <Method Name="initJntPosReset" Id="{67d9eb27-7f10-499f-96e0-41fedf8efea0}">
       <Declaration><![CDATA[// reset the initial joint position with input value
-METHOD initJntPosReset : BOOL
+METHOD PUBLIC initJntPosReset : BOOL
 VAR_INPUT
 	i_initLinkPos:LREAL;
 END_VAR
@@ -156,8 +162,11 @@ m_curMotorPos:=motorEnc2Pos();
 m_curJntPos := m_curMotorPos;
 m_cmdJntPos :=m_curJntPos;	
 m_lastJntPos :=m_curJntPos;
+m_lastLinkPos := m_curLinkPos;
+
 // filter init
-m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
+m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
+m_linkVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);]]></ST>
       </Implementation>
     </Method>
     <Property Name="initLinkPos" Id="{44b4f2ab-df65-46ae-a9da-78e6fae813b9}" FolderPath="property\">
@@ -180,7 +189,7 @@ END_VAR
       </Set>
     </Property>
     <Method Name="isEnabled" Id="{ef8652db-efc2-4f19-bb06-dffbae71dbfe}">
-      <Declaration><![CDATA[METHOD isEnabled : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC isEnabled : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -269,7 +278,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="motorEnc2Pos" Id="{51346d89-1ca9-440c-9afc-a69c362399f6}">
-      <Declaration><![CDATA[METHOD PUBLIC motorEnc2Pos : LREAL
+      <Declaration><![CDATA[METHOD PROTECTED motorEnc2Pos : LREAL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -354,6 +363,11 @@ m_curJntVel:= (m_curJntPos-m_lastJntPos)/m_cycleTime;
 m_curJntVel := m_jntVelLpf.run(m_curJntVel);
 m_lastJntPos :=m_curJntPos;
 
+// compute link velocity
+m_curLinkVel := (m_curLinkPos-m_lastLinkPos)/m_cycleTime;
+m_curLinkVel := m_linkVelLpf.run(m_curLinkVel);
+m_lastLinkPos := m_curLinkPos;
+
 // current and torque
 m_rawCurrent := m_motorInputs.m_current;
 m_filtCurrent := m_curTrqLpf.run(m_rawCurrent);
@@ -386,14 +400,18 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="32" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="33" Count="1" />
+      <LineId Id="44" Count="1" />
       <LineId Id="39" Count="0" />
       <LineId Id="38" Count="0" />
+      <LineId Id="43" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.initJntPosReset">
       <LineId Id="11" Count="4" />
       <LineId Id="5" Count="0" />
+      <LineId Id="24" Count="1" />
       <LineId Id="17" Count="0" />
       <LineId Id="16" Count="0" />
+      <LineId Id="23" Count="0" />
     </LineIds>
     <LineIds Name="FB_JointBase.initLinkPos.Get">
       <LineId Id="2" Count="0" />
@@ -469,6 +487,9 @@ m_curJntTrq := m_filtCurrent * m_current2TrqRatio;]]></ST>
       <LineId Id="6" Count="0" />
       <LineId Id="9" Count="1" />
       <LineId Id="22" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="35" Count="2" />
       <LineId Id="12" Count="0" />
       <LineId Id="27" Count="2" />
       <LineId Id="26" Count="0" />

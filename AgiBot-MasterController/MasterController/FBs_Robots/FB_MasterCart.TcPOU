@@ -89,7 +89,7 @@ r_cartJointData.m_cmdJntCurrent:=m_cmdJntCurrent;
       </Implementation>
     </Method>
     <Method Name="init" Id="{a9830b95-e937-4a29-b70e-785e20452d37}">
-      <Declaration><![CDATA[METHOD init : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -125,7 +125,7 @@ m_cartStatus.m_initFlag :=true;
     </Method>
     <Method Name="monitorAngLink2Motor" Id="{be375282-cfa2-4973-91da-b3215777ab52}">
       <Declaration><![CDATA[// TODO
-METHOD monitorAngLink2Motor : LREAL
+METHOD PROTECTED monitorAngLink2Motor : LREAL
 VAR_INPUT
 	i_linkPos:LREAL;
 END_VAR
@@ -158,7 +158,7 @@ monitorAngLink2Motor:=-X2;
     </Method>
     <Method Name="monitorAngMotor2Link" Id="{5a608b24-1792-4091-9318-b2f1f860af4d}">
       <Declaration><![CDATA[//TODO
-METHOD monitorAngMotor2Link : LREAL
+METHOD PROTECTED monitorAngMotor2Link : LREAL
 VAR_INPUT
 	i_motorPos:LREAL;
 END_VAR
@@ -181,7 +181,7 @@ monitorAngMotor2Link:=X0-offset;]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{5adedbe6-c484-4199-b427-bc8af7c6d1b0}">
-      <Declaration><![CDATA[METHOD run : BOOL
+      <Declaration><![CDATA[METHOD PUBLIC run : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -223,7 +223,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="updateCmds" Id="{a083537e-6f52-4b88-8b83-3c9a5d0db87a}">
-      <Declaration><![CDATA[METHOD updateCmds : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateCmds : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -257,7 +257,7 @@ END_FOR
       </Implementation>
     </Method>
     <Method Name="updateIO" Id="{2eedbee2-a8d4-4513-b19a-4a2795c7d360}">
-      <Declaration><![CDATA[METHOD updateIO : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateIO : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -285,7 +285,7 @@ END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
-      <Declaration><![CDATA[METHOD updateStatus : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED updateStatus : BOOL
 VAR_INPUT
 END_VAR
 VAR

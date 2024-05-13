@@ -5,6 +5,8 @@
 // Input to safety task and Master controller
 TYPE ST_SlaveStatus :
 STRUCT
+	// slave heart beat
+	m_slaveHeartBeat :INT:=0;
 	
 	// state machine
 	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Init)];

@@ -6,11 +6,11 @@
     <Node>
       <Title>GravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -269,12 +269,12 @@
         </Node>
         <Node>
           <Title>LeftArm</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -409,12 +409,12 @@
         </Node>
         <Node>
           <Title>RightArm</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -557,16 +557,34 @@
     </Node>
     <Node>
       <Title>RobotJointData</Title>
-      <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
+      <Expanded>True</Expanded>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>m_cmdJntPos[1]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curCartLinkTwist[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curCartLinkTwist[5]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curCartLinkTwist[6]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -596,13 +614,31 @@
               <Children />
             </Node>
             <Node>
+              <Title>m_curCartTwist[4] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
               <Title>m_curCartTwist[5]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
+              <Title>m_curCartTwist[5] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
               <Title>m_curCartTwist[6]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curCartTwist[6] (1)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -621,6 +657,12 @@
             </Node>
             <Node>
               <Title>m_curLinkPos[2]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_heartBeat</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -713,12 +755,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -733,11 +775,17 @@
                   <FileName></FileName>
                   <Children />
                 </Node>
+                <Node>
+                  <Title>m_heartBeat</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
               </Children>
             </Node>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -786,53 +834,41 @@
             </Node>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
-                  <Title>m_curLinkPos[2]</Title>
+                  <Title>m_curCartTwist[4] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curJntPos[2]</Title>
+                  <Title>m_curCartTwist[5] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curCartTwist[1]</Title>
+                  <Title>m_curCartTwist[6] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curCartTwist[2]</Title>
+                  <Title>m_curCartLinkTwist[4]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curCartTwist[3]</Title>
+                  <Title>m_curCartLinkTwist[5]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curCartTwist[4]</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-                <Node>
-                  <Title>m_curCartTwist[5]</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-                <Node>
-                  <Title>m_curCartTwist[6]</Title>
+                  <Title>m_curCartLinkTwist[6]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />

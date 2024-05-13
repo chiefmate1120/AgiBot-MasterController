@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterArm" Id="{623926f8-06e2-46b6-bb1f-baa6bc16e9cb}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArm
 VAR
@@ -25,12 +25,16 @@ VAR
 	m_curCartTwist: Vec6d;
 	m_cmdCartTwist :Vec6d;
 	m_cmdCartPose:ST_Frame;
+	m_curCartLinkPose :ST_Frame;
+	m_curCartLinkTwist :Vec6d;
+	
 	
 	// arm joint data
 	m_curMotorPos :Vec7d;
 	m_curLinkPos :Vec7d;
 	m_curJntPos :Vec7d;
 	m_curJntVel :Vec7d;
+	m_curLinkVel :Vec7d;
 	m_curJntTrq :Vec7d;
 	m_rawJntCurrent :Vec7d;
 	m_filtJntCurrent :Vec7d;
@@ -50,6 +54,7 @@ VAR
 	
 	// arm jacobian 
 	m_jaco : Mat67;
+	m_linkJaco : Mat67;
 	
 	// simulated status
 	m_simJntPos :Vec7d;
@@ -77,7 +82,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="calcJaco" Id="{1172e5e4-b7f2-4690-a821-6304414cea84}">
-      <Declaration><![CDATA[METHOD PUBLIC calcJaco : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED calcJaco : BOOL
 VAR_IN_OUT CONSTANT
 	i_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
 END_VAR
@@ -347,7 +352,7 @@ END_VAR
       </Get>
     </Property>
     <Method Name="enable" Id="{596f2892-08b6-4851-84d5-1537c558264e}">
-      <Declaration><![CDATA[METHOD PUBLIC enable : BOOL
+      <Declaration><![CDATA[METHOD PROTECTED enable : BOOL
 VAR_IN_OUT CONSTANT
 	i_jntIdx :Vec7i;
 END_VAR
@@ -377,7 +382,7 @@ END_VAR
     </Property>
     <Method Name="forwardKinematic" Id="{182b544f-f7c4-475e-8af7-8c07aa230234}">
       <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
-METHOD forwardKinematic : BOOL
+METHOD PROTECTED forwardKinematic : BOOL
 VAR_IN_OUT CONSTANT
 	i_jntPos :ARRAY[1..g_mJntNum] OF LREAL;
 END_VAR
@@ -492,7 +497,7 @@ END_FOR
       </Implementation>
     </Method>
     <Method Name="initJntPos" Id="{56ee4071-fcb1-4318-b1b9-837ea21e1627}">
-      <Declaration><![CDATA[METHOD initJntPos : BOOL
+      <Declaration><![CDATA[METHOD public initJntPos : BOOL
 VAR_INPUT
 END_VAR
 VAR
@@ -516,7 +521,7 @@ updateStatus();
     </Method>
     <Method Name="inverseKinematic" Id="{a2d4ef4e-dcb4-4918-aceb-3d3fb8d74093}">
       <Declaration><![CDATA[// from cartesian pose in arm origin to active joint position
-METHOD PUBLIC inverseKinematic : BOOL
+METHOD PROTECTED inverseKinematic : BOOL
 VAR_INPUT
 	q4:LREAL;
 	solution_ID:INT;
@@ -701,7 +706,7 @@ END_VAR
     </Property>
     <Method Name="jnt4LinkToMotor" Id="{3d664502-a5ca-4a18-947e-2de6df49b268}">
       <Declaration><![CDATA[//convert joint4 position from link side to motor side
-METHOD jnt4LinkToMotor : LREAL
+METHOD PUBLIC jnt4LinkToMotor : LREAL
 VAR_INPUT
 	i_q2 :LREAL;
 	i_q3:LREAL;
@@ -714,7 +719,7 @@ END_VAR
     </Method>
     <Method Name="jnt4MotorToLink" Id="{73c2344c-abd6-47df-a57c-56c9686be51c}">
       <Declaration><![CDATA[//convert joint4 position from motor side to link side
-METHOD jnt4MotorToLink : LREAL
+METHOD public jnt4MotorToLink : LREAL
 VAR_INPUT
 	i_q2 :LREAL;
 	i_q3:LREAL;
@@ -903,21 +908,26 @@ FOR i:=1 TO g_mJntNum DO
 	m_curLinkPos[i]:=m_joints[i].linkPos;
 	m_curJntPos[i]:=m_joints[i].jntPos;
 	m_curJntVel[i]:=m_joints[i].jntVel;
+	m_curLinkVel[i] := m_joints[i].m_curLinkVel;
 	m_curJntTrq[i]:=m_joints[i].jntTrq;
 	m_rawJntCurrent[i]:=m_joints[i].rawCurrent;
 	m_filtJntCurrent[i]:=m_joints[i].filtCurrent;
 	m_cmdJntCurrent[i]:=m_joints[i].cmdCurrent;
 END_FOR 
 m_curLinkPos[4]:=jnt4LinkToMotor(m_curLinkPos[2],m_curLinkPos[3], m_curLinkPos[4]);// q4motor=q4DH-q8+q2+90; 
+m_curLinkVel[4]:= m_curLinkVel[4] - m_curLinkVel[3] + m_curLinkVel[2]; 
 
 // cartesion pose
 forwardKinematic(m_curJntPos,m_curCartPose);
+forwardKinematic(m_curLinkPos,m_curCartLinkPose);
 
 // jacobian
 calcJaco(m_curJntPos,m_jaco);
+calcJaco(m_curLinkPos,m_linkJaco);
 
 // cartesian twist
 matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
+matMultiVec(m_linkJaco,m_curLinkVel,m_curCartLinkTwist);
 ]]></ST>
       </Implementation>
     </Method>
@@ -1119,18 +1129,24 @@ matMultiVec(m_jaco,m_curJntVel,m_curCartTwist);
       <LineId Id="11" Count="0" />
       <LineId Id="63" Count="1" />
       <LineId Id="13" Count="0" />
-      <LineId Id="17" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="18" Count="0" />
       <LineId Id="80" Count="1" />
       <LineId Id="88" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="103" Count="0" />
+      <LineId Id="128" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="36" Count="1" />
+      <LineId Id="129" Count="0" />
       <LineId Id="43" Count="1" />
       <LineId Id="35" Count="0" />
+      <LineId Id="131" Count="0" />
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
       <LineId Id="47" Count="0" />
+      <LineId Id="130" Count="0" />
       <LineId Id="110" Count="0" />
     </LineIds>
   </POU>

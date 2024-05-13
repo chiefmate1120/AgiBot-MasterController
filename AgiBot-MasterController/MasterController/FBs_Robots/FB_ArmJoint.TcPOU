@@ -69,6 +69,7 @@ m_cmdCurrent := 0.0;
 
 // filter init
 m_jntVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
+m_linkVelLpf.init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
 m_cmdTrqLpf.init(1, g_cmdJntTrqLpfCutoffFreq, g_armCtrlFreq);
 m_curTrqLpf.init(1, g_curJntTrqLpfCutoffFreq, g_armCtrlFreq);
 
@@ -94,7 +95,9 @@ m_motorOutputs.m_cmdMotorEncoder:=m_motorInputs.m_motorEncoder;]]></ST>
       <LineId Id="158" Count="0" />
       <LineId Id="149" Count="0" />
       <LineId Id="148" Count="0" />
-      <LineId Id="136" Count="1" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="137" Count="0" />
       <LineId Id="150" Count="0" />
       <LineId Id="138" Count="4" />
       <LineId Id="39" Count="0" />

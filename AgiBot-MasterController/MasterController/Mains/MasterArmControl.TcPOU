@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
@@ -86,7 +86,14 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[masterOutputData.m_motionScale :=masterStatus.m_motionScale;
+        <ST><![CDATA[// Master heart beat
+IF masterOutputData.m_heartBeat = 0 THEN
+	masterOutputData.m_heartBeat := 1;
+ELSE
+	masterOutputData.m_heartBeat := 0;
+END_IF
+
+masterOutputData.m_motionScale :=masterStatus.m_motionScale;
 
 FOR i:=1 TO g_mArmNum DO
 	masterOutputData.m_armState[i] := masterStatus.m_armState[i];
@@ -127,7 +134,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[slaveStatus.m_endoscopeMounted :=slaveInputData.m_endoscopeMounted;
+        <ST><![CDATA[slaveStatus.m_slaveHeartBeat := slaveInputData.m_heartBeat;
+slaveStatus.m_endoscopeMounted :=slaveInputData.m_endoscopeMounted;
 slaveStatus.m_endoscopePose.m_pos :=slaveInputData.m_endoscopePose.m_pos;
 slaveStatus.m_endoscopePose.m_rot :=slaveInputData.m_endoscopePose.m_rot;
 FOR i:= 1 TO g_sArmNum DO
@@ -214,6 +222,11 @@ END_VAR
       <LineId Id="87" Count="0" />
     </LineIds>
     <LineIds Name="MasterArmControl.masterOutputDataCast">
+      <LineId Id="78" Count="0" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="83" Count="1" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="79" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
@@ -234,6 +247,7 @@ END_VAR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="MasterArmControl.slaveInputDataCast">
+      <LineId Id="63" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="35" Count="0" />

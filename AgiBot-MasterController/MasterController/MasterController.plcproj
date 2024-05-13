@@ -259,6 +259,9 @@
     <Compile Include="FBs_Auxiliary\FB_MSCtrlTriggerCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_slaveConnectionCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_BasicControllers\FB_boundaryForceFeedback.TcPOU">
       <SubType>Code</SubType>
     </Compile>

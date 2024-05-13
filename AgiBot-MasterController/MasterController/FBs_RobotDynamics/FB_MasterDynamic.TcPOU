@@ -223,7 +223,7 @@ matSub(g_eye7d, tmpMat7d, m_dynaNullspace);
     </Method>
     <Method Name="updateKinematic" Id="{d7eec9ea-d7e0-4c73-a3ad-1deeadc32f97}">
       <Declaration><![CDATA[// only update kinematic data
-METHOD PUBLIC updateKinematic : BOOL
+METHOD PROTECTED updateKinematic : BOOL
 VAR_IN_OUT CONSTANT
 	i_jntPos : Vec7d;
 END_VAR
