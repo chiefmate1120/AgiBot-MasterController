@@ -451,7 +451,7 @@ FOR i:=1 TO g_mArmNum DO
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
 				m_nextMasterArmState[i] := MasterArmState_Cart;
 			// to master-slave
-			ELSIF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
+			ELSIF m_slaveOnLine AND  SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
 					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_MSCtrlTriggerFlag[i] THEN
 				m_nextMasterArmState[i] := MasterArmState_MasterSlave;
 			END_IF
@@ -459,7 +459,7 @@ FOR i:=1 TO g_mArmNum DO
 		//MasterSlave
 		MasterArmState_MasterSlave:
 			// to standdy
-			IF (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
+			IF  NOT(m_slaveOnLine) OR (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady)
 				OR m_armSwitchFlag[i] THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
