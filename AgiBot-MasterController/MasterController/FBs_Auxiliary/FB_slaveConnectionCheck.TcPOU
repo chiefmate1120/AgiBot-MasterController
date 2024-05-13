@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_slaveConnectionCheck" Id="{e5f1fdfc-6a14-4f4a-8041-8bb9448142d8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_slaveConnectionCheck
+VAR
+	// current state 
+	m_isConnected :BOOL :=FALSE;
+	
+	// last heart beat
+	m_lastHeartBeat :INT:=0 ;
+	
+	// current conneciton cycles
+	m_curConnectionCycles :INT:=0;
+	
+	// current disconneciton cycles
+	m_curDisconnectionCycles :INT:=0;
+	
+	// conneciton cycles thresshold
+	m_connectionCyclesThres :INT:=5;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="check" Id="{637c8591-2caa-40e8-9a5f-7460ac421fa8}">
+      <Declaration><![CDATA[METHOD PUBLIC check : BOOL
+VAR_INPUT
+	i_heartBeat :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// current is disconnected
+IF NOT(m_isConnected) THEN
+	m_curDisconnectionCycles:=0;
+	
+	IF  i_heartBeat <> m_lastHeartBeat THEN
+		m_curConnectionCycles :=  m_curConnectionCycles +1;
+	ELSE
+		m_curConnectionCycles :=0;
+	END_IF
+	
+	IF  m_curConnectionCycles >= m_connectionCyclesThres THEN
+		m_isConnected := TRUE;
+	END_IF
+
+// current is connected
+ELSE
+	m_curConnectionCycles :=0;
+	
+	IF  i_heartBeat = m_lastHeartBeat THEN
+		m_curDisconnectionCycles := m_curDisconnectionCycles +1;
+	ELSE
+		m_curDisconnectionCycles :=0;
+	END_IF
+	
+	IF m_curDisconnectionCycles>= m_curDisconnectionCycles THEN
+		m_isConnected:=FALSE;
+	END_IF
+
+END_IF
+
+m_lastHeartBeat:= i_heartBeat;
+check:=m_isConnected;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_slaveConnectionCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_slaveConnectionCheck.check">
+      <LineId Id="33" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="46" Count="1" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="37" Count="5" />
+      <LineId Id="48" Count="2" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="53" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
