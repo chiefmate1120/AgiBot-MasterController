@@ -451,15 +451,16 @@ FOR i:=1 TO g_mArmNum DO
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
 				m_nextMasterArmState[i] := MasterArmState_Cart;
 			// to master-slave
-			ELSIF m_slaveOnLine AND  SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
+			ELSIF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
 					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_MSCtrlTriggerFlag[i] THEN
 				m_nextMasterArmState[i] := MasterArmState_MasterSlave;
 			END_IF
 		
 		//MasterSlave
 		MasterArmState_MasterSlave:
+			continue;
 			// to standdy
-			IF  NOT(m_slaveOnLine) OR (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
+			IF  (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady)
 				OR m_armSwitchFlag[i] THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
@@ -768,6 +769,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="278" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="95" Count="2" />
+      <LineId Id="351" Count="0" />
       <LineId Id="219" Count="1" />
       <LineId Id="279" Count="0" />
       <LineId Id="335" Count="0" />

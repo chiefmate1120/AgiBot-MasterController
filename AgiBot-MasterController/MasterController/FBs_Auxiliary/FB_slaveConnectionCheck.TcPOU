@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_slaveConnectionCheck" Id="{e5f1fdfc-6a14-4f4a-8041-8bb9448142d8}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_slaveConnectionCheck
 VAR
@@ -54,7 +54,7 @@ ELSE
 		m_curDisconnectionCycles :=0;
 	END_IF
 	
-	IF m_curDisconnectionCycles>= m_curDisconnectionCycles THEN
+	IF m_curDisconnectionCycles>= m_connectionCyclesThres THEN
 		m_isConnected:=FALSE;
 	END_IF
 
