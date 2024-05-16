@@ -33,11 +33,14 @@ VAR
 	m_cartJointCtrlIOCheck :ARRAY[1..8] OF FB_IOCheck;
 	
 	// cart joint control data
+	m_jntEnableCounts:Vec4i ;
+	m_jntDisableCounts:Vec4i ;
+	m_jntEnableCountsThres:INT:=500;
 	m_jntCmdMotionDir :Vec4i;
 	m_cmdJntTrq :Vec4d;
 	m_cmdJntPos :Vec4d;
 	m_cmdJntVel :Vec4d;
-	m_jntEnableFlag :Vec4i;
+	m_jntEnableFlag :Vec4b;
 	
 	// cart joint status data
 	m_curMotorPos :Vec4d;
@@ -111,7 +114,9 @@ m_cartJoints[2].initJntPosReset(initLinkPos);
 
 // init commands
 FOR i:=1 TO 4 DO
-	m_jntEnableFlag[i]:=0;
+	m_jntEnableCounts[i]:=0;
+	m_jntDisableCounts[i]:=0;
+	m_jntEnableFlag[i]:=FALSE;
 	m_jntCmdMotionDir[i]:=0;
 	m_cmdJntTrq[i]:=0;
 	m_cmdJntVel[i]:=0;
@@ -200,7 +205,7 @@ updateCmds();
 // send command to joint driver
 FOR i:=1 TO 4 DO
 	// joint enable
-	IF NOT(m_jntErrFlag[i]) AND m_jntEnableFlag[i]=1 THEN
+	IF NOT(m_jntErrFlag[i]) AND m_jntEnableFlag[i] THEN
 		m_cartJoints[i].enable();
 	ELSE
 		m_cartJoints[i].disable();
@@ -233,9 +238,13 @@ END_VAR]]></Declaration>
         <ST><![CDATA[// update joint enable flag
 FOR i:= 1 TO 4 DO
 	IF m_jntCmdMotionDir[i] <> 0 THEN
-		m_jntEnableFlag[i] := 1;
+		m_jntEnableFlag[i] := TRUE;
+		m_jntEnableCounts[i]:= LIMIT(0, m_jntEnableCounts[i]+1, m_jntEnableCountsThres);
+		m_jntDisableCounts[i]:=m_jntEnableCountsThres;
 	ELSE
-		m_jntEnableFlag[i] :=0; 
+		m_jntEnableCounts[i]:=0;
+		m_jntDisableCounts[i]:= LIMIT(0, m_jntDisableCounts[i]-1, m_jntEnableCountsThres);
+		m_jntEnableFlag[i] :=m_jntDisableCounts[i]>0; 
 	END_IF
 END_FOR
 
@@ -243,11 +252,16 @@ END_FOR
 // update joint command positon
 FOR i:=1 TO 4 DO
 	//only update command after joints is truly enabled
-	IF m_jntEnableFlag[i]=1 AND m_cartJoints[i].isEnabled() THEN
+	IF m_jntEnableFlag[i] AND m_cartJoints[i].isEnabled() AND m_jntEnableCounts[i]>= m_jntEnableCountsThres THEN
 		//  update command joint velocity
 		m_cmdJntVel[i]:=m_jntCmdMotionDir[i]*GVL_CartJointParameters.g_jntCtrlMotionVel[i];
+		
+		// limit handle
+		IF (m_cmdJntPos[i]> GVL_CartJointParameters.g_maxJntPos[i] AND m_cmdJntVel[i] >0 ) OR 
+				(m_cmdJntPos[i]< GVL_CartJointParameters.g_minJntPos[i] AND m_cmdJntVel[i] <0 )  THEN
+				m_cmdJntVel[i] := 0.0;
+		END_IF
 		m_cmdJntPos[i]:= m_cmdJntPos[i]+ m_cmdJntVel[i]*g_cartCtrlCycleTime;
-		m_cmdJntPos[i]:= LIMIT(GVL_CartJointParameters.g_minJntPos[i], m_cmdJntPos[i], GVL_CartJointParameters.g_maxJntPos[i]);
 	ELSE
 		m_cmdJntVel[i]:=0;
 		m_cmdJntPos[i] := m_cartJoints[i].jntPos;
@@ -353,6 +367,7 @@ END_FOR]]></ST>
       <LineId Id="33" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="34" Count="0" />
+      <LineId Id="72" Count="1" />
       <LineId Id="40" Count="0" />
       <LineId Id="35" Count="0" />
       <LineId Id="37" Count="2" />
@@ -399,7 +414,11 @@ END_FOR]]></ST>
       <LineId Id="5" Count="1" />
       <LineId Id="9" Count="0" />
       <LineId Id="11" Count="0" />
-      <LineId Id="13" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="101" Count="1" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="14" Count="0" />
       <LineId Id="12" Count="0" />
       <LineId Id="10" Count="0" />
       <LineId Id="16" Count="0" />
@@ -408,8 +427,10 @@ END_FOR]]></ST>
       <LineId Id="19" Count="0" />
       <LineId Id="21" Count="2" />
       <LineId Id="25" Count="0" />
+      <LineId Id="90" Count="3" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="94" Count="0" />
       <LineId Id="29" Count="0" />
-      <LineId Id="78" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="27" Count="1" />
       <LineId Id="24" Count="0" />

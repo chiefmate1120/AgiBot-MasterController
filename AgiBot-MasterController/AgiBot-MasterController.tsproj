@@ -1339,7 +1339,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{7DACB54B-9329-CF68-D0A1-86FD8D82FD9E}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{C898098E-AC19-113C-8199-682773926703}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1704,17 +1704,10 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2024-05-15T11:29:17">
-						<OwnerA Name="InputDst" Prefix="TIPC^MasterController^MasterController Instance" Type="1">
-							<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 46 (EL6695-0002)">
-								<Link VarA="MasterArmControl.m_slaveRobotData" TypeA="MSCommu_SlaveStatus" InOutA="0" GuidA="{B1D99331-6642-48EB-B511-A60AF6264F93}" VarB="IO Inputs^SlaveRobotData" RestoreInfo="TypeMismatch" OldTypeA="MSCommu_SlaveStatus" OldGuidA="{B1D99331-6642-48EB-B511-A60AF6264F93}" NewTypeA="MSCommu_SlaveStatus" NewGuidA="{4FC03D72-A202-4D6B-B208-AF75B769D0A2}"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
 					<UnrestoredVarLinks ImportTime="2024-05-15T11:35:22">
 						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
 							<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 46 (EL6695-0002)">
-								<Link VarA="MasterArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="1" GuidA="{6678352E-8694-4CA9-AFA3-2CC17F093665}" VarB="IO Outputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="1" RestoreInfo="RestoredWithTypeChange"/>
+								<Link VarA="MasterArmControl.m_masterRobotData" TypeA="MSCommu_MasterStatus" InOutA="1" GuidA="{6678352E-8694-4CA9-AFA3-2CC17F093665}" VarB="IO Outputs^MasterRobotData" RestoreInfo="TypeChanged" IdA="858" RestoreInfo="RestoredWithTypeChange"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
