@@ -397,8 +397,8 @@ FOR i:=1 TO g_mArmNum DO
 			
 		// init
 		MasterArmState_Init:
-			// to home(self-check)
-			IF m_armCtrl[i].isFinished AND i_masterInputDataPool.m_UIData.m_selfCheckFlag  THEN
+			// to home
+			IF m_armCtrl[i].isFinished THEN
 				// NOTICE: multiple cycles joints back to center during initialization
 				// 			need to reset joints encoder data again
 				m_masterArms[i].initJntPos();

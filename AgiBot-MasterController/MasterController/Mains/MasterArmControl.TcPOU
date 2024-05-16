@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
@@ -95,6 +95,8 @@ END_IF
 
 masterOutputData.m_motionScale :=masterStatus.m_motionScale;
 
+masterOutputData.m_slaveSelfCheckFlag := m_masterInputDataPool.m_UIData.m_selfCheckFlag;
+
 FOR i:=1 TO g_mArmNum DO
 	masterOutputData.m_armState[i] := masterStatus.m_armState[i];
 	masterOutputData.m_teleSlaveArmIdx[i] :=masterStatus.m_teleSlaveArmIdx[i];
@@ -134,7 +136,8 @@ VAR
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[slaveStatus.m_slaveHeartBeat := slaveInputData.m_heartBeat;
+        <ST><![CDATA[slaveStatus.m_selfCheckPass := slaveInputData.m_selfCheckPass;
+slaveStatus.m_slaveHeartBeat := slaveInputData.m_heartBeat;
 slaveStatus.m_endoscopeMounted :=slaveInputData.m_endoscopeMounted;
 slaveStatus.m_endoscopePose.m_pos :=slaveInputData.m_endoscopePose.m_pos;
 slaveStatus.m_endoscopePose.m_rot :=slaveInputData.m_endoscopePose.m_rot;
@@ -189,7 +192,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[//TODO]]></ST>
+        <ST><![CDATA[//TODO
+GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_selfCheckPass;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="MasterArmControl">
@@ -228,6 +232,8 @@ END_VAR
       <LineId Id="82" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="101" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="2" />
@@ -247,6 +253,7 @@ END_VAR
       <LineId Id="17" Count="0" />
     </LineIds>
     <LineIds Name="MasterArmControl.slaveInputDataCast">
+      <LineId Id="76" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="34" Count="0" />
       <LineId Id="33" Count="0" />
@@ -281,6 +288,7 @@ END_VAR
     </LineIds>
     <LineIds Name="MasterArmControl.UIOutputProcess">
       <LineId Id="5" Count="0" />
+      <LineId Id="9" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

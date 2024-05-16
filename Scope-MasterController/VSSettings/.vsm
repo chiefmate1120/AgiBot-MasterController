@@ -6,7 +6,7 @@
     <Node>
       <Title>GravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -557,12 +557,12 @@
     </Node>
     <Node>
       <Title>RobotJointData</Title>
-      <Expanded>True</Expanded>
-      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
+      <Expanded>False</Expanded>
+      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
@@ -617,12 +617,12 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>True</Expanded>
+          <Expanded>False</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
               <Title>Axis Group</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -647,7 +647,7 @@
             </Node>
             <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -672,7 +672,7 @@
             </Node>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
@@ -685,7 +685,7 @@
             </Node>
             <Node>
               <Title>Axis Group (3)</Title>
-              <Expanded>True</Expanded>
+              <Expanded>False</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
