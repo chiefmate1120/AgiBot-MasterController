@@ -14,27 +14,27 @@ VAR
 	// cali trajectory
 	m_leftGraCaliTraj :ARRAY [1..m_caliMotionSegs, 1..g_mJntNum] OF LREAL:=
 		// first calibration traj
-		[0.0,  -PI/2+pi/6 , 0+pi/12 , -PI+pi/3,  PI+pi/2, -PI/2+pi/6, 0,
-		 0.0, -pi/2-pi/6,  0-pi/12,  -pi-pi/3, Pi-pi/2, -pi/2-pi/6, 0,
-		 0.0,  -PI/2+pi/6 , 0+pi/12 , -PI+pi/3,  PI+pi/2, -PI/2+pi/6, 0,
+		[0,  -60*g_deg2Rad,    0.0,  -195*g_deg2Rad,  270*g_deg2rad,  -60*g_deg2rad, 0.0 , 
+		 0, -120*g_deg2rad,   0.0,  -165*g_deg2rad,   90*g_deg2rad,  -120*g_deg2rad,  0,
+		 0,  -60*g_deg2Rad,    0.0,  -195*g_deg2Rad,  270*g_deg2rad,  -60*g_deg2rad, 0.0 , 
 		// second calibration traj
-		0.0,  -PI/2+pi/12 , pi/6 , -PI-pi/6,  PI, -PI/2, 0,
-		0.0,  -PI/2-pi/12 , -pi/6 , -PI+pi/6,  PI, -PI/2, 0,
-		0.0,  -PI/2+pi/12 , pi/6 , -PI-pi/6,  PI, -PI/2, 0];
+		 0.0,  -75*g_deg2Rad,   30*g_deg2Rad,  -195*g_deg2Rad,  180*g_deg2Rad,  -90*g_deg2Rad,    0,
+		 0.0,  -105*g_deg2Rad,  -30*g_deg2Rad, -165*g_deg2Rad,  180*g_deg2Rad,  -90*g_deg2Rad,     0,
+		0.0,  -75*g_deg2Rad,   30*g_deg2Rad,  -195*g_deg2Rad,  180*g_deg2Rad,  -90*g_deg2Rad,    0];
 		
 	m_rightGraCaliTraj :ARRAY [1..m_caliMotionSegs, 1..g_mJntNum] OF LREAL:=
 		// first calibration traj
-		[0.0,  -PI/2+pi/6,  0+pi/12,  0-pi/3,     PI-pi/2,  PI/2-pi/6, 0,
-		 0.0, -pi/2-pi/6,  0-pi/12,  0+pi/3,    Pi+pi/2,  pi/2+pi/6, 0,
-		 0.0,  -PI/2+pi/6,  0+pi/12,  0-pi/3,     PI-pi/2,  PI/2-pi/6, 0,
+		[0,   -60*g_deg2Rad,    0.0,   75*g_deg2Rad,   90*g_deg2Rad,   60*g_deg2Rad,  0.0,
+		 0.0,  -120*g_deg2Rad,  0.0,  -75*g_deg2Rad,  270*g_deg2Rad,  120*g_deg2Rad,  0.0,
+		 0,   -60*g_deg2Rad,    0.0,   75*g_deg2Rad,   90*g_deg2Rad,   60*g_deg2Rad,  0.0,
 		// second calibration traj
-		 0.0,  -PI/2+pi/12,  pi/6,  0-pi/6,     PI,  PI/2, 0,
-		0.0,  -PI/2-pi/12,  -pi/6,  0+pi/6,     PI,  PI/2, 0,
-		 0.0,  -PI/2+pi/12,  pi/6,  0-pi/6,     PI,  PI/2, 0];
+		 0.0,  -75*g_deg2Rad,   30*g_deg2Rad,  -15*g_deg2Rad,  180*g_deg2Rad,   90*g_deg2Rad,    0,
+		 0.0, -105*g_deg2Rad,  -30*g_deg2Rad,   15*g_deg2Rad,  180*g_deg2Rad,   90*g_deg2Rad,    0,
+		 0.0,  -75*g_deg2Rad,   30*g_deg2Rad,  -15*g_deg2Rad,  180*g_deg2Rad,   90*g_deg2Rad,    0];
 	
 
 	m_transMaxjntVel:Vec7d:=[7(30*g_deg2rad)];
-	m_caliMaxjntVel:Vec7d:=[7(2.0*g_deg2rad)];
+	m_caliMaxjntVel:Vec7d:=[7(3.0*g_deg2rad)];
 	m_caliMaxjntAcc:Vec7d:=[7(1.0)];
 	m_caliMaxjntJerk:Vec7d:=[7(2.0)];
 	

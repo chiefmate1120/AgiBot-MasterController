@@ -482,8 +482,8 @@ FOR i:=1 TO g_mArmNum DO
 		// Endoscope 
 		MasterArmState_Endoscope:
 			// to standby
-			IF NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) OR SlaveArmState_ScopeReady <> m_scopeArmState
-						OR SlaveArmState_EndoScope <> m_scopeArmState THEN
+			IF NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) OR NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) 
+				OR (SlaveArmState_ScopeReady <> m_scopeArmState AND SlaveArmState_EndoScope <> m_scopeArmState) THEN
 				m_nextMasterArmState[i] := MasterArmState_Standby;
 			// to clutch
 			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
@@ -787,7 +787,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="171" Count="1" />
       <LineId Id="223" Count="0" />
       <LineId Id="173" Count="0" />
-      <LineId Id="228" Count="0" />
+      <LineId Id="359" Count="0" />
       <LineId Id="175" Count="0" />
       <LineId Id="293" Count="1" />
       <LineId Id="292" Count="0" />
