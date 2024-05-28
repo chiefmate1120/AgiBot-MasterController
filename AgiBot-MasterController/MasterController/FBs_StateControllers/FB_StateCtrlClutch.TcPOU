@@ -10,8 +10,8 @@ END_VAR
 VAR
 	m_rotTrackKp : LREAL := 200;
 	m_maxTrackVel :LREAL := PI;
-	m_jnt4AdjustKp : LREAL :=50;
-	m_jnt4MaxVel :LREAL :=pi ;
+	m_jnt4AdjustKp : LREAL :=10;
+	m_jnt4MaxVel :LREAL :=pi/3 ;
 	m_cartTrackVel :Vec3d;
 	
 	

@@ -3,6 +3,7 @@
   <GVL Name="GVLs_ArmDynamics_4" Id="{0c21b408-cacc-4cdf-bff7-ad95e7b31fc9}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
+// Robot4 Data
 VAR_GLOBAL CONSTANT
 	// link mass [m1, m2, m3, m4, m5, m6, m7, m8, m9]
 	g_linkMass :ARRAY[1..9] OF LREAL :=[2.676, 0.825, 0.547, 0.25, 0.195, 0.194, 0.05, 0.111, 0.09] ;

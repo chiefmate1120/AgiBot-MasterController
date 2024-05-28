@@ -1,32 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_ArmJointCaliData" Id="{5c841afd-c3aa-40ca-9432-cc135b4ac74a}">
+  <GVL Name="GVL_ArmJointCaliData_3" Id="{3b29091e-7826-426c-9a5d-a3c2bd67b2a1}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
-// Robot5 Data
+// Robot3 Data
 VAR_GLOBAL CONSTANT
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
 	g_linkEncLimitBuffer : DINT := 100000;
 	
+	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, 1, -1, 1, 1, 1,
+												 -1, -1, 1, -1, 1, 1, 1];
+												 
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[3330608, 6592612, 11754876, 8357648, 7032320, 3206208, 0,
-		 14145556, 9942668, 4526812, 4839456,3252816 , 11705152, 0];
+		[5320292, 1637888, 16267012, 9121008, 16329376, 6965264, 0,
+		 54048, 5138400, 12480240, 3380960, 9526944, 5270880, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[9148752, 724532, 16056044, 13808640, 2987504, 7442528, 16777216,
-		 3137384, 4088172, 8898876, 10199744, 15896032, 16050256, 16777216];
+		[16734116, 13586832, 3813732, 14235024, 11133568, 11256240, 0,
+		 11534296, 16020072, 96940, 8157232, 13636784, 5270880, 0];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[6250820, 3668632, 13311308, 1419280, 13415264, 5208832, 11610128,
-		 236924, 7059956, 5977404, 566400, 9673872, 13718496, 14927904];
+		[2383568, 16504180, 1064304, 2073472, 6104944, 9016224, 13420592,
+		 14507208, 2154776, 14028284, 15460608, 3197104, 7324448, 14964448];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
 	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
-		[0, 0, 0, 1, 1, 0, 1,
-		 1, 0, 0, 1, 0, 0, 1];
+		[1, 1, 1, 1, 1, 0, 1,
+		 1, 1, 1, 1, 1, 0, 1];
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
@@ -39,8 +42,8 @@ VAR_GLOBAL CONSTANT
 		 0.0, -PI/2, 0.0, 0.0, pi, PI/2, 0.0];
 		 
 	// limit value of gripper hall sensor
-	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3801219,2818152];
-	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[45023889,41878148];
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[2687067,2883677];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[38142472,44696204];
 
 END_VAR]]></Declaration>
   </GVL>

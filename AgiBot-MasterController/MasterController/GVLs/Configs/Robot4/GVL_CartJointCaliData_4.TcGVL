@@ -2,6 +2,7 @@
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_CartJointCaliData_4" Id="{1fa417df-26e5-4d8b-881c-bda5c8eedba8}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
+// Robot4 Data
 VAR_GLOBAL CONSTANT
 	(* cart joints are defiend in sequence as below
 	[monitor lift, monitor rotate, armset, pedal] *)

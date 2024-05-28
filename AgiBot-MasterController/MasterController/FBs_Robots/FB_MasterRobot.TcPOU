@@ -458,7 +458,6 @@ FOR i:=1 TO g_mArmNum DO
 		
 		//MasterSlave
 		MasterArmState_MasterSlave:
-			continue;
 			// to standdy
 			IF  (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady)
@@ -769,7 +768,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="278" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="95" Count="2" />
-      <LineId Id="351" Count="0" />
       <LineId Id="219" Count="1" />
       <LineId Id="279" Count="0" />
       <LineId Id="335" Count="0" />
