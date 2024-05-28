@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterArmCheck" Id="{7fa43d5a-568e-4b76-ad81-6c5cf7c4ee74}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterArmCheck
 VAR_INPUT
@@ -84,7 +84,8 @@ FOR i:=1 TO g_mArmNum DO
 	END_IF
 	
 	FOR j:=1 TO g_mJntNum DO 
-		IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
+		//IF m_jntCtrlErrFlag[i][j] OR m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
+		IF m_jntEncErrFlag[i][j] OR m_jntVelErrFlag[i][j] OR m_jntLimitErrFlag[i][j] THEN
 			m_armErrFlag[i]:=TRUE;
 			EXIT;
 		END_IF
@@ -244,7 +245,9 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="159" Count="2" />
       <LineId Id="113" Count="0" />
       <LineId Id="115" Count="0" />
-      <LineId Id="119" Count="11" />
+      <LineId Id="119" Count="5" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="125" Count="5" />
       <LineId Id="114" Count="0" />
       <LineId Id="131" Count="0" />
       <LineId Id="67" Count="0" />

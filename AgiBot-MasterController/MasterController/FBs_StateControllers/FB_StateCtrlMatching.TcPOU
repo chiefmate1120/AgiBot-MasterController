@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlMatching" Id="{886a3c3b-c6fb-4a12-8c63-bddb11202d66}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Orientation Matching
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMatching EXTENDS FB_MasterArmCtrlBase
@@ -16,8 +16,8 @@ VAR
 	m_matchTrajPlanner : FB_TrajMoveJ;
 	m_targetJntPos :Vec7d;
 	
-	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
-	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0];
+	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0];
+	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0, 8.0, 8.0, 8.0, 8.0];
 	m_maxMatchJntJerk:Vec7d:=[7(10.0)];
 	
 	m_rotErrAng :LREAL;
