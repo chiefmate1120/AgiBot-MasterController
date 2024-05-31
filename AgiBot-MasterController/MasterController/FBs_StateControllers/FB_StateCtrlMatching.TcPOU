@@ -16,9 +16,9 @@ VAR
 	m_matchTrajPlanner : FB_TrajMoveJ;
 	m_targetJntPos :Vec7d;
 	
-	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 4.0, 4.0, 4.0, 4.0];
-	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0, 8.0, 8.0, 8.0, 8.0];
-	m_maxMatchJntJerk:Vec7d:=[7(10.0)];
+	m_maxMatchJntVel:Vec7d:=[1.0, 1.0, 1.0, 2*pi, 3*pi, 3*pi, 5*pi];
+	m_maxMatchJntAcc:Vec7d:=[1.0, 1.0, 1.0,  8*pi, 12*pi, 12*pi, 20*pi];
+	m_maxMatchJntJerk:Vec7d:=[7(100.0)];
 	
 	m_rotErrAng :LREAL;
 
@@ -110,13 +110,8 @@ IF m_IKSuccess THEN
 	m_targetJntPos[5]:=q5;
 	m_targetJntPos[6]:=q6;
 	
-	// handle multiple cycles of joint7
-	IF ABS(i_masterArm.curJntPos[7] - q7) > PI THEN
-		cycleNum := LREAL_TO_INT((i_masterArm.curJntPos[7]-q7)/g_2pi);
-		m_targetJntPos[7] := cycleNum * g_2pi + q7;
-	ELSE
-		m_targetJntPos[7]:= q7;
-	END_IF
+	// roll flip handle
+	i_masterArm.flipGripper(rollFlipHandle(i_masterArm.armIdx,i_masterArm.curJntPos[7], q7, o_cmdJntPos7 =>m_targetJntPos[7]));
 
 	m_matchTrajPlanner.init(m_cmdJntPos,m_targetJntPos,m_maxMatchJntVel,m_maxMatchJntAcc,m_maxMatchJntJerk);
 	m_timePeriod :=0;
@@ -130,7 +125,7 @@ END_IF
 (*armDH=[   0      0   q1      d1;
             -deg90  0   q2      0;
             0       a3  q3      0];*)
-METHOD calcJnt3Rotation : Mat3d
+METHOD PROTECTED calcJnt3Rotation : Mat3d
 VAR_INPUT CONSTANT
 	q1:LREAL;
 	q2:LREAL;
@@ -175,7 +170,7 @@ calcJnt3Rotation[3,3]:=0;]]></ST>
 	0       a3  q3      0;
 	 -deg90  a4  q4      d4]
 *)
-METHOD calcJnt4Rotation : Mat3d
+METHOD PROTECTED calcJnt4Rotation : Mat3d
 VAR_INPUT
 	q1 :LREAL;
 	q2 :LREAL;
@@ -258,7 +253,7 @@ copyCmds(r_masterArmCtrlCmd);
 [                           cos(q5)*sin(q7),                             cos(q5)*cos(q7),         -sin(q5)]
 [ cos(q4)*cos(q7) + sin(q4)*sin(q5)*sin(q7),   cos(q7)*sin(q4)*sin(q5) - cos(q4)*sin(q7),  cos(q5)*sin(q4)]
 *)
-METHOD leftWristOptIK : BOOL
+METHOD PROTECTED leftWristOptIK : BOOL
 VAR_IN_OUT CONSTANT
 	i_cmdRot :Mat3d;
 END_VAR
@@ -355,7 +350,7 @@ END_IF
 [   sin(q4)*sin(q5)*sin(q7) - cos(q4)*cos(q7), cos(q4)*sin(q7) + cos(q7)*sin(q4)*sin(q5), -cos(q5)*sin(q4)]
  
 *)
-METHOD rightWristOptIK : BOOL
+METHOD PROTECTED rightWristOptIK : BOOL
 VAR_IN_OUT CONSTANT
 	i_cmdRot :Mat3d;
 END_VAR
@@ -431,6 +426,78 @@ IF q4> GVL_ArmJointParameters.g_minJntPos[2,4] AND q4<GVL_ArmJointParameters.g_m
 END_IF]]></ST>
       </Implementation>
     </Method>
+    <Method Name="rollFlipHandle" Id="{8ed883c8-bcc7-4a8d-b5a5-e09032451118}">
+      <Declaration><![CDATA[METHOD PROTECTED rollFlipHandle : BOOL
+VAR_INPUT
+	i_armIdx:INT;
+	i_curJntPos7 :LREAL;
+	i_initCmdJntPos7 :LREAL;
+END_VAR
+VAR_OUTPUT
+	o_cmdJntPos7 :LREAL;
+END_VAR
+
+VAR
+	solFeasible1,solFeasible2 :BOOL;
+	solIdx :INT:=0;
+	halfcycleNum1, halfcycleNum2:INT;
+	solution1, solution2 :LREAL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// this part is used to drive gripper back near center, in case that gripper roll is stuck near limit
+// TODO: remove after gripper roll has infinite motion range
+IF NOT (MasterArmControl.m_masterInputDataPool.m_cartStatus.m_surgonReady) THEN
+	o_cmdJntPos7:=i_initCmdJntPos7;
+	rollFlipHandle:=FALSE;
+	RETURN;
+END_IF
+
+// handle multiple cycles of joint7
+// find the first solution within pi angle from current position
+halfcycleNum1 := LREAL_TO_INT((i_curJntPos7 - i_initCmdJntPos7)/pi);
+solution1 := halfcycleNum1 * pi + i_initCmdJntPos7;
+
+IF solution1 > i_curJntPos7 THEN
+	solution2 := solution1 - PI;
+	halfcycleNum2 := halfcycleNum1 - 1;
+ELSE
+	solution2 := solution1 + PI;
+	halfcycleNum2 := halfcycleNum1 + 1;
+END_IF
+
+//choose the solution which is closer to current q7 which can achive orientation match with a max pi/2 degree
+// NOTE: There maybe risk this joint7 is stuck at limit, which can be solved after joint7 has infinite rotation angle,
+solFeasible1:=solution1> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] 	AND solution1< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
+solFeasible2:=solution2> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] 	AND solution2< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
+IF solFeasible1 AND solFeasible2 THEN
+	IF ABS(solution1-i_curJntPos7) < ABS(solution2-i_curJntPos7)  THEN
+		solIdx:=1;
+	ELSE
+		solIdx:=2;
+	END_IF
+ELSIF solFeasible1 AND NOT(solFeasible2) THEN
+	solIdx:=1;
+ELSIF solFeasible2 AND NOT(solFeasible1) THEN
+	solIdx:=2;
+ELSE
+	solIdx:=0;
+END_IF
+
+IF solIdx = 1 THEN
+	o_cmdJntPos7 := solution1;
+	rollFlipHandle:= ((ABS(halfcycleNum1) MOD 2) = 1);
+ELSIF solIdx =2 THEN
+	o_cmdJntPos7 := solution2;
+	rollFlipHandle:= ((ABS(halfcycleNum2) MOD 2) = 1);
+ELSE
+	o_cmdJntPos7:=i_initCmdJntPos7;
+	rollFlipHandle:=FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="wristIK" Id="{5d6388c7-a5fc-4ec4-bbd8-54b7da79fe62}">
       <Declaration><![CDATA[// calculate position of joint 5/6/7 
 (*wristDH=[   deg90   0   q5      0;
@@ -441,7 +508,7 @@ END_IF]]></ST>
 [                           cos(q7)*sin(q6),                            -sin(q6)*sin(q7),        -cos(q6)]
 [ cos(q5)*sin(q7) + cos(q6)*cos(q7)*sin(q5),   cos(q5)*cos(q7) - cos(q6)*sin(q5)*sin(q7), sin(q5)*sin(q6)]
 *)
-METHOD wristIK : BOOL
+METHOD PROTECTED wristIK : BOOL
 VAR_IN_OUT CONSTANT
 	i_cmdRot :Mat3d;
 	i_masterArm :FB_MasterArm;
@@ -524,15 +591,13 @@ wristIK:=true;
       <LineId Id="371" Count="0" />
       <LineId Id="283" Count="4" />
       <LineId Id="274" Count="0" />
-      <LineId Id="250" Count="1" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="251" Count="0" />
       <LineId Id="288" Count="0" />
       <LineId Id="252" Count="0" />
       <LineId Id="256" Count="2" />
-      <LineId Id="389" Count="3" />
-      <LineId Id="396" Count="0" />
-      <LineId Id="395" Count="0" />
-      <LineId Id="397" Count="0" />
-      <LineId Id="393" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="418" Count="1" />
       <LineId Id="255" Count="0" />
       <LineId Id="249" Count="0" />
       <LineId Id="327" Count="0" />
@@ -609,6 +674,45 @@ wristIK:=true;
       <LineId Id="198" Count="12" />
       <LineId Id="297" Count="11" />
       <LineId Id="59" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.rollFlipHandle">
+      <LineId Id="119" Count="1" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="10" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="89" Count="1" />
+      <LineId Id="92" Count="1" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="98" Count="1" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="111" Count="6" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.wristIK">
       <LineId Id="126" Count="0" />

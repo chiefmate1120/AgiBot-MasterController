@@ -17,8 +17,11 @@ VAR
 	m_handClutchSwitch :BOOL;
 	
 	// joints
-	// NOTICE: all joints are the ture active joints, not DH ones!
+	// NOTICE: all joints are the true active joints, not DH ones!
 	m_joints :ARRAY[1..g_mJntNum] OF FB_ArmJoint;
+	
+	// master gripper roll flip flag, if true, q7 would add pi in FK
+	m_gripperRollFlip :BOOL :=False;
 	
 	// arm cartesian data, defined in each arm origin
 	m_curCartPose	:ST_Frame;
@@ -380,6 +383,16 @@ END_VAR
         </Implementation>
       </Get>
     </Property>
+    <Method Name="flipGripper" Id="{b34dfa37-adbc-4e99-a96a-e20f87ddba4a}">
+      <Declaration><![CDATA[METHOD PUBLIC flipGripper : BOOL
+VAR_INPUT
+	i_flipFlag :BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_gripperRollFlip := i_flipFlag;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="forwardKinematic" Id="{182b544f-f7c4-475e-8af7-8c07aa230234}">
       <Declaration><![CDATA[// from active joint position to cartesian pose in arm origin
 METHOD PROTECTED forwardKinematic : BOOL
@@ -406,6 +419,12 @@ q4:=jnt4MotorToLink(i_jntPos[2],i_jntPos[3], i_jntPos[4]);//q4DH=q4motor+q8-q2-9
 q5:=i_jntPos[5];  
 q6:=i_jntPos[6];  
 q7:=i_jntPos[7];  
+
+// master roll flip handle
+IF m_gripperRollFlip THEN
+	q7 := q7+PI;
+END_IF
+
 d1:=g_d1;
 d4:=g_d4;
 a3:=g_a3;
@@ -450,6 +469,17 @@ END_VAR
 ]]></Declaration>
         <Implementation>
           <ST><![CDATA[gripAngle:=m_gripAngle;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="gripperRollFlip" Id="{93c1f56a-60e7-470f-8b01-d27018c6d468}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY gripperRollFlip : BOOL]]></Declaration>
+      <Get Name="Get" Id="{9fa59e73-352b-4612-8aea-47cc6b1973bb}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[gripperRollFlip := m_gripperRollFlip;]]></ST>
         </Implementation>
       </Get>
     </Property>
@@ -992,14 +1022,24 @@ matMultiVec(m_linkJaco,m_curLinkVel,m_curCartLinkTwist);
     <LineIds Name="FB_MasterArm.filtJntCurrent.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterArm.flipGripper">
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterArm.forwardKinematic">
       <LineId Id="84" Count="3" />
       <LineId Id="163" Count="0" />
-      <LineId Id="89" Count="27" />
+      <LineId Id="89" Count="2" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="181" Count="3" />
+      <LineId Id="92" Count="24" />
       <LineId Id="140" Count="7" />
       <LineId Id="29" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.gripAngle.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArm.gripperRollFlip.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.handClutchSwitch.Get">

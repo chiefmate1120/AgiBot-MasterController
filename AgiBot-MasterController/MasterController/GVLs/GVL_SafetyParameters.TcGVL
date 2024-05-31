@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 //TODO: safety check parameters need to be reviewd
@@ -9,7 +9,7 @@ VAR_GLOBAL CONSTANT
 	g_faultTriggerCounts :INT :=2;
 	
 	// joint limit buffer(outside of joint limit)
-	g_armJntPosLimitBuffer :vec7d:=[3(5.0*g_deg2Rad), 45*g_deg2rad, 3(5.0*g_deg2Rad)];
+	g_armJntPosLimitBuffer :vec7d:=[3(5.0*g_deg2Rad), 4(30.0*g_deg2Rad)];
 
 	// master arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.005;

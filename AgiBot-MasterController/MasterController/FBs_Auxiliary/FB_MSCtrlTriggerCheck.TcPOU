@@ -31,10 +31,10 @@ VAR
 	m_firstGripTime :LREAL;
 	
 	// angle threshold indicating gripper open
-	m_openAngThres :LREAL := g_maxGripAngle * 0.7;
+	m_openAngThres :LREAL := g_maxGripAngle * 0.5;
 	
 	// angle threshold indicating gripper close
-	m_closeAngThres :LREAL := 5.0 *g_deg2rad;
+	m_closeAngThres :LREAL := 2.0 *g_deg2rad;
 END_VAR
 ]]></Declaration>
     <Implementation>

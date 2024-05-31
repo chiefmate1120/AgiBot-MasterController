@@ -1319,7 +1319,7 @@
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
-					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="90" DongleSystemId="{5D171E4D-33CB-22C4-BFFE-0A6DFA4EED6F}"/>
+					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="92"/>
 				</Target>
 			</Licenses>
 			<Tasks>
