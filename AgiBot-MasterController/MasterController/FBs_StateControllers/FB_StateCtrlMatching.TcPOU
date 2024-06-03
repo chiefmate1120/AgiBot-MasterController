@@ -40,12 +40,17 @@ END_VAR
 var 
 	i,j : INT;
 
+	mq4,mq5,mq6,mq7:LREAL;
 	q4,q5,q6,q7:LREAL;
+
 	rotErr:Mat3d;
-	
 	wristRotInJnt3, wristRotInJnt4 :Mat3d;
 	rot, invRot :Mat3d;
 	cycleNum:INT;
+	
+	jnt4MoveRange:LREAL;
+	jnt5Bias, jnt4MoveScale :LREAL;
+
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[IF m_IKSuccess THEN 
@@ -101,6 +106,24 @@ IF NOT m_IKSuccess THEN
 	matTranspose(rot, invRot);
 	matMultiply(invRot, m_cmdCartPose.m_rot, wristRotInJnt4);
 	m_IKSuccess := wristIK(wristRotInJnt4,i_masterArm, q5=>q5, q6=>q6, q7=>q7);
+END_IF
+
+// try to minimize joint4 move angle based on current posture
+IF m_IKSuccess THEN
+	jnt4MoveRange :=  i_masterArm.jnt4LinkToMotor(m_targetJntPos[2],m_targetJntPos[3],q4)-i_masterArm.curJntPos[4];
+	jnt5Bias :=  LIMIT (0, ABS(i_masterArm.curJntPos[5] -pi), pi/2);
+	jnt4MoveRange := jnt4MoveRange * ABS(COS(jnt5Bias));
+	mq4:=  i_masterArm.jnt4MotorToLink(m_targetJntPos[2],m_targetJntPos[3],i_masterArm.curJntPos[4] + jnt4MoveRange) ;
+	
+	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],mq4);
+	matTranspose(rot, invRot);
+	matMultiply(invRot, m_cmdCartPose.m_rot, wristRotInJnt4);
+	IF wristIK(wristRotInJnt4,i_masterArm, q5=>mq5, q6=>mq6, q7=>mq7) THEN
+		q4:=mq4;
+		q5:=mq5;
+		q6:=mq6;
+		q7:=mq7;
+	END_IF
 END_IF
 
 // traj plan
@@ -175,7 +198,7 @@ VAR_INPUT
 	q1 :LREAL;
 	q2 :LREAL;
 	q3 :LREAL;
-	q4 :LREAL;
+	q4 :LREAL;// already at the link side
 END_VAR
 
 VAR
@@ -183,7 +206,7 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// !Convert active joint position to DH model for kinematic calculation
-q4:=q4+q3-q2-pi/2;//q4DH=q4motor+q8-q2-90;  
+//q4:=q4+q3-q2-pi/2;//q4DH=q4motor+q8-q2-90;  
 q3:=q3-q2;  //q3=q8-q2
 
 c1:=COS(q1);
@@ -591,6 +614,19 @@ wristIK:=true;
       <LineId Id="371" Count="0" />
       <LineId Id="283" Count="4" />
       <LineId Id="274" Count="0" />
+      <LineId Id="440" Count="0" />
+      <LineId Id="439" Count="0" />
+      <LineId Id="441" Count="1" />
+      <LineId Id="449" Count="0" />
+      <LineId Id="448" Count="0" />
+      <LineId Id="446" Count="0" />
+      <LineId Id="452" Count="0" />
+      <LineId Id="454" Count="2" />
+      <LineId Id="453" Count="0" />
+      <LineId Id="457" Count="0" />
+      <LineId Id="459" Count="2" />
+      <LineId Id="458" Count="0" />
+      <LineId Id="443" Count="0" />
       <LineId Id="417" Count="0" />
       <LineId Id="251" Count="0" />
       <LineId Id="288" Count="0" />
