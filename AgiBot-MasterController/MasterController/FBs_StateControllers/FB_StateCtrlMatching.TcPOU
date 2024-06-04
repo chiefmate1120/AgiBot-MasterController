@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_StateCtrlMatching" Id="{886a3c3b-c6fb-4a12-8c63-bddb11202d66}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Orientation Matching
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMatching EXTENDS FB_MasterArmCtrlBase
@@ -111,7 +111,7 @@ END_IF
 // try to minimize joint4 move angle based on current posture
 IF m_IKSuccess THEN
 	jnt4MoveRange :=  i_masterArm.jnt4LinkToMotor(m_targetJntPos[2],m_targetJntPos[3],q4)-i_masterArm.curJntPos[4];
-	jnt5Bias :=  LIMIT (0, ABS(i_masterArm.curJntPos[5] -pi), pi/2);
+	jnt5Bias :=  LIMIT (0, ABS(q5-pi), pi/2);
 	jnt4MoveRange := jnt4MoveRange * ABS(COS(jnt5Bias));
 	mq4:=  i_masterArm.jnt4MotorToLink(m_targetJntPos[2],m_targetJntPos[3],i_masterArm.curJntPos[4] + jnt4MoveRange) ;
 	
