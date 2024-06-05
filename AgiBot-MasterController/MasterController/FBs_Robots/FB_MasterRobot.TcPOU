@@ -222,8 +222,8 @@ m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_1;
 m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_3;
 
 // shoulder pose in monitor
-m_shoulderPoseInMonitor[1].m_pos[2]:=-g_shoulderDistance/2;
-m_shoulderPoseInMonitor[2].m_pos[2]:=g_shoulderDistance/2;
+m_shoulderPoseInMonitor[1].m_pos[1]:=-g_shoulderDistance/2;
+m_shoulderPoseInMonitor[2].m_pos[1]:=g_shoulderDistance/2;
 
 FOR i:=1 TO g_mArmNum DO
 	// arm init
