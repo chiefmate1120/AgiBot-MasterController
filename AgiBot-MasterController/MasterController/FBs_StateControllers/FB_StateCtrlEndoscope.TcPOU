@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlEndoscope" Id="{6b490525-446d-48f2-ab19-237faca074bd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Endoscope Control
 FUNCTION_BLOCK PUBLIC FB_StateCtrlEndoscope EXTENDS FB_MasterArmCtrlBase
@@ -8,13 +8,711 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// enter endoscope control for the first time
+	m_firstIn :BOOL := TRUE;
+	
+	//master arm posture error
+	posErr,posErrInBase,posErrInTcp:Vec3d;
+	rotErr :Mat3d;
+	errAngle : LREAL;
+	errAxisLocal, errAxis,errAxis2,errAxisInBase,errAxisInTcp :Vec3d;
+	masterPoseError,masterPoseErrorInTcp :Vec6d;
+	
+	//arm force control in base coordinate
+	impCtrlInBase:BOOL;
+	
+	// force control parameters in local base coordinate
+	kpBase:Vec6d:=[1,1,1,1,1,1];
+	kdBase:Vec6d:=[0.01,0.01,0.01,0.01,0.01,0.01];
+	jntImpTor:Vec7d;
+	
+	//endoscope motion scale
+	m_endoMotionScale:LREAL:=1;
+	
+	// force control parameters in local tcp coordinate
+	kpTcp:Vec6d:=[100,100,100,1,1,0.5];
+	kdTcp:Vec6d:=[1,1,1,0.04,0.04,0.01]; //[5,5,5,0.04,0.04,0.01];
+	
+	//joint 6 KP/KD
+	Kp6:LREAL:=1.0; //1
+	Kd6:LREAL:=0.01; //0.01
+	
+	//expected joint 6 position
+	ExpJ6Pos:LREAL;
+	
+	//joint 4 KP/KD
+	Kp4:LREAL:=1.0; //1
+	Kd4:LREAL:=0.01; //0.01
+	
+	//expected joint 4 position
+	ExpJ4Pos:LREAL;	
+	
+	//joint 6 optimization torque
+	jntOptTor:LREAL;
+		
+	//joint torque for null space
+	TorqueNullSpace:Vec7d;
+	
+	//DH joint torque
+	jntTorqueSum:Vec7d;
+	
+	//for test
+	t:LREAL;
+	curJntPosJ4:LREAL;
+	curJntVelJ4:LREAL;
+	d1,d2:LREAL;
+	
+	
+	//temp varibles
+	armId:INT;
+	refId:INT;
+	x,y:LREAL;
+	i:INT;
+	masterPos,slavePos:ST_Frame;
+	masterPosFirst,slavePosFirst:ST_Frame;
+	ArmTarPos:ST_Frame;
+	posInc:Vec3d;		
+	tmpMat3d : Mat3d;
+	rotInv:Mat3d;
+	
+	vel, velLocal, wVel,wVelLocal :Vec3d;
+	spatialVel,spatialVelInTcp:Vec6d;
+	
+	spatialForceP1,spatialForceP2:Vec3d;	
+	spatialForceP1Base,spatialForceP2Base:Vec3d;		
+	spatialForTcp,spatialForBase,spatialForTemp:Vec7d;
+	
+	simJaco:Mat67;
+	JacoT :Mat76;	
+	jntTorVec:Vec7d;
+	dynaNullspace:Mat7d;	
 END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="calcCmdJntPos" Id="{984a6e2e-69d6-4229-9915-1fa6625d4fbc}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR 
+
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos;
+m_cmdJntVel:=i_masterArm.curJntVel;
+m_cmdCartPose:=i_masterArm.curCartPose;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{cbe72b32-a8c6-44cd-81bf-77cb04776fee}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntTrq : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR	
+	m_jnt4TargetPos: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//determine slave arm space position relative to endoscope
+masterPos:=transform(i_shoulderPose,i_masterArm.simCartPose);
+slavePos:=i_slaveStatus.m_curArmPose[i_slaveIdx];
+
+//system parameters initial
+IF (m_firstIn=TRUE) THEN
+	m_firstIn:=FALSE;
+	masterPosFirst:=masterPos;
+	slavePosFirst:=slavePos;
+	ExpJ4Pos:=i_masterArm.jnt4MotorToLink(i_masterArm.curJntPos[2], i_masterArm.curJntPos[3], i_masterArm.curJntPos[4]);
+	ExpJ6Pos:=i_masterArm.curJntPos[6];	
+END_IF
+
+t:=t+g_armCtrlCycleTime;
+IF (t<=0.050) THEN
+	m_firstIn:=TRUE;
+	RETURN;	
+END_IF
+
+
+
+
+//calculating slave arm position incresement，and determine master arm space position and posture
+vecSub(slavePos.m_pos,slavePosFirst.m_pos,posInc);
+vecMultiNum(posInc,1.0/m_endoMotionScale,posInc);
+vecAdd(posInc,masterPosFirst.m_pos,ArmTarPos.m_pos);
+ArmTarPos.m_rot:=slavePos.m_rot;
+
+
+
+//calculating master arm position error and postrue error
+vecSub(ArmTarPos.m_pos, masterPos.m_pos, PosErr);
+matTranspose(masterPos.m_rot, tmpMat3d);
+matMultiply(tmpMat3d, ArmTarPos.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxisLocal);
+matMultiVec(masterPos.m_rot, errAxisLocal, errAxis);
+
+
+
+//transform the error to arm base coordinate
+matTranspose(i_shoulderPose.m_rot,tmpMat3d); //transform matrix from eye to base
+matMultiVec(tmpMat3d, PosErr,posErrInBase);
+matMultiVec(tmpMat3d, errAxis,errAxis2);
+vecMultiNum(errAxis2,errAngle,errAxisInBase);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseError[i]:=posErrInBase[i];
+	masterPoseError[i+3]:=errAxisInBase[i];
+END_FOR
+
+
+
+//transform the error to TCP coordinate
+matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+matMultiVec(rotInv, posErrInBase, posErrInTcp);
+matMultiVec(rotInv, errAxisInBase, errAxisInTcp);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseErrorInTcp[i]:=posErrInTcp[i];
+	masterPoseErrorInTcp[i+3]:=errAxisInTcp[i];
+END_FOR
+
+
+
+//determine master arm space velocity in base coordinate
+FOR i:=1 TO 3 DO
+	vel[i]:=i_masterArm.curCartTwist[i];
+	wVel[i]:=i_masterArm.curCartTwist[i+3];
+	spatialVel[i]:=vel[i];
+	spatialVel[i+3]:=wVel[i];
+END_FOR
+
+
+
+//transform master arm space velocity to tcp coordinate
+matMultiVec(rotInv, vel, velLocal);
+matMultiVec(rotInv, wVel, wVelLocal);
+FOR i:=1 TO 3 DO
+	spatialVelInTcp[i]:=velLocal[i];
+	spatialVelInTcp[i+3]:=wVelLocal[i];
+END_FOR
+
+
+
+//Jacobian matrix
+simJaco:=i_masterArm.Jaco;
+
+
+
+//Based on the above pose deviation values, input them into the impedance control equation and derive the impedance joint torque value
+IF (impCtrlInBase=TRUE) THEN
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForBase[i]:=kpBase[i]*masterPoseError[i]-kdBase[i]*spatialVel[i]; //(-1)*err*(-1)=err
+	END_FOR
+	matMultiVec(i_masterArm.m_lambda, spatialForBase, spatialForTemp);
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForTemp, jntImpTor);	
+	
+ELSE // impedance control in tcp coordinate
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForTcp[i]:=kpTcp[i]*masterPoseErrorInTcp[i]-kdTcp[i]*spatialVelInTcp[i];
+	END_FOR
+	
+	//Splitting spatial forces into two parts
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForceP1[i]:=spatialForTcp[i];
+		spatialForceP2[i]:=spatialForTcp[i+3];
+	END_FOR
+	
+	// project torque back to base coordinate	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP1, spatialForceP1Base);	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP2, spatialForceP2Base);	
+	
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForBase[i]:=spatialForceP1Base[i];
+		spatialForBase[i+3]:=spatialForceP2Base[i];
+	END_FOR
+	
+	//compute joint space torque
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForBase, jntImpTor);	
+END_IF
+
+
+
+
+//To ensure that joint 6 is in the appropriate position, a single joint impedance controller is constructed
+jntOptTor:=Kp6*(ExpJ6Pos-i_masterArm.curJntPos[6])-Kd6*i_masterArm.curJntVel[6];
+(*
+//Project the torque of joint 6 onto null space
+jntTorVec[6]:=jntOptTor;
+dynaNullspace:=i_masterArm.dynaNullspace;
+matMultiVec(dynaNullspace, jntTorVec, TorqueNullSpace);	
+
+//Calculate the sum of impedance control torque and zero space torque
+vecAdd(jntImpTor,TorqueNullSpace,jntTorqueSum);
+m_cmdJntTrq:=jntTorqueSum;
+*)
+m_cmdJntTrq:=jntImpTor;
+m_cmdJntTrq[6]:=jntOptTor;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrqM1" Id="{450dbba1-c111-4d53-8d3c-d412329f90d7}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntTrqM1 : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR	
+	m_jnt4TargetPos: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//determine slave arm space position relative to endoscope
+masterPos:=transform(i_shoulderPose,i_masterArm.simCartPose);
+slavePos:=i_slaveStatus.m_curArmPose[i_slaveIdx];
+
+//system parameters initial
+IF (m_firstIn=TRUE) THEN
+	m_firstIn:=FALSE;
+	masterPosFirst:=masterPos;
+	slavePosFirst:=slavePos;
+	ExpJ4Pos:=i_masterArm.jnt4MotorToLink(i_masterArm.curJntPos[2], i_masterArm.curJntPos[3], i_masterArm.curJntPos[4]);
+	ExpJ6Pos:=i_masterArm.curJntPos[6];
+	t:=0;
+END_IF
+t:=t+g_armCtrlCycleTime;
+
+
+
+//calculating slave arm position incresement，and determine master arm space position and posture
+vecSub(slavePos.m_pos,slavePosFirst.m_pos,posInc);
+vecMultiNum(posInc,1.0/m_endoMotionScale,posInc);
+vecAdd(posInc,masterPosFirst.m_pos,ArmTarPos.m_pos);
+ArmTarPos.m_rot:=slavePos.m_rot;
+
+
+
+//calculating master arm position error and postrue error
+vecSub(ArmTarPos.m_pos, masterPos.m_pos, PosErr);
+matTranspose(masterPos.m_rot, tmpMat3d);
+matMultiply(tmpMat3d, ArmTarPos.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxisLocal);
+matMultiVec(masterPos.m_rot, errAxisLocal, errAxis);
+
+
+
+//transform the error to arm base coordinate
+matTranspose(i_shoulderPose.m_rot,tmpMat3d); //transform matrix from eye to base
+matMultiVec(tmpMat3d, PosErr,posErrInBase);
+matMultiVec(tmpMat3d, errAxis,errAxis2);
+vecMultiNum(errAxis2,errAngle,errAxisInBase);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseError[i]:=posErrInBase[i];
+	masterPoseError[i+3]:=errAxisInBase[i];
+END_FOR
+
+
+
+//transform the error to TCP coordinate
+matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+matMultiVec(rotInv, posErrInBase, posErrInTcp);
+matMultiVec(rotInv, errAxisInBase, errAxisInTcp);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseErrorInTcp[i]:=posErrInTcp[i];
+	masterPoseErrorInTcp[i+3]:=errAxisInTcp[i];
+END_FOR
+
+
+
+//determine master arm space velocity in base coordinate
+FOR i:=1 TO 3 DO
+	vel[i]:=i_masterArm.curCartTwist[i];
+	wVel[i]:=i_masterArm.curCartTwist[i+3];
+	spatialVel[i]:=vel[i];
+	spatialVel[i+3]:=wVel[i];
+END_FOR
+
+
+
+//transform master arm space velocity to tcp coordinate
+matMultiVec(rotInv, vel, velLocal);
+matMultiVec(rotInv, wVel, wVelLocal);
+FOR i:=1 TO 3 DO
+	spatialVelInTcp[i]:=velLocal[i];
+	spatialVelInTcp[i+3]:=wVelLocal[i];
+END_FOR
+
+
+
+//Jacobian matrix
+simJaco:=i_masterArm.Jaco;
+
+
+
+//Based on the above pose deviation values, input them into the impedance control equation and derive the impedance joint torque value
+IF (impCtrlInBase=TRUE) THEN
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForBase[i]:=kpBase[i]*masterPoseError[i]-kdBase[i]*spatialVel[i]; //(-1)*err*(-1)=err
+	END_FOR
+	matMultiVec(i_masterArm.m_lambda, spatialForBase, spatialForTemp);
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForTemp, jntImpTor);	
+	
+ELSE // impedance control in tcp coordinate
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForTcp[i]:=kpTcp[i]*masterPoseErrorInTcp[i]-kdTcp[i]*spatialVelInTcp[i];
+	END_FOR
+	
+	//Splitting spatial forces into two parts
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForceP1[i]:=spatialForTcp[i];
+		spatialForceP2[i]:=spatialForTcp[i+3];
+	END_FOR
+	
+	// project torque back to base coordinate	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP1, spatialForceP1Base);	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP2, spatialForceP2Base);	
+	
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForBase[i]:=spatialForceP1Base[i];
+		spatialForBase[i+3]:=spatialForceP2Base[i];
+	END_FOR
+	
+	//compute joint space torque
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForBase, jntImpTor);	
+END_IF
+
+
+
+
+//To ensure that joint 6 is in the appropriate position, a single joint impedance controller is constructed
+jntOptTor:=Kp6*(ExpJ6Pos-i_masterArm.curJntPos[6])-Kd6*i_masterArm.curJntVel[6];
+(*
+//Project the torque of joint 6 onto null space
+jntTorVec[6]:=jntOptTor;
+dynaNullspace:=i_masterArm.dynaNullspace;
+matMultiVec(dynaNullspace, jntTorVec, TorqueNullSpace);	
+
+//Calculate the sum of impedance control torque and zero space torque
+vecAdd(jntImpTor,TorqueNullSpace,jntTorqueSum);
+m_cmdJntTrq:=jntTorqueSum;
+*)
+m_cmdJntTrq:=jntImpTor;
+m_cmdJntTrq[6]:=jntOptTor;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrqM2" Id="{9ee94aee-a92e-4be1-9044-57226fd0da49}">
+      <Declaration><![CDATA[METHOD PROTECTED calcCmdJntTrqM2 : BOOL
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+
+VAR	
+	m_jnt4TargetPos: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+//determine slave arm space position relative to endoscope
+masterPos:=transform(i_shoulderPose,i_masterArm.simCartPose);
+slavePos:=i_slaveStatus.m_curArmPose[i_slaveIdx];
+
+//system parameters initial
+IF (m_firstIn=TRUE) THEN
+	m_firstIn:=FALSE;
+	masterPosFirst:=masterPos;
+	slavePosFirst:=slavePos;
+	ExpJ4Pos:=i_masterArm.jnt4MotorToLink(i_masterArm.curJntPos[2], i_masterArm.curJntPos[3], i_masterArm.curJntPos[4]);
+	t:=0;
+END_IF
+t:=t+g_armCtrlCycleTime;
+
+
+
+//calculating slave arm position incresement，and determine master arm space position and posture
+vecSub(slavePos.m_pos,slavePosFirst.m_pos,posInc);
+vecMultiNum(posInc,1.0/m_endoMotionScale,posInc);
+vecAdd(posInc,masterPosFirst.m_pos,ArmTarPos.m_pos);
+ArmTarPos.m_rot:=slavePos.m_rot;
+
+//for test
+ArmTarPos.m_pos:=masterPosFirst.m_pos;
+ArmTarPos.m_rot:=masterPosFirst.m_rot;
+
+
+
+//calculating master arm position error and postrue error
+vecSub(ArmTarPos.m_pos, masterPos.m_pos, PosErr);
+matTranspose(masterPos.m_rot, tmpMat3d);
+matMultiply(tmpMat3d, ArmTarPos.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>errAngle, axis=>errAxisLocal);
+matMultiVec(masterPos.m_rot, errAxisLocal, errAxis);
+
+
+
+//transform the error to arm base coordinate
+matTranspose(i_shoulderPose.m_rot,tmpMat3d); //transform matrix from eye to base
+matMultiVec(tmpMat3d, PosErr,posErrInBase);
+matMultiVec(tmpMat3d, errAxis,errAxis2);
+vecMultiNum(errAxis2,errAngle,errAxisInBase);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseError[i]:=posErrInBase[i];
+	masterPoseError[i+3]:=errAxisInBase[i];
+END_FOR
+
+//transform the error to TCP coordinate
+//matTranspose(masterPos.m_rot, rotInv);  //i_masterArm.curCartPose.m_rot
+matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+
+matMultiVec(rotInv, posErrInBase, posErrInTcp);
+matMultiVec(rotInv, errAxisInBase, errAxisInTcp);
+FOR i:=1 TO 3 BY 1 DO
+	masterPoseErrorInTcp[i]:=posErrInTcp[i];
+	masterPoseErrorInTcp[i+3]:=errAxisInTcp[i];
+END_FOR
+
+
+
+//determine master arm space velocity in base coordinate
+FOR i:=1 TO 3 DO
+	vel[i]:=i_masterArm.curCartTwist[i];
+	wVel[i]:=i_masterArm.curCartTwist[i+3];
+	spatialVel[i]:=vel[i];
+	spatialVel[i+3]:=wVel[i];
+END_FOR
+
+//transform master arm space velocity to tcp coordinate
+matMultiVec(rotInv, vel, velLocal);
+matMultiVec(rotInv, wVel, wVelLocal);
+FOR i:=1 TO 3 DO
+	spatialVelInTcp[i]:=velLocal[i];
+	spatialVelInTcp[i+3]:=wVelLocal[i];
+END_FOR
+
+
+
+//Jacobian matrix
+//simJaco:=i_masterArm.simJaco; //i_masterArm.jaco
+simJaco:=i_masterArm.Jaco;
+
+
+
+//Based on the above pose deviation values, input them into the impedance control equation and derive the impedance joint torque value
+IF (impCtrlInBase=TRUE) THEN
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForBase[i]:=kpBase[i]*masterPoseError[i]-kdBase[i]*spatialVel[i]; //(-1)*err*(-1)=err
+	END_FOR
+	matMultiVec(i_masterArm.m_lambda, spatialForBase, spatialForTemp);
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForTemp, jntImpTor);
+	
+	
+ELSE // impedance control in tcp coordinate
+	FOR i:=1 TO 6 BY 1 DO
+		spatialForTcp[i]:=kpTcp[i]*masterPoseErrorInTcp[i]-kdTcp[i]*spatialVelInTcp[i];
+	END_FOR
+	
+	//Splitting spatial forces into two parts
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForceP1[i]:=spatialForTcp[i];
+		spatialForceP2[i]:=spatialForTcp[i+3];
+	END_FOR
+	
+	// project torque back to base coordinate	
+	//matMultiVec(masterPos.m_rot, spatialForceP1, spatialForceP1Base);	 //i_masterArm.curCartPose.m_rot
+	//matMultiVec(masterPos.m_rot, spatialForceP2, spatialForceP2Base);	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP1, spatialForceP1Base);	
+	matMultiVec(i_masterArm.curCartPose.m_rot, spatialForceP2, spatialForceP2Base);	
+	
+	FOR i:=1 TO 3 BY 1 DO
+		spatialForBase[i]:=spatialForceP1Base[i];
+		spatialForBase[i+3]:=spatialForceP2Base[i];
+	END_FOR
+	
+	//compute joint space torque
+	matTranspose(simJaco,JacoT);
+	matMultiVec(JacoT, spatialForBase, jntImpTor);	
+END_IF
+
+
+
+(*
+//To ensure that joint 6 is in the appropriate position, a single joint impedance controller is constructed
+IF (i_masterArm.armIdx=1) THEN
+	ExpJ6Pos:=-pi/2;
+ELSE
+	ExpJ6Pos:=pi/2;
+END_IF
+jntOptTor:=Kp6*(ExpJ6Pos-i_masterArm.m_simJntPos[6])-Kd6*i_masterArm.curJntVel[6];
+//jntOptTor:=Kp6*(ExpJ6Pos-i_masterArm.m_simJntPos[6])-Kd6*i_masterArm.cmdJntVel[6];
+
+
+
+//Project the torque of joint 6 onto null space
+jntTorVec[6]:=jntOptTor;
+dynaNullspace:=i_masterArm.dynaNullspace;
+matMultiVec(dynaNullspace, jntTorVec, TorqueNullSpace);	
+
+
+
+//Calculate the sum of impedance control torque and zero space torque
+vecAdd(jntImpTor,TorqueNullSpace,jntTorqueSum);
+m_cmdJntTrq:=jntTorqueSum;
+*)
+
+
+
+
+//fixed the joint position of joint 4--------q4DH=q4motor+q8-q2-90;  
+curJntPosJ4:=i_masterArm.jnt4MotorToLink(i_masterArm.curJntPos[2], i_masterArm.curJntPos[3], i_masterArm.curJntPos[4]);
+curJntVelJ4:=i_masterArm.curJntVel[4]+i_masterArm.curJntVel[3]-i_masterArm.curJntVel[2];
+
+d1:=ExpJ4Pos-curJntPosJ4;
+d2:=curJntVelJ4;
+jntOptTor:=Kp4*(ExpJ4Pos-curJntPosJ4)-Kd4*curJntVelJ4;
+
+
+
+m_cmdJntTrq:=jntImpTor;
+m_cmdJntTrq[4]:=jntOptTor;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{57b32a0e-e8b3-4703-9ef3-d40781548cc4}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+
+m_jntOPMode[1] := DriverOPMode_Trq;
+m_jntOPMode[2] := DriverOPMode_Trq;
+m_jntOPMode[3] := DriverOPMode_Trq;
+m_jntOPMode[4] := DriverOPMode_Trq;
+m_jntOPMode[5] := DriverOPMode_Trq;
+m_jntOPMode[6] := DriverOPMode_Trq;
+m_jntOPMode[7] := DriverOPMode_Trq;
+
+m_firstIn:=TRUE;
+t:=0;
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="relativeAngle" Id="{4e04bc39-4042-4125-b6b8-eb31367798cc}">
+      <Declaration><![CDATA[METHOD relativeAngle : bool
+VAR_INPUT
+	armId:INT;
+	x:LREAL;
+	y:LREAL;
+END_VAR
+
+VAR_OUTPUT
+	angle:LREAL;
+END_VAR
+
+VAR
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+angle:=atan2(y,x);
+IF (armId=1) AND (angle<0) THEN
+	angle:=angle+2*pi;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_StateCtrlEndoscope">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.calcCmdJntPos">
+      <LineId Id="14" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="111" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.calcCmdJntTrq">
+      <LineId Id="415" Count="11" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="571" Count="0" />
+      <LineId Id="429" Count="0" />
+      <LineId Id="567" Count="0" />
+      <LineId Id="570" Count="0" />
+      <LineId Id="568" Count="1" />
+      <LineId Id="566" Count="0" />
+      <LineId Id="430" Count="7" />
+      <LineId Id="441" Count="111" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.calcCmdJntTrqM1">
+      <LineId Id="214" Count="22" />
+      <LineId Id="240" Count="111" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.calcCmdJntTrqM2">
+      <LineId Id="6" Count="18" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="25" Count="101" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="127" Count="34" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="174" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.init">
+      <LineId Id="13" Count="0" />
+      <LineId Id="16" Count="8" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.relativeAngle">
+      <LineId Id="15" Count="3" />
+      <LineId Id="21" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

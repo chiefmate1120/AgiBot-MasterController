@@ -63,7 +63,7 @@ jntEncErrCheck(i_cartJointData.m_curMotorPos, i_cartJointData.m_curLinkPos);
 jntVelCheck(i_cartJointData.m_curJntVel);
 
 // joint limit 
-jntLimitCheck(i_cartJointData.m_curJntVel);
+jntLimitCheck(i_cartJointData.m_curJntPos);
 	
 FOR i:=1 TO 4 DO 
 	// stop check if arm is already in error state

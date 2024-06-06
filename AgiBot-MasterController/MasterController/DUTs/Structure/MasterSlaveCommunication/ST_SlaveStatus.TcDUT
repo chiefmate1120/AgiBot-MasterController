@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="ST_SlaveStatus" Id="{8673ecde-c145-4df2-8157-2e6da5d46538}">
     <Declaration><![CDATA[// Output from slave arm control task, including arm status and cartesian data
 // Input to safety task and Master controller
@@ -7,6 +7,9 @@ TYPE ST_SlaveStatus :
 STRUCT
 	// slave heart beat
 	m_slaveHeartBeat :INT:=0;
+	
+	// slave self-check pass
+	m_selfCheckPass :BOOL :=false;
 	
 	// state machine
 	m_armState:ARRAY[1..g_sArmNum] OF E_SlaveArmState:=[g_sArmNum(SlaveArmState_Init)];

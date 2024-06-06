@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -57,6 +57,8 @@ VAR
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_mArmNum] OF ST_ArmCtrlCmds;
 
+	//endoscopeTest
+	endoscopeTest:BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -222,8 +224,8 @@ m_teleSlaveArmIdx[1]:=MatchedSlaveArmIdx_1;
 m_teleSlaveArmIdx[2]:=MatchedSlaveArmIdx_3;
 
 // shoulder pose in monitor
-m_shoulderPoseInMonitor[1].m_pos[2]:=-g_shoulderDistance/2;
-m_shoulderPoseInMonitor[2].m_pos[2]:=g_shoulderDistance/2;
+m_shoulderPoseInMonitor[1].m_pos[1]:=-g_shoulderDistance/2;
+m_shoulderPoseInMonitor[2].m_pos[1]:=g_shoulderDistance/2;
 
 FOR i:=1 TO g_mArmNum DO
 	// arm init
@@ -397,8 +399,8 @@ FOR i:=1 TO g_mArmNum DO
 			
 		// init
 		MasterArmState_Init:
-			// to home(self-check)
-			IF m_armCtrl[i].isFinished AND i_masterInputDataPool.m_UIData.m_selfCheckFlag  THEN
+			// to home
+			IF m_armCtrl[i].isFinished THEN
 				// NOTICE: multiple cycles joints back to center during initialization
 				// 			need to reset joints encoder data again
 				m_masterArms[i].initJntPos();
@@ -458,7 +460,6 @@ FOR i:=1 TO g_mArmNum DO
 		
 		//MasterSlave
 		MasterArmState_MasterSlave:
-			continue;
 			// to standdy
 			IF  (SlaveArmState_InstruReady <> m_instruArmState[i] AND SlaveArmState_MasterSlave <> m_instruArmState[i])
 				OR SlaveArmState_ScopeReady <> m_scopeArmState OR NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady)
@@ -482,8 +483,8 @@ FOR i:=1 TO g_mArmNum DO
 		// Endoscope 
 		MasterArmState_Endoscope:
 			// to standby
-			IF NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) OR SlaveArmState_ScopeReady <> m_scopeArmState
-						OR SlaveArmState_EndoScope <> m_scopeArmState THEN
+			IF NOT(i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch) OR (SlaveArmState_ScopeReady <> m_scopeArmState
+						AND SlaveArmState_EndoScope <> m_scopeArmState) THEN
 				m_nextMasterArmState[i] := MasterArmState_Standby;
 			// to clutch
 			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
@@ -538,7 +539,14 @@ IF SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartSt
   (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
 	m_nextMasterArmState[1] := MasterArmState_Endoscope;
 	m_nextMasterArmState[2] := MasterArmState_Endoscope;
-END_IF]]></ST>
+END_IF
+
+//for test
+IF(endoscopeTest=TRUE) THEN
+	m_nextMasterArmState[1] := MasterArmState_Endoscope;
+	m_nextMasterArmState[2] := MasterArmState_Endoscope;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateShoulderPose" Id="{fb1a54a0-df1a-4720-ac59-3d297fc90e27}">
@@ -769,7 +777,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="278" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="95" Count="2" />
-      <LineId Id="351" Count="0" />
       <LineId Id="219" Count="1" />
       <LineId Id="279" Count="0" />
       <LineId Id="335" Count="0" />
@@ -821,6 +828,10 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="227" Count="0" />
       <LineId Id="305" Count="0" />
       <LineId Id="225" Count="0" />
+      <LineId Id="364" Count="3" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="359" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.updateShoulderPose">
       <LineId Id="11" Count="0" />

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<TcLicenseInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2011/11/TcLicenseInfo">
+	<LicenseInfo>
+		<SystemId>{B49A35C6-67A7-FA55-3B5B-ABC646B85FF7}</SystemId>
+		<IssueTime>2024-05-24T01:28:00</IssueTime>
+		<ExpireTime>2024-06-01T00:00:00</ExpireTime>
+		<LicenseKey>583a10db201a87daf6e0f0b4fe9b9ac7fd28ac5da72eff6991fbca8dbf4d89f50ae552691d180868dc315b1607e15faa79ee870c324083dae00ebf882360e04f64799de7269325287cd994a945a05a774e04a7d90670a0f36cde32e1543683c05fc128b5ceb89b3d6c5972f0c04be2ea448a04e356c8fb3b6e22b359bbb7ecf28481dc9fa747ba59542f4d4ebc743d2784ae05f84b7f5511525cb3d42c2bbcca837fa6c9ae7a96377c23488084e9313c57125a6528c32c1a29b246d85fec35fdea3374211e15919d4520a903baf6a72555861e1cac80b024628448d42877221444b2fcbcb0fe1a9f416d2a339952542ec69287cb75cbdc9dd7d12a5f44993272</LicenseKey>
+		<License>
+			<LicenseId>{B27B051A-CA6A-42EA-833E-82CC92903D83}</LicenseId>
+			<Name>TC3 UML</Name>
+			<OrderNo>TF1910</OrderNo>
+		</License>
+	</LicenseInfo>
+</TcLicenseInfo>

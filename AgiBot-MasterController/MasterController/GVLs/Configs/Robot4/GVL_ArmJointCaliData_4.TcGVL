@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_ArmJointCaliData_4" Id="{789136b1-f7e9-44c4-9d46-3f5025a8eba9}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
+	
+	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, 1, -1, 1, 1, 1,
+												 -1, -1, 1, -1, 1, 1, 1];
+												 
+	// absolute encoder value at minimal joint positon
+	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
+		[14726704, 4156456, 15345668, 1991632, 16314208, 14415440, 0,
+		 2048324, 9416252, 4526812, 8226032,651760 , 8965456, 0];
+		 
+	// absolute encoder value at maximum joint positon
+	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
+		[8963928, 15089072, 1747256, 7226288, 12212368, 1891360, 16777216,
+		 13022120, 3582816, 8511152, 13547040, 13305856, 13284352	, 16777216];
+	
+	// absolute encoder value at calibrated positon
+	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
+		[11829704, 1302576, 105152, 11634960, 5974256, 16596400, 9523824,
+		 15937604, 6509960, 10128944, 4071280, 7063664, 11098016, 8939696];
+	
+	 // if absolute encoder value cross zeros within joint motion range
+	 // NOTICE: joint 7 is always 0.
+	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
+		[0, 1, 1, 1, 1, 1, 1,
+		 1, 0, 0, 1, 0, 0, 1];
+	
+	// flag if joint can rotate multiple cycles
+	g_multipleCyclesJoint :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
+		[0, 0, 0, 0, 0, 0, 1,
+		 0, 0, 0, 0, 0, 0, 1];
+		 
+	// joint position at link encoder calibrated point
+	g_linkEncCaliJntPos :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF LREAL :=
+		[0.0, -PI/2, 0.0, -pi, pi, -PI/2, 0.0,
+		 0.0, -PI/2, 0.0, 0.0, pi, PI/2, 0.0];
+		 
+	// limit value of gripper hall sensor
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3211374,2687079];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[44171868,48104169];
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

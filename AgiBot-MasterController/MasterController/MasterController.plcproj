@@ -419,6 +419,30 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\Configs\Robot4\GVLs_ArmDynamics_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Configs\Robot4\GVL_ArmJointCaliData_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Configs\Robot4\GVL_CartJointCaliData_4.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Configs\Robot5\GVLs_ArmDynamics_5.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Configs\Robot5\GVL_ArmJointCaliData_5.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Configs\Robot5\GVL_CartJointCaliData_5.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
@@ -513,6 +537,9 @@
     <Folder Include="FBs_Auxiliary" />
     <Folder Include="GVLs\Arms" />
     <Folder Include="GVLs\Cart" />
+    <Folder Include="GVLs\Configs" />
+    <Folder Include="GVLs\Configs\Robot4" />
+    <Folder Include="GVLs\Configs\Robot5" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

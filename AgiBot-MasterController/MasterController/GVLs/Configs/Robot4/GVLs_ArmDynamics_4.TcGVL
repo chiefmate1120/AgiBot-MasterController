@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVLs_ArmDynamics_4" Id="{0c21b408-cacc-4cdf-bff7-ad95e7b31fc9}">
+    <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
+{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	// link mass [m1, m2, m3, m4, m5, m6, m7, m8, m9]
+	g_linkMass :ARRAY[1..9] OF LREAL :=[2.676, 0.825, 0.547, 0.25, 0.195, 0.194, 0.05, 0.111, 0.09] ;
+	
+	// lin center of amss
+	g_linkCOM :ARRAY[1..9,1..3] OF LREAL := [   1.376E-3,    -1.019E-3,  -81.464E-3,
+										   90.622E-3,   -0.113E-3,  15.088E-3,
+										   167.4E-3,    3.7E-3,     -0.438E-3,
+										   0.1E-3,      98.49E-3,   -55.74E-3,
+										   0.12E-3,     76.667E-3,  -36E-3,
+										   0,           -61.63E-3,  27.3E-3,
+										   0.06E-3,     -0.08E-3,   17.671E-3,
+										   11E-3,       -3.364E-3,  39.265E-3,
+										   143e-3,      0.495e-3,   24.253e-3];
+	// link  inertial
+    // [Ixx,Iyy,Izz, Ixy,Ixz, Iyz]
+ 	g_linkInertia :ARRAY[1..9,1..6] OF LREAL :=[  19.63E-3,   16.43E-3,  12.7E-3,   -0.3222E-3,    -0.667E-3,     -0.0268E-3,
+												   1.017E-3,   6.637E-3,  5.935E-3,  -0.037E-3,     -0.238E-3,     0.06E-3,
+												   0.161E-3,   9.572E-3,  9.586E-3,  0.0447E-3,     0.0277E-3,     0.465E-6,
+												   0.992E-3,   0.707E-3,  0.335E-3,  0.2E-6,     2E-6,       0.224E-3,
+												   0.402E-3,   0.25E-3,   0.186E-3,  0.002E-6,   -1.2E-6,    0.106E-3,
+												   0.281E-3,   0.178E-3,  0.137E-3,  0.076E-6,   0.09E-6,    0.056E-3,
+												   0.0255E-3,  0.0259E-3, 5.96E-6,0.34E-6,    -3E-9,      24E-9,
+												   0.033E-3,   0.0976E-3, 0.126E-3,  3E-6,       -5E-6,      -0.162E-6,
+												   4.9E-6,  0.757E-3,  0.760E-3,  2.6E-6,     -5.3E-6,    -18E-9];
+
+
+	//  motor inertial at link size
+	g_motorInertia :ARRAY[1..7] OF LREAL := [34.7E-7, 34.7E-7, 34.7E-7, 9.26E-7, 0.495E-7, 0.495E-7, 0.495E-7];
+	
+	// arm gravity parameters
+	(*graParam=[ 2.7244*m3 + 2.7244*m4 + 2.7244*m5 + 2.7244*m6 + 9.8*mx2 + 9.8*mx9,
+				9.8*my2 + 9.8*my9,
+				3.577*m4 + 3.577*m5 + 3.577*m6 + 0.49*m9 + 9.8*mx3 + 9.8*mx8
+				1.5827*m4 + 1.5827*m5 + 1.5827*m6 + 9.8*my3 + 9.8*my8 + 9.8*mz4
+				mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
+				preF2,   k2,   preF3,    k3,    preF5   k5]*)
+	g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
+		[ 5.2118752, -0.0002385075, 3.9412822, 1.0730209, -0.042026339, 0.02790659, 0.0000375, 0.0000117, 0.0000099999999, -0.016609005, 14.143583, 2463.2839, 15.174336, 2351.097, 1.112, 607.79195,
+		6.3392437, -0.0007155225, 3.8802769, 0.92991641, -0.039186952, 0.025957034, 0.0000375, 0.0000351, -0.00001, -0.016609005, 7.784502, 3133.1092, 14.990838, 2457.9582, 2.7402828, 512.94063];
+	// spring parameters
+	// spring2 [L0, b1, b2, l1, r0]
+	g_spring2Param :ARRAY[1..5] OF LREAL :=[101.6E-3, 14.5E-3, 15E-3, 172E-3, 31E-3];
+	// spring3 [L0, b1, b2, l1, r0,d]
+	g_spring3Param :ARRAY[1..6] OF LREAL :=[101.6E-3, 14E-3, 15E-3, 172E-3, 30E-3, 10E-3];
+	// spring5 [L0, s1, L1, r0, beta]
+	g_spring5Param :ARRAY[1..5] OF LREAL :=[34.93E-3, 34.3E-3, 100E-3, 12.5E-3, 32.02*g_deg2rad];
+	
+	// arm friction parameters [a1,b1,...a7,b7];
+	// friction = a * gravity + b; only joint 5 and 6 is identified
+	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
+	[ 0.25322969, 0.011032717, 0.21191432, 0.011507059,
+	0.22571876, 0.010890225, 0.25013929, 0.0050658523];
+	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
+	 
+	 // joint observer paramters
+	g_jntObvParamL1 :Vec7d :=[0, 0, 0, 0, 300, 300, 0];
+	g_jntObvParamL2 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvParamL3 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvDamp:Vec7d := [0.8,    0.8,    0.8,     0.05, 0.05, 0.05, 0.05];// TODO: need to be identified
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>
