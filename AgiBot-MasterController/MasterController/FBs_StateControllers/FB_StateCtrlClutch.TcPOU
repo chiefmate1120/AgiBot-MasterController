@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlClutch" Id="{093bd9ec-6cc6-4389-91e4-f8586e50bb1f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Clutch
 FUNCTION_BLOCK PUBLIC FB_StateCtrlClutch EXTENDS FB_MasterArmCtrlBase

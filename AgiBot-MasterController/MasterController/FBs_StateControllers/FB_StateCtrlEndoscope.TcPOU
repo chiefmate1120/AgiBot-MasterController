@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlEndoscope" Id="{6b490525-446d-48f2-ab19-237faca074bd}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Endoscope Control
 FUNCTION_BLOCK PUBLIC FB_StateCtrlEndoscope EXTENDS FB_MasterArmCtrlBase
@@ -13,8 +13,51 @@ END_VAR
     <Implementation>
       <ST><![CDATA[]]></ST>
     </Implementation>
+    <Method Name="init" Id="{9bf97a6e-88c2-40c5-bd95-38c8c9fdb7ea}">
+      <Declaration><![CDATA[METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// endoscope is controlled by other controller, do nothing here
+return;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{8c80d15e-f24c-40b2-ac61-f019c6d6aee9}">
+      <Declaration><![CDATA[{warning '添加方法实现'}
+METHOD run : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+VAR_IN_OUT
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// endoscope is controlled by other controller, do nothing here
+return;]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_StateCtrlEndoscope">
       <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.init">
+      <LineId Id="93" Count="0" />
+      <LineId Id="12" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlEndoscope.run">
+      <LineId Id="159" Count="0" />
+      <LineId Id="10" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

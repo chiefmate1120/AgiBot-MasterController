@@ -76,6 +76,9 @@ FOR i:=1 TO g_mArmNum DO
 	
 	// joint limit error
 	m_jntLimitErrFlag[i]:=jntLimitErrCheck(i,i_masterJointData.m_curJntPos[i],m_jntLimitErrCounts[i]);
+	IF i_masterStatus.m_armState[i] = MasterArmState_Init THEN
+		m_jntLimitErrFlag[i][7] := false;
+	END_IF
 										
 	// final arm error status check
 	IF  m_cartPoseErrFlag[i] THEN
@@ -243,6 +246,7 @@ poseErrCheck:= r_errCount >= g_faultTriggerCounts;
       <LineId Id="38" Count="1" />
       <LineId Id="111" Count="1" />
       <LineId Id="159" Count="2" />
+      <LineId Id="187" Count="2" />
       <LineId Id="113" Count="0" />
       <LineId Id="115" Count="0" />
       <LineId Id="119" Count="5" />

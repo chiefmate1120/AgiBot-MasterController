@@ -322,6 +322,9 @@
     <Compile Include="FBs_Robots\FB_MasterCart.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_StateControllers\FB_EndoscopeController.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlClutch.TcPOU">
       <SubType>Code</SubType>
     </Compile>

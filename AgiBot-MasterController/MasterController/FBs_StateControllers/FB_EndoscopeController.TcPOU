@@ -1,0 +1,527 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_EndoscopeController" Id="{311b6261-a50e-45fe-88ed-e8188e25e8c2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EndoscopeController
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// steering wheel parameter
+	m_wheelRadius:LREAL;
+	m_wheelHeight:ARRAY[1..2] OF LREAL;
+	m_wheelCenter:ARRAY[1..2] OF Vec3d;
+	
+	// VF position control parameters
+	m_VFPts :ARRAY[1..2] OF Vec3d;
+	m_VFDeviation :ARRAY[1..2] OF Vec3d;
+	m_lastVFDeviation :ARRAY[1..2] OF Vec3d;
+	m_VFVel :ARRAY[1..2] OF Vec3d;
+	m_VFVelLpf:ARRAY[1..2,1..3] OF FB_LowPassFilter;
+	m_VFKp :LREAL := 200;
+	m_VFKd :LREAL := 10;
+	m_VFForce :ARRAY[1..2] OF Vec3d;
+	
+	// oritention control parameter
+	m_rotTrackKp : LREAL := 200;
+	m_maxTrackVel :LREAL := PI;
+	m_jnt4AdjustKp : LREAL :=10;
+	m_jnt4MaxVel :LREAL :=pi/3 ;
+	m_cartTrackVel :Vec3d;
+	
+	// master pose in monitor
+		tmpVFPt :ARRAY[1..2] OF Vec3d;
+	m_masterPoseInView :ARRAY[1..2] OF ST_Frame;
+	
+	// flag if the controller has finished all its jobs
+	m_isFinished:BOOL:=FALSE;
+	
+	// controller execute time period
+	m_timePeriod :LREAL:=0;
+	
+	// arm control data
+	m_cmdJntPos :ARRAY[1..2] OF VEC7d;
+	m_cmdJntVel :ARRAY[1..2] OF VEC7d;
+	m_cmdJntAcc :ARRAY[1..2] OF VEC7d;
+	m_cmdJntTrq :ARRAY[1..2] OF VEC7d;
+	m_jntOPMode :ARRAY[1..2] OF Vec7i;
+	m_jntEnableFlag :ARRAY[1..2] OF Vec7i;
+	m_cmdCartPose :ARRAY[1..2] OF ST_Frame;
+	m_cmdCartTwist :ARRAY[1..2] OF Vec6d;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{010ad3dd-bcc4-454c-abf2-f1c15ea59de0}">
+      <Declaration><![CDATA[// compute the desired joint position of joint 4-7 for orientation tracking
+METHOD PROTECTED calcCmdJntPos : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+	i_slaveStatus : ST_SlaveStatus;
+END_VAR
+VAR 
+	armIdx:INT;
+	i,j : INT;
+	
+	rotT,rotErr:Mat3d;
+	angle : LREAL;
+	axis,localAxis :Vec3d;
+	oriJaco:Mat34;
+	oriJt:Mat43;
+	oriJJt:Mat3d;
+	oriJJtInv:Mat3d;
+	oriJPinv:Mat43;
+	cartTrackVel:Vec3d;
+	jntTrackVel:Vec4d;
+	JpinvJ, nullJ:Mat4d;
+	eye4d :Mat4d := g_eye4d;
+	redunCtrlVel :Vec4d;
+	jnt4TrackVel :LREAL;
+	
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR armIdx:=1 TO 2 DO
+	
+	// first three joints is passive control
+	FOR i:=1 TO 3 DO 
+		m_cmdJntPos[armIdx][i]:=i_masterArm[armIdx].curJntPos[i];
+		m_cmdJntVel[armIdx][i]:=i_masterArm[armIdx].curJntVel[i];
+	END_FOR
+	
+	// compute cartesian tracking velocity
+	matTranspose(i_masterArm[armIdx].simCartPose.m_rot, rotT);
+	matMultiply(rotT, m_cmdCartPose[armIdx].m_rot, rotErr);
+	rot2AngAxis(rotErr, angle=>angle,axis=>localAxis);
+	matMultiVec(i_masterArm[armIdx].simCartPose.m_rot, localAxis, axis);
+	vecMultiNum(axis, LIMIT(-m_maxTrackVel, angle*m_rotTrackKp, m_maxTrackVel), cartTrackVel);
+	m_cartTrackVel :=cartTrackVel;
+	
+	// compute pinv of orientation jacobian
+	FOR i:=1 TO 3 DO
+		FOR j:=1 TO 4 DO
+			oriJaco[i,j]:=i_masterArm[armIdx].simJaco[i+3,j+3];
+		END_FOR
+	END_FOR
+	matTranspose(oriJaco, oriJt);
+	matMultiply(oriJaco ,oriJt , oriJJt);
+	invMat3(oriJJt, oriJJtInv);
+	matMultiply(oriJt, oriJJtInv, oriJPinv);
+	matMultiVec(oriJpinv, cartTrackVel, jntTrackVel);
+	
+	// calculate nullspace
+	matMultiply(oriJPinv, oriJaco, JpinvJ);
+	matSub(eye4d , JpinvJ, nullJ);
+	
+	// redundant velocity
+	jnt4TrackVel:=calcRedunVel(i_masterArm[armIdx]);
+	redunCtrlVel[1]:=nullJ[1,1]*jnt4TrackVel;
+	redunCtrlVel[2]:=nullJ[2,1]*jnt4TrackVel;
+	redunCtrlVel[3]:=nullJ[3,1]*jnt4TrackVel;
+	redunCtrlVel[4]:=nullJ[4,1]*jnt4TrackVel;
+	
+	// update final command joint position and velocity
+	FOR i :=1 TO 4 DO 
+		m_cmdJntVel[armIdx][i+3]:=jntTrackVel[i]+redunCtrlVel[i];
+		m_cmdJntPos[armIdx][i+3]:=m_cmdJntPos[armIdx][i+3]+m_cmdJntVel[armIdx][i+3]*g_armCtrlCycleTime;
+	END_FOR
+
+END_FOR
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcCmdJntTrq" Id="{b8016091-c8e3-4690-ae2f-cd184a2d59dd}">
+      <Declaration><![CDATA[// compute the desired joint torque of joint 1-3 for intuitive force guiding
+METHOD PROTECTED calcCmdJntTrq : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+	i_slaveStatus : ST_SlaveStatus;
+END_VAR
+
+VAR 
+	
+	armIdx :INT;
+	i,j :INT;
+	kpForce, kdForce :Vec3d;
+	jntTrq :Vec3d;
+	posJaco, posJacoT :Mat3d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntTrq[1] := g_zeroVec7d;
+m_cmdJntTrq[2] := g_zeroVec7d;
+
+// compute cuurent VF parameters
+steeringWheelCalc(i_shoulderPose, i_masterArm);
+
+// compute VF motion velocity
+FOR armIdx:=1 TO 2 DO
+	vecSub(m_lastVFDeviation[armIdx],m_VFDeviation[armIdx], m_VFVel[armIdx]);
+	vecSelfMultiNum(m_VFVel[armIdx], g_armCtrlFreq);
+	FOR j:=1 TO 3 DO 
+		m_VFVel[armIdx][j] := m_VFVelLpf[armIdx,j].run(m_VFVel[armIdx][j]);
+	END_FOR
+	
+	m_lastVFDeviation[armIdx] := m_VFDeviation[armIdx];
+END_FOR
+
+// compute VF force
+FOR armIdx:=1 TO 2 DO
+	vecMultiNum(m_VFDeviation[armIdx], m_VFKp, kpForce);
+	vecMultiNum(m_VFVel[armIdx], m_VFKd, kdForce);
+	vecSub(kpForce, kdForce, m_VFForce[armIdx]);
+END_FOR
+
+// compute joint space torque
+FOR armIdx:=1 TO 2 DO 
+	FOR i :=1 TO  3 DO
+		FOR j:=1 TO 3 DO
+			posJaco[i,j]:= i_masterArm[armIdx].jaco[i,j];
+		END_FOR
+	END_FOR
+	matTranspose(posJaco, posJacoT);
+	matMultiVec(posJacoT, m_VFForce[armIdx], jntTrq);
+	
+	m_cmdJntTrq[armIdx][1]:=jntTrq[1];
+	m_cmdJntTrq[armIdx][2]:=jntTrq[2];
+	m_cmdJntTrq[armIdx][3]:=jntTrq[3];
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="calcRedunVel" Id="{54a048a7-3963-4f88-9230-adf753c31abe}">
+      <Declaration><![CDATA[METHOD PROTECTED calcRedunVel : LREAL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+
+VAR 
+	j6Bias,j5Bias :LREAL;
+	curJntPos : Vec7d;
+	jnt4LinkPos :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute desired joint4 link position
+curJntPos :=  i_masterArm.cmdJntPos;
+jnt4LinkPos:=i_masterArm.jnt4MotorToLink(curJntPos[2],curJntPos[3],curJntPos[4]);
+IF 1= i_masterArm.armIdx THEN
+	j6Bias :=curJntPos[6]+PI/2;
+ELSE 
+	j6Bias := curJntPos[6]-PI/2;
+END_IF
+
+j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
+j6Bias := j6Bias * ABS(COS(j5Bias));
+calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);
+
+// joint limit
+IF (calcRedunVel > 0 AND jnt4LinkPos+calcRedunVel * g_armCtrlCycleTime > GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4])
+	 OR ( calcRedunVel <0 AND  jnt4LinkPos +calcRedunVel * g_armCtrlCycleTime< GVL_ArmJointParameters.g_minJntPos[i_masterArm.armIdx,4]) THEN
+	 calcRedunVel :=0;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{4f8bfc3d-09c7-4a85-920c-1b402f5c5a84}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ARRAY[1..2] OF ST_ArmCtrlCmds;
+END_VAR
+VAR
+	i,j:INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_timePeriod:=0;
+FOR i:=1 TO 2 DO 
+	m_jntEnableFlag[i] :=g_onesVec7i;
+	m_jntOPMode[i][1] := DriverOPMode_Trq;
+	m_jntOPMode[i][2] := DriverOPMode_Trq;
+	m_jntOPMode[i][3] := DriverOPMode_Trq;
+	m_jntOPMode[i][4] := DriverOPMode_PosTrq;
+	m_jntOPMode[i][5] := DriverOPMode_PosTrq;
+	m_jntOPMode[i][6] := DriverOPMode_PosTrq;
+	m_jntOPMode[i][7] := DriverOPMode_PosTrq;
+	m_cmdCartPose[i]:=i_masterArm[i].curCartPose;
+	m_cmdCartTwist[i]:=g_zeroVec6d;
+	m_cmdJntPos[i]:=i_masterArm[i].curJntPos;
+	m_cmdJntVel[i]:=g_zeroVec7d;
+	m_cmdJntAcc[i]:=g_zeroVec7d;
+	m_cmdJntTrq[i]:=g_zeroVec7d;
+	
+	r_masterArmCtrlCmd[i].m_jntEnableFlag :=m_jntEnableFlag[i];
+	r_masterArmCtrlCmd[i].m_cmdCartPose:=m_cmdCartPose[i];
+	r_masterArmCtrlCmd[i].m_cmdCartTwist:=m_cmdCartTwist[i];
+	r_masterArmCtrlCmd[i].m_cmdJntPos:=m_cmdJntPos[i];
+	r_masterArmCtrlCmd[i].m_cmdJntVel:=m_cmdJntVel[i];
+	r_masterArmCtrlCmd[i].m_cmdJntAcc:=m_cmdJntAcc[i];
+	r_masterArmCtrlCmd[i].m_cmdJntTrq:=m_cmdJntTrq[i];
+	r_masterArmCtrlCmd[i].m_jntOPMode:=m_jntOPMode[i];
+	
+	m_lastVFDeviation[i] := g_zeroVec3d;
+	
+	// filter init
+	FOR j:=1 TO 3 DO 
+		m_VFVelLpf[i,j].init(1, g_curJntVelLpfCutoffFreq, g_armCtrlFreq);
+	END_FOR
+
+END_FOR
+
+steeringWheelInit(i_shoulderPose, i_masterArm);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{b5febb70-d533-42f5-b7c9-4e139b9a0211}">
+      <Declaration><![CDATA[// TODO: corner case that two arm tips coincide on z axis need to be handle
+METHOD run : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+	i_slaveStatus : ST_SlaveStatus;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ARRAY[1..2] OF ST_ArmCtrlCmds;
+END_VAR
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF m_isFinished THEN
+	RETURN;
+END_IF
+
+// check if arm enabled
+IF NOT(i_masterArm[1].isEnabled(m_jntEnableFlag[1])) OR NOT(i_masterArm[2].isEnabled(m_jntEnableFlag[2]))  THEN
+	RETURN;
+END_IF
+
+// calculate command joint position--Motion control
+calcCmdJntPos(i_shoulderPose, i_masterArm,i_slaveStatus);
+
+// calculate command joint torque -- Force control
+calcCmdJntTrq(i_shoulderPose, i_masterArm,i_slaveStatus);
+
+// update commands to arm
+FOR i:=1 TO 2 DO 
+	r_masterArmCtrlCmd[i].m_cmdJntPos:=m_cmdJntPos[i];
+	r_masterArmCtrlCmd[i].m_cmdJntTrq:=m_cmdJntTrq[i];
+END_FOR
+
+// update time period
+m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="steeringWheelCalc" Id="{32a6a63f-edcb-492d-b3a3-3fd59305455a}">
+      <Declaration><![CDATA[METHOD PROTECTED steeringWheelCalc : BOOL
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+END_VAR
+VAR
+	tipCenter :Vec3d;
+	i:INT;
+
+	rotT :Mat3d;
+	VFDeviationInView:Vec3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// master pose in view coordinate
+m_masterPoseInView[1] := transform(i_shoulderPose[1],  i_masterArm[1].curCartPose);
+m_masterPoseInView[2] := transform(i_shoulderPose[2],  i_masterArm[2].curCartPose);
+
+// master tip center 
+vecAdd(m_masterPoseInView[1].m_pos, m_masterPoseInView[2].m_pos, tipCenter);
+vecSelfMultiNum(tipCenter,0.5);
+
+FOR i:=1 TO 2 DO 
+// steering wheel center 
+m_wheelCenter[i]:=tipCenter;
+m_wheelCenter[i][3]:=m_wheelCenter[i][3]+m_wheelHeight[i];
+
+// compute current virtual fixture points on wheel 
+vecSub(m_masterPoseInView[i].m_pos, m_wheelCenter[i], tmpVFPt[i]);
+tmpVFPt[i][3]:=0;
+IF NOT(normalize(tmpVFPt[i])) THEN
+	steeringWheelCalc := FALSE;
+	RETURN;
+END_IF
+vecSelfMultiNum(tmpVFPt[i], m_wheelRadius);
+vecAdd(m_wheelCenter[i], tmpVFPt[i], m_VFPts[i]);
+
+// compute current deviation from VF points in shoulder coordinate
+vecSub(m_VFPts[i], m_masterPoseInView[i].m_pos, VFDeviationInView);
+matTranspose(i_shoulderPose[i].m_rot , rotT);
+matMultiVec(rotT, VFDeviationInView, m_VFDeviation[i]);
+
+END_FOR
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="steeringWheelInit" Id="{e55932b2-6de1-40a4-bfce-4f83b95e9fbb}">
+      <Declaration><![CDATA[METHOD PROTECTED steeringWheelInit : BOOL
+VAR_IN_OUT CONSTANT
+	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
+	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
+END_VAR
+VAR
+	tipDis,tipCenter :Vec3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// master pose in view coordinate
+m_masterPoseInView[1] := transform(i_shoulderPose[1],  i_masterArm[1].curCartPose);
+m_masterPoseInView[2] := transform(i_shoulderPose[2],  i_masterArm[2].curCartPose);
+
+// master tip height relative to center 
+vecAdd(m_masterPoseInView[1].m_pos, m_masterPoseInView[2].m_pos, tipCenter);
+vecSelfMultiNum(tipCenter,0.5);
+m_wheelHeight[1] :=m_masterPoseInView[1].m_pos[3] -  tipCenter[3];
+m_wheelHeight[2] :=m_masterPoseInView[2].m_pos[3] -  tipCenter[3];
+
+// master tip distance  relative to center 
+vecSub(m_masterPoseInView[1].m_pos, m_masterPoseInView[2].m_pos, tipDis);
+tipDis[3] := 0;
+m_wheelRadius :=norm(tipDis)/2.0;
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EndoscopeController">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.calcCmdJntPos">
+      <LineId Id="105" Count="0" />
+      <LineId Id="237" Count="39" />
+      <LineId Id="278" Count="1" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="131" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.calcCmdJntTrq">
+      <LineId Id="48" Count="0" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="237" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="235" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="243" Count="4" />
+      <LineId Id="302" Count="1" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="255" Count="2" />
+      <LineId Id="264" Count="2" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="292" Count="5" />
+      <LineId Id="290" Count="0" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="300" Count="1" />
+      <LineId Id="291" Count="0" />
+      <LineId Id="13" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.calcRedunVel">
+      <LineId Id="77" Count="1" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="79" Count="8" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="99" Count="3" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.init">
+      <LineId Id="49" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="148" Count="5" />
+      <LineId Id="134" Count="2" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="142" Count="3" />
+      <LineId Id="154" Count="6" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="168" Count="3" />
+      <LineId Id="131" Count="1" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="83" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.run">
+      <LineId Id="127" Count="2" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="88" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="144" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="179" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.steeringWheelCalc">
+      <LineId Id="59" Count="4" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="51" Count="2" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="67" Count="3" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="81" Count="1" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="41" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EndoscopeController.steeringWheelInit">
+      <LineId Id="5" Count="0" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="19" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

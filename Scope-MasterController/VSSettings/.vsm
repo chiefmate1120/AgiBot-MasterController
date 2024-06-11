@@ -6,7 +6,7 @@
     <Node>
       <Title>GravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -557,58 +557,106 @@
     </Node>
     <Node>
       <Title>RobotJointData</Title>
-      <Expanded>False</Expanded>
-      <FileName>C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
+      <Expanded>True</Expanded>
+      <FileName>C:\Users\NFJ\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
-              <Title>m_cmdJntAcc</Title>
+              <Title>m_cmdJntVel[4]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_cmdJntPos</Title>
+              <Title>m_cmdJntVel[4] (1)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_cmdJntVel</Title>
+              <Title>m_cmdJntVel[5]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_curJntPos[4]</Title>
+              <Title>m_cmdJntVel[5] (1)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_curManipWVel</Title>
+              <Title>m_cmdJntVel[6]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_jnt4TargetPos</Title>
+              <Title>m_cmdJntVel[6] (1)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_maxV</Title>
+              <Title>m_cmdJntVel[7]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_trackFlag</Title>
+              <Title>m_cmdJntVel[7] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[4] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[5]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[5] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[6]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[6] (1)</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[7]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_curJntVel[7] (1)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -617,53 +665,58 @@
         </Node>
         <Node>
           <Title>YT Chart</Title>
-          <Expanded>False</Expanded>
+          <Expanded>True</Expanded>
           <FileName></FileName>
           <Children>
             <Node>
-              <Title>Axis Group</Title>
-              <Expanded>False</Expanded>
-              <FileName></FileName>
-              <Children>
-                <Node>
-                  <Title>m_maxV</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-                <Node>
-                  <Title>m_cmdJntVel</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-                <Node>
-                  <Title>m_curManipWVel</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-              </Children>
-            </Node>
-            <Node>
               <Title>Axis Group (1)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
-                  <Title>m_jnt4TargetPos</Title>
+                  <Title>m_curJntVel[4]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_cmdJntPos</Title>
+                  <Title>m_curJntVel[5]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_curJntPos[4]</Title>
+                  <Title>m_curJntVel[6]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_curJntVel[7]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[5]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[6]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[7]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
@@ -672,11 +725,53 @@
             </Node>
             <Node>
               <Title>Axis Group (2)</Title>
-              <Expanded>False</Expanded>
+              <Expanded>True</Expanded>
               <FileName></FileName>
               <Children>
                 <Node>
-                  <Title>m_trackFlag</Title>
+                  <Title>m_curJntVel[4] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_curJntVel[5] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_curJntVel[6] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_curJntVel[7] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[4] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[5] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[6] (1)</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>m_cmdJntVel[7] (1)</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
@@ -687,14 +782,7 @@
               <Title>Axis Group (3)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
-              <Children>
-                <Node>
-                  <Title>m_cmdJntAcc</Title>
-                  <Expanded>False</Expanded>
-                  <FileName></FileName>
-                  <Children />
-                </Node>
-              </Children>
+              <Children />
             </Node>
           </Children>
         </Node>

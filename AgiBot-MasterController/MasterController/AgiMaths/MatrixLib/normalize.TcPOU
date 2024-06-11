@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="normalize" Id="{eb641c1c-60d0-4f1d-89d2-38d09d557bbf}" SpecialFunc="None">
     <Declaration><![CDATA[// normalize the input vector
 FUNCTION normalize : BOOL
@@ -23,11 +23,13 @@ END_IF
 
 FOR i:=1 TO m DO
 	vec[i] := vec[i]/vecNorm;
-END_FOR]]></ST>
+END_FOR
+normalize :=TRUE;]]></ST>
     </Implementation>
     <LineIds Name="normalize">
       <LineId Id="85" Count="10" />
       <LineId Id="18" Count="0" />
+      <LineId Id="115" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

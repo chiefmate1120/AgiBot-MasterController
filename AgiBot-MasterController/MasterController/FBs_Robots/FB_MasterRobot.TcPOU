@@ -53,6 +53,9 @@ VAR
 	m_armTest :ARRAY[1..g_mArmNum] OF FB_StateCtrlTest;
 	m_armDisable :ARRAY[1..g_mArmNum] OF FB_StateCtrlDisable;
 	
+	// specialized endoscope controller
+	m_scopeCtrl :FB_EndoscopeController;
+	
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_mArmNum] OF ST_ArmCtrlCmds;
@@ -155,6 +158,12 @@ END_VAR]]></Declaration>
 		
 		// init next controller
 		m_armCtrl[i].Init(m_masterArms[i],m_armCtrlCmds[i]);
+		
+		// init scope controller
+		IF m_masterArmState[i] = MasterArmState_Endoscope  THEN
+			m_scopeCtrl.init(m_shoulderPoseInMonitor, m_masterArms, m_armCtrlCmds);
+		END_IF
+		
 		m_masterArms[i].updateCmds(m_armCtrlCmds[i]);
 	END_IF
 END_FOR]]></ST>
@@ -332,11 +341,18 @@ FOR i:=1 TO g_mArmNum DO
 	// run controller
 	m_armCtrl[i].run(m_teleSlaveArmIdx[i], m_shoulderPoseInMonitor[i], m_masterArms[i],
 						i_masterInputDataPool.m_slaveStatus,m_armCtrlCmds[i]);
-
+						
 	// update commands to drivers
 	m_masterArms[i].updateCmds(m_armCtrlCmds[i]);
 
 END_FOR
+
+// run scope controller
+IF m_masterArmState[1] = MasterArmState_Endoscope AND m_masterArmState[2] = MasterArmState_Endoscope THEN
+	m_scopeCtrl.run(m_shoulderPoseInMonitor, m_masterArms, i_masterInputDataPool.m_slaveStatus, m_armCtrlCmds);
+	m_masterArms[1].updateCmds(m_armCtrlCmds[1]);
+	m_masterArms[2].updateCmds(m_armCtrlCmds[2]);
+END_IF
 
 ]]></ST>
       </Implementation>
@@ -597,7 +613,9 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="96" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.controllerTransit">
-      <LineId Id="6" Count="12" />
+      <LineId Id="6" Count="11" />
+      <LineId Id="27" Count="5" />
+      <LineId Id="18" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
@@ -691,11 +709,14 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="71" Count="0" />
       <LineId Id="56" Count="1" />
       <LineId Id="81" Count="0" />
-      <LineId Id="59" Count="0" />
+      <LineId Id="147" Count="0" />
       <LineId Id="58" Count="0" />
       <LineId Id="55" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="12" Count="0" />
+      <LineId Id="158" Count="3" />
+      <LineId Id="163" Count="1" />
+      <LineId Id="162" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="22" Count="0" />
     </LineIds>
