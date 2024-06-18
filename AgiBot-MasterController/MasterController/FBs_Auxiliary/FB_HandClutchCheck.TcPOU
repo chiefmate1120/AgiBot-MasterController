@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_HandClutchCheck" Id="{2862370c-9cbe-4e26-a065-d84dc0dc8b05}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_HandClutchCheck
 VAR_INPUT
@@ -9,7 +9,7 @@ END_VAR
 VAR
 	m_handClutchSwitch :BOOL;
 	m_handClutchOnCounts :INT;
-	m_handClutchOnCountThres :INT :=20;
+	m_handClutchOnCountThres :INT :=100;
 END_VAR
 ]]></Declaration>
     <Implementation>

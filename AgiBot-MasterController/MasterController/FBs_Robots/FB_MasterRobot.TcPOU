@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -349,7 +349,7 @@ END_FOR
 
 // run scope controller
 IF m_masterArmState[1] = MasterArmState_Endoscope AND m_masterArmState[2] = MasterArmState_Endoscope THEN
-	m_scopeCtrl.run(m_shoulderPoseInMonitor, m_masterArms, i_masterInputDataPool.m_slaveStatus, m_armCtrlCmds);
+	m_scopeCtrl.run(m_teleSlaveArmIdx, m_shoulderPoseInMonitor, m_masterArms, i_masterInputDataPool.m_slaveStatus, m_armCtrlCmds);
 	m_masterArms[1].updateCmds(m_armCtrlCmds[1]);
 	m_masterArms[2].updateCmds(m_armCtrlCmds[2]);
 END_IF
@@ -548,7 +548,7 @@ FOR i:=1 TO g_mArmNum DO
 END_FOR
 
 // To Endoscope Control 
-IF SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch AND
+IF SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND
   (MasterArmState_Standby = m_masterArmState[1] OR MasterArmState_Ready = m_masterArmState[1] OR MasterArmState_MasterSlave = m_masterArmState[1]) AND 
   (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
 	m_nextMasterArmState[1] := MasterArmState_Endoscope;

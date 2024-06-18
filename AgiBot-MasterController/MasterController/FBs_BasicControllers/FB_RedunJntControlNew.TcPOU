@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_RedunJntControlNew" Id="{4f86ed46-4f20-4735-b7f7-0bc8643b352f}" SpecialFunc="None">
     <Declaration><![CDATA[// Author: Feijian Ni
 // Date: 2023.11.22
@@ -13,7 +13,7 @@ VAR
 	m_staticVelThres :LREAL := 90 *g_deg2Rad;
 	
 	// static threshold of joint bias
-	m_staticBiasThres :LREAL := 25 *g_deg2Rad;
+	m_staticBiasThres :LREAL := 35 *g_deg2Rad;
 	
 	// rudundancy track flag
 	m_trackFlag :BOOL;
@@ -205,7 +205,7 @@ matMultiVec(rotT, wVelWrd, wVelLocal);
 wVelLocal[3]:=0;
 m_curManipWVel:=norm(wVelLocal);
 
-IF m_curManipWVel> m_staticVelThres OR ABS(j6Bias)> m_staticBiasThres THEN
+IF (m_curManipWVel> m_staticVelThres AND i_masterArm.m_curLinkVel[6] * j6Bias > 0)  OR ABS(j6Bias)> m_staticBiasThres THEN
 	startTrack := TRUE;
 ELSE
 	startTrack :=FALSE;

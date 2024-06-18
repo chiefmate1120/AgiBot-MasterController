@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_EndoscopeController" Id="{311b6261-a50e-45fe-88ed-e8188e25e8c2}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_EndoscopeController
 VAR_INPUT
@@ -59,6 +59,7 @@ END_VAR
 METHOD PROTECTED calcCmdJntPos : BOOL
 
 VAR_IN_OUT CONSTANT
+	i_teleSlaveArmIdx:ARRAY[1..2] OF E_MatchedSlaveArmIdx;
 	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
 	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
 	i_slaveStatus : ST_SlaveStatus;
@@ -66,6 +67,9 @@ END_VAR
 VAR 
 	armIdx:INT;
 	i,j : INT;
+	
+	cmdRotInMonitor :Mat3d;
+	invRot:Mat3d;
 	
 	rotT,rotErr:Mat3d;
 	angle : LREAL;
@@ -85,13 +89,25 @@ VAR
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[FOR armIdx:=1 TO 2 DO
-	
-	// first three joints is passive control
+	// arm position is compliant
+	m_cmdCartPose[armIdx].m_pos:= i_masterArm[armIdx].curCartPose.m_pos;
 	FOR i:=1 TO 3 DO 
 		m_cmdJntPos[armIdx][i]:=i_masterArm[armIdx].curJntPos[i];
 		m_cmdJntVel[armIdx][i]:=i_masterArm[armIdx].curJntVel[i];
 	END_FOR
 	
+	
+	// update command oritentation if corresponding slave arm is in SlaveArmState_InstruReady state
+	IF i_slaveStatus.m_armState[i_teleSlaveArmIdx[armIdx]] = SlaveArmState_InstruReady THEN
+		// command rotation in monitor
+		cmdRotInMonitor := i_slaveStatus.m_curArmPose[i_teleSlaveArmIdx[armIdx]].m_rot;
+		
+		// command rotation in master arm base
+		matTranspose(i_shoulderPose[armIdx].m_rot, invRot);
+		matMultiply(invRot, cmdRotInMonitor, m_cmdCartPose[armIdx].m_rot);
+	END_IF
+
+
 	// compute cartesian tracking velocity
 	matTranspose(i_masterArm[armIdx].simCartPose.m_rot, rotT);
 	matMultiply(rotT, m_cmdCartPose[armIdx].m_rot, rotErr);
@@ -140,6 +156,7 @@ END_FOR
 METHOD PROTECTED calcCmdJntTrq : BOOL
 
 VAR_IN_OUT CONSTANT
+	i_teleSlaveArmIdx:ARRAY[1..2] OF E_MatchedSlaveArmIdx;
 	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
 	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
 	i_slaveStatus : ST_SlaveStatus;
@@ -291,6 +308,7 @@ steeringWheelInit(i_shoulderPose, i_masterArm);
 METHOD run : BOOL
 
 VAR_IN_OUT CONSTANT
+	i_teleSlaveArmIdx:ARRAY[1..2] OF E_MatchedSlaveArmIdx;
 	i_shoulderPose:ARRAY[1..2] OF ST_Frame;
 	i_masterArm :ARRAY[1..2] OF FB_MasterArm;
 	i_slaveStatus : ST_SlaveStatus;
@@ -312,10 +330,10 @@ IF NOT(i_masterArm[1].isEnabled(m_jntEnableFlag[1])) OR NOT(i_masterArm[2].isEna
 END_IF
 
 // calculate command joint position--Motion control
-calcCmdJntPos(i_shoulderPose, i_masterArm,i_slaveStatus);
+calcCmdJntPos(i_teleSlaveArmIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 
 // calculate command joint torque -- Force control
-calcCmdJntTrq(i_shoulderPose, i_masterArm,i_slaveStatus);
+calcCmdJntTrq(i_teleSlaveArmIdx, i_shoulderPose, i_masterArm,i_slaveStatus);
 
 // update commands to arm
 FOR i:=1 TO 2 DO 
@@ -406,7 +424,15 @@ m_wheelRadius :=norm(tipDis)/2.0;
     </LineIds>
     <LineIds Name="FB_EndoscopeController.calcCmdJntPos">
       <LineId Id="105" Count="0" />
-      <LineId Id="237" Count="39" />
+      <LineId Id="335" Count="5" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="311" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="327" Count="5" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="310" Count="0" />
+      <LineId Id="243" Count="33" />
       <LineId Id="278" Count="1" />
       <LineId Id="235" Count="0" />
       <LineId Id="280" Count="0" />
