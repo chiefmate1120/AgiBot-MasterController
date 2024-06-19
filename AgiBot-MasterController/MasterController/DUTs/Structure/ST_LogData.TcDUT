@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <DUT Name="ST_LogData" Id="{9c98a792-ac77-481e-b6bb-ca528d3f7e2f}">
+    <Declaration><![CDATA[TYPE ST_LogData :
+STRUCT
+	// master robot information, including arm status and cartesian data
+	m_masterStatus :ST_masterStatus;
+	
+	// master robot joint data
+	m_masterJointData :ST_masterJointData;
+	
+	//cart status
+	m_cartStatus :ST_CartStatus;
+	
+	//cart joint data
+	m_cartJointData :ST_cartJointData;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

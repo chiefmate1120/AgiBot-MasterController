@@ -142,6 +142,9 @@
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\ST_LogData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterDynaData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -499,6 +502,9 @@
     <Compile Include="Mains\CartControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mains\MasterLog.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -521,6 +527,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskDynamic.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskLogger.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskSafetyCheck.TcTTO">

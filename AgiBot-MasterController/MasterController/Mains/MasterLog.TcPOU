@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MasterLog" Id="{c612269f-81a1-4c8f-8570-628351dc808c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MasterLog
+VAR
+	m_getAmsNetId : FB_GetLocalAmsNetId; 
+	m_getAmsNetIdStep :INT :=0;
+  	bBusy      :BOOL;
+    bError     :BOOL;
+    nErrId     :UDINT;
+    AddrString :T_AmsNetId;
+    AddrBytes  :T_AmsNetIdArr;
+	
+	// master robot information, including arm status and cartesian data
+	m_masterStatus AT %I* :ST_masterStatus;
+	
+	// master robot joint data
+	m_masterJointData AT %I* :ST_masterJointData;
+	
+	//cart status
+	m_cartStatus AT %I* :ST_CartStatus;
+	
+	//cart joint data
+	m_cartJointData AT %I* :ST_cartJointData;
+	
+	// log data buffer
+	m_masterStatusBuffer :ARRAY[1..2000] OF ST_LogData;
+	
+	// system tyme
+	fbTime : FB_LocalSystemTime;
+	
+	
+	a :STRING(100) := INT_TO_STRING(32);
+	b :STRING := LREAL_TO_STRING(2.0/3.0);
+	c :STRING(1000);
+	asize,bsize,csize:INT;
+	alen,blen,clen:INT;
+	sidx :INT := 100;
+	schar :BYTE;
+	logDataStuSize :DINT;
+	testVar :LREAL;
+	
+	
+	// log write
+	m_fileWriteStep :INT := 0;
+	fbFileOpen           : FB_FileOpen;
+    fbFileClose          : FB_FileClose;
+    fbFileRead           : FB_FileRead;
+    fbFileWrite          : FB_FileWrite;
+    hDestFile            : UINT := 0;(* File handle of the destination file *)
+	m_logFileName :T_MaxString := WSTRING_TO_STRING("C:\Users\Ni Feijian\Career\AgiBot\Develop Code\New Architecture\AgiBot-MasterController\logTest.txt");
+	
+	// code execute time measure
+	m_logTime : Profiler;
+	
+	timeCount:INT:=0;
+	writeCount :INT:=0;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE m_getAmsNetIdStep OF
+	0:
+		m_getAmsNetId(bExecute:=TRUE, tTimeOut := DEFAULT_ADS_TIMEOUT);
+		m_getAmsNetIdStep:=1;
+	1:
+		m_getAmsNetId(bExecute:=FALSE, tTimeOut := DEFAULT_ADS_TIMEOUT,bBusy=>bBusy, bError=>bError, nErrId=>nErrId, AddrString=>AddrString, AddrBytes=>AddrBytes);
+		IF NOT(bBusy) THEN
+			m_getAmsNetIdStep:=2;
+		END_IF
+	2:
+	   IF NOT(bError) THEN
+		   m_getAmsNetIdStep:=3;
+	   END_IF
+END_CASE
+
+IF m_getAmsNetIdStep<>3 THEN
+	RETURN;
+END_IF
+fbTime(sNetID:=AddrString, bEnable:=true, dwCycle:=1);
+
+logDataStuSize:= SIZEOF(m_masterStatusBuffer);
+timeCount:=timeCount+1;
+testVar := SafetyCheck.m_masterStatus.m_armState[1];
+
+CASE m_fileWriteStep OF
+	0:
+		fbFileOpen( bExecute := FALSE ); 
+		fbFileOpen( sNetId := AddrString, sPathName := m_logFileName, 
+					 nMode := FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+					 ePath := PATH_GENERIC, tTimeout := T#0.5S, bExecute := TRUE ); 
+		m_fileWriteStep := 1;
+	1:
+		 fbFileOpen( bExecute := FALSE ); 
+		IF NOT fbFileOpen.bBusy THEN 
+		   IF fbFileOpen.bError THEN 
+				nErrId := fbFileOpen.nErrId; 
+				bError := TRUE; 
+				m_fileWriteStep := -1; 
+		   ELSE 
+				hDestFile := fbFileOpen.hFile; 
+				m_fileWriteStep := 2; 
+		   END_IF 
+		END_IF 
+	
+	2:
+		m_logTime(START:=TRUE, RESET:=TRUE);
+	 	fbFileWrite( bExecute := FALSE ); 
+		fbFileWrite( sNetId:=AddrString, hFile:=hDestFile, 
+					 pWriteBuff:= ADR(m_masterStatusBuffer), cbWriteLen:= SIZEOF(m_masterStatusBuffer), 
+					 bExecute:=TRUE, tTimeout:=T#1S ); 
+		writeCount:=writeCount+1;
+		m_fileWriteStep := 3; 
+	3:
+		fbFileWrite( bExecute := FALSE ); 
+		IF NOT fbFileWrite.bBusy THEN 
+		   IF fbFileWrite.bError THEN 
+				nErrId := fbFileWrite.nErrId; 
+				bError := TRUE; 
+				m_fileWriteStep := -2; 
+		   ELSIF timeCount > 1000 THEN
+			timeCount :=0;
+			m_fileWriteStep := 1; 
+			m_logTime(START:=FALSE);
+		   END_IF 
+		END_IF 
+		
+	4:
+		fbFileClose( bExecute := FALSE ); 
+	  	fbFileClose( sNetId:=AddrString, hFile:=hDestFile, bExecute:=TRUE, tTimeout:=T#1S ); 
+	  	m_fileWriteStep :=5;
+		
+	5:
+		fbFileClose( bExecute := FALSE ); 
+		IF NOT fbFileClose.bBusy THEN 
+		   IF fbFileClose.bError THEN 
+				nErrId := fbFileClose.nErrId; 
+				bError := TRUE; 
+		   END_IF 
+		   m_fileWriteStep := 6; 
+		   hDestFile := 0; 
+		END_IF 
+END_CASE
+
+c:=CONCAT(a,b);
+asize:=SIZEOF(a);
+bsize:=SIZEOF(b);
+csize:=SIZEOF(c);
+alen:=LEN(a);
+blen:=LEN(b);
+clen:=LEN(c);
+schar:=b[sidx];]]></ST>
+    </Implementation>
+    <LineIds Name="MasterLog">
+      <LineId Id="5" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="16" Count="10" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="60" Count="1" />
+      <LineId Id="166" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="155" Count="0" />
+      <LineId Id="63" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="68" Count="3" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="75" Count="1" />
+      <LineId Id="78" Count="8" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="87" Count="1" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="90" Count="3" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="97" Count="6" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="108" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="110" Count="1" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="7" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="137" Count="1" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="143" Count="2" />
+      <LineId Id="139" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

@@ -1312,9 +1312,10 @@
 	</ImageDatas>
 	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
-			<Settings MaxCpus="8" NonWinCpus="2">
+			<Settings MaxCpus="20">
 				<Cpu CpuId="1" RtLimit="90"/>
-				<Cpu CpuId="2" RtLimit="90"/>
+				<Cpu CpuId="2" RtLimit="90" BaseTime="2500"/>
+				<Cpu CpuId="3" RtLimit="90"/>
 				<Cpu CpuId="6" BaseTime="2500"/>
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
@@ -1323,23 +1324,26 @@
 				</Target>
 			</Licenses>
 			<Tasks>
-				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000040" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000004" AdtTasks="true">
 					<Name>TaskArmControl</Name>
 				</Task>
 				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000002" AdtTasks="true">
 					<Name>TaskDynamic</Name>
 				</Task>
-				<Task Id="5" Priority="3" CycleTime="10000" AmsPort="352" AdtTasks="true">
+				<Task Id="5" Priority="3" CycleTime="10000" AmsPort="352" Affinity="#x00000008" AdtTasks="true">
 					<Name>TaskSafetyCheck</Name>
 				</Task>
 				<Task Id="6" Priority="4" CycleTime="10000" AmsPort="353" AdtTasks="true">
 					<Name>TaskCartControl</Name>
 				</Task>
+				<Task Id="7" Priority="5" CycleTime="100000" AmsPort="354" Affinity="#x00000008" AdtTasks="true">
+					<Name>TaskLogger</Name>
+				</Task>
 			</Tasks>
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{BBF8FDCB-F586-6939-FF13-2DA320805E2B}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{386E2914-F59B-7CE9-602C-532538C0404B}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1656,6 +1660,29 @@
 							<Type GUID="{B09070B0-7D71-A6A7-E97E-969B283AF690}">ST_CartJointData</Type>
 						</Var>
 					</Vars>
+					<Vars VarGrpType="1" ContextId="4" AreaNo="64">
+						<Name>TaskLogger Inputs</Name>
+						<Var>
+							<Name>MasterLog.m_masterStatus</Name>
+							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
+							<Type GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}">ST_MasterStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterLog.m_masterJointData</Name>
+							<Comment><![CDATA[ master robot joint data]]></Comment>
+							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
+						</Var>
+						<Var>
+							<Name>MasterLog.m_cartStatus</Name>
+							<Comment><![CDATA[cart status]]></Comment>
+							<Type GUID="{162166D7-3FBC-E24C-ECAF-8F4F0A5E1C99}">ST_CartStatus</Type>
+						</Var>
+						<Var>
+							<Name>MasterLog.m_cartJointData</Name>
+							<Comment><![CDATA[cart joint data]]></Comment>
+							<Type GUID="{B09070B0-7D71-A6A7-E97E-969B283AF690}">ST_CartJointData</Type>
+						</Var>
+					</Vars>
 					<UnrestoredVarLinks ImportTime="2023-12-15T10:38:09">
 						<OwnerA Name="InputDst" Prefix="TIPC^MasterArmControl^MasterArmControl Instance" Type="1">
 							<OwnerB Name="TIPC^MasterArmControl^MasterArmControl Instance">
@@ -1748,18 +1775,28 @@
 							<Priority>4</Priority>
 							<CycleTime>1000000</CycleTime>
 						</Context>
+						<Context>
+							<Id>4</Id>
+							<Name>TaskLogger</Name>
+							<ManualConfig>
+								<OTCID>#x02010070</OTCID>
+							</ManualConfig>
+							<Priority>5</Priority>
+							<CycleTime>10000000</CycleTime>
+						</Context>
 					</Contexts>
 					<TaskPouOids>
 						<TaskPouOid Prio="1" OTCID="#x08502001"/>
 						<TaskPouOid Prio="2" OTCID="#x08502002"/>
 						<TaskPouOid Prio="3" OTCID="#x08502003"/>
 						<TaskPouOid Prio="4" OTCID="#x08502004"/>
+						<TaskPouOid Prio="5" OTCID="#x08502005"/>
 					</TaskPouOids>
 				</Instance>
 			</Project>
 		</Plc>
 		<Io>
-			<Device Id="8" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="192.168.0.10.9.1" RemoteName="RightArm (EtherCAT)" InfoImageId="7">
+			<Device Id="8" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28680" AmsNetId="192.168.0.10.9.1" RemoteName="RightArm (EtherCAT)" InfoImageId="7">
 				<Name>RightArm (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -3232,7 +3269,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="3" DevType="111" DevFlags="#x0003" AmsPort="28675" AmsNetId="192.168.0.10.4.1" RemoteName="LeftArm (EtherCAT)" InfoImageId="10">
+			<Device Id="3" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28675" AmsNetId="192.168.0.10.4.1" RemoteName="LeftArm (EtherCAT)" InfoImageId="10">
 				<Name>LeftArm (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -4037,7 +4074,7 @@
 				</Box>
 				<EtherCAT/>
 			</Device>
-			<Device Id="6" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="192.168.0.10.7.1" RemoteName="MSCommunication (EtherCAT)" InfoImageId="12">
+			<Device Id="6" Disabled="true" DevType="111" DevFlags="#x0003" AmsPort="28678" AmsNetId="192.168.0.10.7.1" RemoteName="MSCommunication (EtherCAT)" InfoImageId="12">
 				<Name>MSCommunication (EtherCAT)</Name>
 				<AddressInfo>
 					<Pnp>
@@ -4295,10 +4332,6 @@
 		</Io>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500860000403}" Id="#x02030050"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-500890000403}" Id="#x02030010"/>
-		<MappingInfo Identifier="{00000000-2001-0850-0020-5008B0000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0320-500811000403}" Id="#x02030040"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030080" Watchdog="04000000040000000400000004000000"/>
