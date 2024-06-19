@@ -478,10 +478,11 @@ IF NOT (MasterArmControl.m_masterInputDataPool.m_cartStatus.m_surgonReady) THEN
 END_IF
 
 // handle multiple cycles of joint7
-// find the first solution within pi angle from current position
+// find the first solution within pi from current position
 halfcycleNum1 := LREAL_TO_INT((i_curJntPos7 - i_initCmdJntPos7)/pi);
 solution1 := halfcycleNum1 * pi + i_initCmdJntPos7;
 
+// solution2
 IF solution1 > i_curJntPos7 THEN
 	solution2 := solution1 - PI;
 	halfcycleNum2 := halfcycleNum1 - 1;
@@ -492,8 +493,8 @@ END_IF
 
 //choose the solution which is closer to current q7 which can achive orientation match with a max pi/2 degree
 // NOTE: There maybe risk this joint7 is stuck at limit, which can be solved after joint7 has infinite rotation angle,
-solFeasible1:=solution1> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] 	AND solution1< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
-solFeasible2:=solution2> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] 	AND solution2< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
+solFeasible1:=solution1> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] AND solution1< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
+solFeasible2:=solution2> GVL_ArmJointParameters.g_minJntPos[i_armIdx,7] AND solution2< GVL_ArmJointParameters.g_maxJntPos[i_armIdx,7];
 IF solFeasible1 AND solFeasible2 THEN
 	IF ABS(solution1-i_curJntPos7) < ABS(solution2-i_curJntPos7)  THEN
 		solIdx:=1;
@@ -722,6 +723,7 @@ wristIK:=true;
       <LineId Id="48" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="10" Count="1" />
+      <LineId Id="138" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="41" Count="0" />

@@ -295,7 +295,17 @@ FOR i:=1 TO 4 DO
 	ELSE
 		m_jntCmdMotionDir[i]:=0;
 	END_IF
-END_FOR]]></ST>
+END_FOR
+
+
+// if console is already in adjust, only check the currently moving joint
+IF m_cartStatus.m_consoleInAdjust THEN
+	FOR i:=1 TO 4 DO
+		IF NOT(m_cartJoints[i].isEnabled()) THEN
+			m_jntCmdMotionDir[i] := 0;
+		END_IF
+	END_FOR
+END_IF]]></ST>
       </Implementation>
     </Method>
     <Method Name="updateStatus" Id="{7dc0698e-0910-43df-8937-4fb176791915}">
@@ -450,6 +460,13 @@ END_FOR]]></ST>
       <LineId Id="24" Count="1" />
       <LineId Id="19" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="37" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.updateStatus">
       <LineId Id="9" Count="0" />

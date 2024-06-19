@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 //TODO: safety check parameters need to be reviewd
@@ -9,7 +9,7 @@ VAR_GLOBAL CONSTANT
 	g_faultTriggerCounts :INT :=2;
 	
 	// joint limit buffer(outside of joint limit)
-	g_armJntPosLimitBuffer :vec7d:=[3(5.0*g_deg2Rad), 4(30.0*g_deg2Rad)];
+	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(30.0*g_deg2Rad)];
 
 	// master arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.005;
@@ -20,11 +20,11 @@ VAR_GLOBAL CONSTANT
 	g_maxJntEncErr :LREAL := 15.0*g_deg2Rad;
 	
 	// cart joint safety error
-	g_cartMaxJntCtrlErr :Vec4d := [0.002, 2*g_deg2Rad,0.002, 0.002];
-	g_cartMaxJntEncErr :Vec4d :=  [0.002, 2*g_deg2Rad,0.002, 0.002];
+	g_cartMaxJntCtrlErr :Vec4d := [0.005, 5*g_deg2Rad,0.005, 0.005];
+	g_cartMaxJntEncErr :Vec4d :=  [0.005, 5*g_deg2Rad,0.005, 0.005];
 
 	// cart joint limit buffer(outside of joint limit)
-	g_cartJntPosLimitBuffer :Vec4d :=[0.01, 5*g_deg2Rad,0.01, 0.02];
+	g_cartJntPosLimitBuffer :Vec4d :=[0.05, 10*g_deg2Rad,0.05, 0.05];
 	
 	// cart joint velocity limit
 	g_cartMaxJntVel :Vec4d :=[0.03, 4*g_deg2Rad,0.02,0.015];
