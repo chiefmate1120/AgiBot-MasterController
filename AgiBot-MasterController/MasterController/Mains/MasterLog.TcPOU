@@ -56,6 +56,8 @@ VAR
 	timeCount:INT:=0;
 	writeCount :INT:=0;
 	
+	testGitVar :INT;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
