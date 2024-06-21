@@ -6,10 +6,7 @@
 VAR_GLOBAL CONSTANT
 	(* cart joints are defiend in sequence as below
 	[monitor lift, monitor rotate, armset, pedal] *)
-	
-	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 100000;
-	
+
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..4] OF DINT :=[10551943, 13637932, 8646306,11744290];
 		 
@@ -21,6 +18,10 @@ VAR_GLOBAL CONSTANT
 	
 	// if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..4] OF INT :=[0, 0, 0, 0];
+		
+	 //################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..4] OF INT :=[0, 0, 0, 0];

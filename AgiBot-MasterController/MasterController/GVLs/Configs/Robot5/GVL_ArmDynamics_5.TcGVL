@@ -1,10 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVLs_ArmDynamics_3" Id="{ea8b5fca-3727-4144-bae8-a6af9338e864}">
+  <GVL Name="GVL_ArmDynamics_5" Id="{9541d2e6-cbb5-4500-b58a-7bd182d681f4}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot3 Data
+// Robot5 Data
 VAR_GLOBAL CONSTANT
+	// arm gravity parameters
+	(*graParam=[ 2.7244*m3 + 2.7244*m4 + 2.7244*m5 + 2.7244*m6 + 9.8*mx2 + 9.8*mx9,
+				9.8*my2 + 9.8*my9,
+				3.577*m4 + 3.577*m5 + 3.577*m6 + 0.49*m9 + 9.8*mx3 + 9.8*mx8
+				1.5827*m4 + 1.5827*m5 + 1.5827*m6 + 9.8*my3 + 9.8*my8 + 9.8*mz4
+				mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
+				preF2,   k2,   preF3,    k3,    preF5   k5]*)
+	g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
+		[  6.233821, -0.0007155225, 2.1490133, 0.48504608, -0.04459068, 0.026744535, 0.0000125, 0.0000117, -0.00001, -0.016609005, 
+		  7.7845, 3195.0, 7.7845, 1307.2023, 1.112, 559.81848,
+		  6.1554212, -0.0007155225, 2.7407729, 0.48504608, -0.036823967, 0.023888653, 0.0000375, 0.0000117, -0.00001, -0.016609005, 
+		  7.7845252, 3194.9998, 7.7845, 1621.7158, 3.336, 454.73229];
+	
+	// arm friction parameters [a1,b1,...a7,b7];
+	// friction = a * gravity + b; only joint 5 and 6 is identified
+	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
+	[0.26783306, 0.010838125, 0.16823959, 0.014497874,
+	 0.23963001, 0.010367281, 0.32339166, 0.0044046397];
+	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
+
+	//################ dynamic reference model parameters below ###########################
 	// link mass [m1, m2, m3, m4, m5, m6, m7, m8, m9]
 	g_linkMass :ARRAY[1..9] OF LREAL :=[2.676, 0.825, 0.547, 0.25, 0.195, 0.194, 0.05, 0.111, 0.09] ;
 	
@@ -30,22 +51,10 @@ VAR_GLOBAL CONSTANT
 												   0.033E-3,   0.0976E-3, 0.126E-3,  3E-6,       -5E-6,      -0.162E-6,
 												   4.9E-6,  0.757E-3,  0.760E-3,  2.6E-6,     -5.3E-6,    -18E-9];
 
-
+	//################ DO NOT modify parameters below ###########################
 	//  motor inertial at link size
 	g_motorInertia :ARRAY[1..7] OF LREAL := [34.7E-7, 34.7E-7, 34.7E-7, 9.26E-7, 0.495E-7, 0.495E-7, 0.495E-7];
 	
-	// arm gravity parameters
-	(*graParam=[ 2.7244*m3 + 2.7244*m4 + 2.7244*m5 + 2.7244*m6 + 9.8*mx2 + 9.8*mx9,
-				9.8*my2 + 9.8*my9,
-				3.577*m4 + 3.577*m5 + 3.577*m6 + 0.49*m9 + 9.8*mx3 + 9.8*mx8
-				1.5827*m4 + 1.5827*m5 + 1.5827*m6 + 9.8*my3 + 9.8*my8 + 9.8*mz4
-				mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
-				preF2,   k2,   preF3,    k3,    preF5   k5]*)
-	g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
-		[ 6.2519484, -0.0007155225, 4.4102199, 0.90900533, -0.034614681, 0.025019647, 0.0000375, 0.0000351, -0.00001, -0.015067978, 
-		  7.7845, 3195.0, 13.693383, 2735.5621, 1.2226446, 503.69683,
-		  5.2488015, -0.0002385075, 4.5811527, 1.3001393, -0.033798161, 0.0199221, 0.0000125, 0.0000117, -0.00001, -0.013625485, 
-		  15.213282, 2516.3251, 12.947769, 3053.2154, 1.5316464, 419.59403];
 	// spring parameters
 	// spring2 [L0, b1, b2, l1, r0]
 	g_spring2Param :ARRAY[1..5] OF LREAL :=[101.6E-3, 14.5E-3, 15E-3, 172E-3, 31E-3];
@@ -53,19 +62,6 @@ VAR_GLOBAL CONSTANT
 	g_spring3Param :ARRAY[1..6] OF LREAL :=[101.6E-3, 14E-3, 15E-3, 172E-3, 30E-3, 10E-3];
 	// spring5 [L0, s1, L1, r0, beta]
 	g_spring5Param :ARRAY[1..5] OF LREAL :=[34.93E-3, 34.3E-3, 100E-3, 12.5E-3, 32.02*g_deg2rad];
-	
-	// arm friction parameters [a1,b1,...a7,b7];
-	// friction = a * gravity + b; only joint 5 and 6 is identified
-	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
-	[0.26166854, 0.011489246, 0.2601509, 0.0061409276,
-	 0.27002216, 0.0075509278, 0.35633837, 0.00663217727];
-	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
-	 
-	 // joint observer paramters
-	g_jntObvParamL1 :Vec7d :=[0, 0, 0, 0, 300, 300, 0];
-	g_jntObvParamL2 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
-	g_jntObvParamL3 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
-	g_jntObvDamp:Vec7d := [0.8,    0.8,    0.8,     0.05, 0.05, 0.05, 0.05];// TODO: need to be identified
 	
 END_VAR]]></Declaration>
   </GVL>

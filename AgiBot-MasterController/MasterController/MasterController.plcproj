@@ -394,7 +394,7 @@
     <Compile Include="FBs_Filters\FB_LowPassFilter.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GVLs\Arms\GVLs_ArmDynamics.TcGVL">
+    <Compile Include="GVLs\Arms\GVL_ArmDynamics.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -422,7 +422,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\Configs\Robot3\GVLs_ArmDynamics_3.TcGVL">
+    <Compile Include="GVLs\Configs\Robot3\GVL_ArmDynamics_3.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -432,7 +432,7 @@
     <Compile Include="GVLs\Configs\Robot3\GVL_CartJointCaliData_3.TcGVL">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GVLs\Configs\Robot4\GVLs_ArmDynamics_4.TcGVL">
+    <Compile Include="GVLs\Configs\Robot4\GVL_ArmDynamics_4.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -444,7 +444,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\Configs\Robot5\GVLs_ArmDynamics_5.TcGVL">
+    <Compile Include="GVLs\Configs\Robot5\GVL_ArmDynamics_5.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

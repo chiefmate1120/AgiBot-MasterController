@@ -17,7 +17,7 @@ VAR_GLOBAL CONSTANT
 	
 	// master joint safety error
 	g_maxJntCtrlErr :LREAL := 15.0*g_deg2Rad;
-	g_maxJntEncErr :LREAL := 15.0*g_deg2Rad;
+	g_maxJntEncErr :LREAL := 30.0*g_deg2Rad;
 	
 	// cart joint safety error
 	g_cartMaxJntCtrlErr :Vec4d := [0.005, 5*g_deg2Rad,0.005, 0.005];

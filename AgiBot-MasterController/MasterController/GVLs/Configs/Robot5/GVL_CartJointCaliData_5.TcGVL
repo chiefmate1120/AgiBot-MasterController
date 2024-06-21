@@ -1,14 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_CartJointCaliData_5" Id="{12099d6b-04f1-4bf9-a6f4-c5b76647dbe1}">
+  <GVL Name="GVL_CartJointCaliData_5" Id="{6ac290f0-52c2-45ac-8fa7-f50c93f51f5f}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot5 Data
 VAR_GLOBAL CONSTANT
 	(* cart joints are defiend in sequence as below
 	[monitor lift, monitor rotate, armset, pedal] *)
-	
-	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..4] OF DINT :=[54146051, 12890812, 50227236,48935748];
@@ -21,6 +18,10 @@ VAR_GLOBAL CONSTANT
 	
 	// if absolute encoder value cross zeros within joint motion range
 	g_linkEncZeroCross :ARRAY[1..4] OF INT :=[0, 0, 0, 0];
+	
+	 //################ DO NOT modify parameters below ###########################
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..4] OF INT :=[0, 0, 0, 0];

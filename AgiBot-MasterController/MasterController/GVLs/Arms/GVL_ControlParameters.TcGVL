@@ -42,6 +42,12 @@ VAR_GLOBAL CONSTANT
 	g_homeMaxjntVel:Vec7d:=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 	g_homeMaxjntAcc:Vec7d:=[1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0];
 	g_homeMaxjntJerk:Vec7d:=[7(4.0)];
+	
+	 // joint observer paramters
+	g_jntObvParamL1 :Vec7d :=[0, 0, 0, 0, 300, 300, 0];
+	g_jntObvParamL2 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvParamL3 :Vec7d :=[0, 0, 0, 0, 1000, 1000, 0];
+	g_jntObvDamp:Vec7d := [0.8,    0.8,    0.8,     0.05, 0.05, 0.05, 0.05];// TODO: need to be identified
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

@@ -106,30 +106,30 @@ m_a4:=g_a4;
 m_d4:=g_d4;
 m_a9:=g_a9;
 
-m_linkMass:=g_linkMass;
+m_linkMass:=GVL_ArmDynamics.g_linkMass;
 FOR i:=1 TO 9 DO
-	m_linkCOM[i][1]:=g_linkCOM[i,1];
-	m_linkCOM[i][2]:=g_linkCOM[i,2];
-	m_linkCOM[i][3]:=g_linkCOM[i,3];
+	m_linkCOM[i][1]:=GVL_ArmDynamics.g_linkCOM[i,1];
+	m_linkCOM[i][2]:=GVL_ArmDynamics.g_linkCOM[i,2];
+	m_linkCOM[i][3]:=GVL_ArmDynamics.g_linkCOM[i,3];
 	
 	m_armDH[i][1]:=g_masterArmDH[i,1];
 	m_armDH[i][2]:=g_masterArmDH[i,2];
 	m_armDH[i][3]:=g_masterArmDH[i,3];
 	m_armDH[i][4]:=g_masterArmDH[i,4];
 	
-	m_linkInertia[i][1,1]:=g_linkInertia[i,1];
-	m_linkInertia[i][2,2]:=g_linkInertia[i,2];
-	m_linkInertia[i][3,3]:=g_linkInertia[i,3];
-	m_linkInertia[i][1,2]:=g_linkInertia[i,4];
-	m_linkInertia[i][1,3]:=g_linkInertia[i,5];
-	m_linkInertia[i][2,3]:=g_linkInertia[i,6];
+	m_linkInertia[i][1,1]:=GVL_ArmDynamics.g_linkInertia[i,1];
+	m_linkInertia[i][2,2]:=GVL_ArmDynamics.g_linkInertia[i,2];
+	m_linkInertia[i][3,3]:=GVL_ArmDynamics.g_linkInertia[i,3];
+	m_linkInertia[i][1,2]:=GVL_ArmDynamics.g_linkInertia[i,4];
+	m_linkInertia[i][1,3]:=GVL_ArmDynamics.g_linkInertia[i,5];
+	m_linkInertia[i][2,3]:=GVL_ArmDynamics.g_linkInertia[i,6];
 	m_linkInertia[i][2,1]:=m_linkInertia[i][1,2];
 	m_linkInertia[i][3,1]:=m_linkInertia[i][1,3];
 	m_linkInertia[i][3,2]:=m_linkInertia[i][2,3];
 END_FOR
 
 FOR i:=1 TO 7 DO
-	m_motorInertia[i]:=g_motorInertia[i]*GVL_ArmJointParameters.g_motorReduction[i]*GVL_ArmJointParameters.g_motorReduction[i];
+	m_motorInertia[i]:=GVL_ArmDynamics.g_motorInertia[i]*GVL_ArmJointParameters.g_motorReduction[i]*GVL_ArmJointParameters.g_motorReduction[i];
 END_FOR
 ]]></ST>
       </Implementation>

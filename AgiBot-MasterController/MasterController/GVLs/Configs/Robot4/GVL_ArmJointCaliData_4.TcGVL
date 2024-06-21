@@ -3,13 +3,7 @@
   <GVL Name="GVL_ArmJointCaliData_4" Id="{789136b1-f7e9-44c4-9d46-3f5025a8eba9}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot4 Data
-VAR_GLOBAL CONSTANT
-	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
-	g_linkEncLimitBuffer : DINT := 100000;
-	
-	g_asbEncoderDir :ARRAY[1..2, 1..7] OF INT :=[-1, -1, 1, -1, 1, 1, 1,
-												 -1, -1, 1, -1, 1, 1, 1];
-												 
+VAR_GLOBAL CONSTANT										 
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[14726704, 4156456, 15345668, 1991632, 16314208, 14415440, 0,
@@ -30,6 +24,14 @@ VAR_GLOBAL CONSTANT
 	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
 		[0, 1, 1, 1, 1, 1, 1,
 		 1, 0, 0, 1, 0, 0, 1];
+		 
+	// limit value of gripper hall sensor
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3211374,2687079];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[44171868,48104169];
+	 
+	 //################ DO NOT modify parameters below ###########################	 
+	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
+	g_linkEncLimitBuffer : DINT := 100000;
 	
 	// flag if joint can rotate multiple cycles
 	g_multipleCyclesJoint :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
@@ -41,10 +43,6 @@ VAR_GLOBAL CONSTANT
 		[0.0, -PI/2, 0.0, -pi, pi, -PI/2, 0.0,
 		 0.0, -PI/2, 0.0, 0.0, pi, PI/2, 0.0];
 		 
-	// limit value of gripper hall sensor
-	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3211374,2687079];
-	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[44171868,48104169];
-
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_StateCtrlClutch" Id="{093bd9ec-6cc6-4389-91e4-f8586e50bb1f}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Clutch
 FUNCTION_BLOCK PUBLIC FB_StateCtrlClutch EXTENDS FB_MasterArmCtrlBase
@@ -8,12 +8,16 @@ END_VAR
 VAR_OUTPUT
 END_VAR
 VAR
+	// orientation tracking parameters
 	m_rotTrackKp : LREAL := 200;
 	m_maxTrackVel :LREAL := PI;
-	m_jnt4AdjustKp : LREAL :=10;
-	m_jnt4MaxVel :LREAL :=pi/3 ;
 	m_cartTrackVel :Vec3d;
 	
+	// redundant control parameters
+	m_jnt4AdjustKp : LREAL :=10;
+	m_jnt4MaxVel :LREAL :=pi/3 ;
+	m_linearVelLb :LREAL := 0.02;
+	m_linearVelUb :LREAL :=0.1;	
 	
 	rotT,rotErr:Mat3d;
 	angle : LREAL;
@@ -108,6 +112,8 @@ END_VAR
 
 VAR 
 	j6Bias,j5Bias :LREAL;
+	velScale :LREAL;
+	linearVel :Vec3d;
 	curJntPos : Vec7d;
 	jnt4LinkPos :LREAL;
 END_VAR
@@ -122,9 +128,18 @@ ELSE
 	j6Bias := curJntPos[6]-PI/2;
 END_IF
 
+// scale based on joint5 position
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
-calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);
+
+// scale based on linear velocity
+linearVel[1]:=i_masterArm.curCartTwist[1];
+linearVel[2]:=i_masterArm.curCartTwist[2];
+linearVel[3]:=i_masterArm.curCartTwist[3];
+velScale :=LIMIT(0, (norm(linearVel)-m_linearVelLb)/(m_linearVelUb-m_linearVelLb),1.0);
+
+
+calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp * velScale ,m_jnt4MaxVel);
 
 // joint limit
 IF (calcRedunVel > 0 AND jnt4LinkPos+calcRedunVel * g_armCtrlCycleTime > GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4])
@@ -208,7 +223,13 @@ copyCmds(r_masterArmCtrlCmd);
     <LineIds Name="FB_StateCtrlClutch.calcRedunVel">
       <LineId Id="77" Count="1" />
       <LineId Id="113" Count="0" />
-      <LineId Id="79" Count="8" />
+      <LineId Id="79" Count="4" />
+      <LineId Id="125" Count="0" />
+      <LineId Id="131" Count="0" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="134" Count="6" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="87" Count="0" />
       <LineId Id="98" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="99" Count="3" />

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -531,14 +531,14 @@ FOR i:=1 TO g_mArmNum DO
 			
 		//arm disable
 		MasterArmState_Disable:
-			// to standby
+			// to init
 			IF  NOT(i_masterInputDataPool.m_UIData.m_masterArmDisableFlag[i]) THEN
-				m_nextMasterArmState[i]:=MasterArmState_Standby;
+				m_nextMasterArmState[i]:=MasterArmState_Init;
 			END_IF
 	END_CASE
 	
 	// arm disable
-	IF i_masterInputDataPool.m_UIData.m_masterArmDisableFlag[i] AND m_masterArmState[i] <> MasterArmState_Init THEN
+	IF i_masterInputDataPool.m_UIData.m_masterArmDisableFlag[i] THEN
 		m_nextMasterArmState[i] := MasterArmState_Disable;
 	// error check
 	ELSIF i_masterInputDataPool.m_safetyData.m_masterErrFlag[i] THEN

@@ -121,15 +121,15 @@ END_VAR]]></Declaration>
         <ST><![CDATA[m_armIdx:=i_armIdx;
 
 FOR i:=1 TO 16 DO
-	m_gravityParam[i]:=g_gravityParam[m_armIdx, i];
+	m_gravityParam[i]:=GVL_ArmDynamics.g_gravityParam[m_armIdx, i];
 END_FOR
 
 FOR i:=1 TO 5 DO
-	m_spring2Param[i]:=g_spring2Param[i];
-	m_spring3Param[i]:=g_spring3Param[i];
-	m_spring5Param[i]:=g_spring5Param[i];
+	m_spring2Param[i]:=GVL_ArmDynamics.g_spring2Param[i];
+	m_spring3Param[i]:=GVL_ArmDynamics.g_spring3Param[i];
+	m_spring5Param[i]:=GVL_ArmDynamics.g_spring5Param[i];
 END_FOR
-m_spring3Param[6]:=g_spring3Param[6];]]></ST>
+m_spring3Param[6]:=GVL_ArmDynamics.g_spring3Param[6];]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{469433a3-9614-4c99-9efb-b9558878df36}">

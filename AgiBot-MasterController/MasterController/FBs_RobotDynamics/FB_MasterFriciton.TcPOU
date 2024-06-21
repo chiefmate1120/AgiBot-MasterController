@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterFriciton" Id="{e1c0a847-1949-4788-8871-72ab788e2df1}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterFriciton
 VAR_INPUT
@@ -44,12 +44,12 @@ END_VAR
 m_frictionParamA := g_zeroVec7d;
 m_frictionParamB := g_zeroVec7d;
 m_jntDamp := g_zeroVec7d;
-m_maxFriction := g_maxJntFriction;
+m_maxFriction := GVL_ArmDynamics.g_maxJntFriction;
 
-m_frictionParamA[5] := g_jntFrictionParam[m_armIdx, 1];
-m_frictionParamB[5] := g_jntFrictionParam[m_armIdx, 2];
-m_frictionParamA[6] := g_jntFrictionParam[m_armIdx, 3];
-m_frictionParamB[6] := g_jntFrictionParam[m_armIdx, 4];]]></ST>
+m_frictionParamA[5] := GVL_ArmDynamics.g_jntFrictionParam[m_armIdx, 1];
+m_frictionParamB[5] := GVL_ArmDynamics.g_jntFrictionParam[m_armIdx, 2];
+m_frictionParamA[6] := GVL_ArmDynamics.g_jntFrictionParam[m_armIdx, 3];
+m_frictionParamB[6] := GVL_ArmDynamics.g_jntFrictionParam[m_armIdx, 4];]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{0e064868-95f9-4591-a903-e34a876d9e26}">
