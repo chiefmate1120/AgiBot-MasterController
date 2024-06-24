@@ -1,35 +1,35 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_ArmJointCaliData" Id="{cbdf7771-6b3f-4bb7-8d8c-ddef3827d97f}">
+  <GVL Name="GVL_ArmJointCaliData" Id="{a203e055-e0ed-49ab-b79a-01de3e9b8ab9}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
-// Robot4 Data
-VAR_GLOBAL CONSTANT										 
+// Robot5 Data
+VAR_GLOBAL CONSTANT
 	// absolute encoder value at minimal joint positon
 	g_minLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[14726704, 4156456, 15345668, 1991632, 16314208, 14415440, 0,
-		 2048324, 9416252, 4526812, 8226032,651760 , 8965456, 0];
+		[3330608, 6592612, 11754876, 8357648, 7032320, 3206208, 0,
+		 14145556, 9942668, 4526812, 4839456,3252816 , 11705152, 0];
 		 
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[8963928, 15089072, 1747256, 7226288, 12212368, 1891360, 16777216,
-		 13022120, 3582816, 8511152, 13547040, 13305856, 13284352	, 16777216];
+		[9148752, 724532, 16056044, 13808640, 2987504, 7442528, 16777216,
+		 3137384, 4088172, 8898876, 10199744, 15896032, 16050256, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
-		[11829704, 1302576, 105152, 11634960, 5974256, 16596400, 9523824,
-		 15937604, 6509960, 10128944, 4071280, 7063664, 11098016, 8939696];
+		[6250820, 3668632, 13311308, 1419280, 13415264, 5208832, 11610128,
+		 236924, 7059956, 5977404, 566400, 9673872, 13718496, 14927904];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.
 	g_linkEncZeroCross :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF INT :=
-		[0, 1, 1, 1, 1, 1, 1,
+		[0, 0, 0, 1, 1, 0, 1,
 		 1, 0, 0, 1, 0, 0, 1];
 		 
 	// limit value of gripper hall sensor
-	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3211374,2687079];
-	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[44171868,48104169];
-	 
-	 //################ DO NOT modify parameters below ###########################	 
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[3801219,2818152];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[45023889,41878148];
+	
+	 //################ DO NOT modify parameters below ###########################
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position
 	g_linkEncLimitBuffer : DINT := 100000;
 	
