@@ -1,0 +1,596 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_MasterDataLogger" Id="{3d52fd62-8541-49f8-a010-2bf7066dbd91}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterDataLogger
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR CONSTANT
+	g_singleLineDataNum :INT :=70;
+	g_bufferLength :INT :=4000;
+	g_dataStrLength:INT:=10;
+END_VAR
+VAR
+	// current time stamp
+	m_timeStamp :LREAL :=0;
+	
+	// logger duration
+	m_logDuration :TIME := T#1m;
+	
+	// variables to get NetID
+	m_getAmsNetId : FB_GetLocalAmsNetId; 
+	m_getAmsNetIdStep :INT :=0;
+  	m_getAmsNetIdBusy      :BOOL;
+    m_getAmsNetIdError     :BOOL;
+    m_getAmsNetIdErrId     :UDINT;
+    m_AmsNetIdString :T_AmsNetId;
+    m_AmsNetIdBytes  :T_AmsNetIdArr;
+	
+	// system time
+	m_systemTime : FB_LocalSystemTime;
+	m_initTime : TIMESTRUCT;
+	m_initTimeFlag :BOOL:=FALSE;
+	
+	// log file name
+	m_logFileNamePrefix :STRING := 'C:\TwinCAT\3.1\Boot\masterLogger-';
+	m_logFileNameSuffix:STRING := '.txt';
+	m_nullString :STRING(10) :='          ';
+	
+	// log write
+	m_fileOpenStep :INT := 0;
+	m_fileWriteStep :INT := 0;
+	m_FileOpen           : FB_FileOpen;
+    m_FileClose          : FB_FileClose;
+    m_FileWrite          : FB_FileWrite;
+    m_writeFileHandle            : UINT := 0;(* File handle of the destination file *)
+
+	// log data buffer
+	m_masterDataBuffer1 :ARRAY[1..g_bufferLength, 1..g_singleLineDataNum] OF STRING(g_dataStrLength);
+	m_masterDataBuffer2 :ARRAY[1..g_bufferLength, 1..g_singleLineDataNum] OF STRING(g_dataStrLength);
+	m_bufferAddr :PVOID;
+	m_currentBuffer :INT := 1;
+	m_bufferIdx1 :DINT;
+	m_bufferIdx2 :DINT;
+	
+	// log file header
+	m_header :STRING(5000);
+	m_header1 :STRING(300) :='monitorAngle surgeonReady armSwitch scopeSwitch clutchSwitch ConsoleAdjust';
+	m_header2 :STRING(300) :=' leftArmState rightArmState leftSlaveArmIdx rightSlaveArmIdx leftGripAngle rightGripAngle';
+	m_header3 :STRING(300) :=' leftCmdJntPos1 leftCmdJntPos2 leftCmdJntPos3 leftCmdJntPos4 leftCmdJntPos5 leftCmdJntPos6 leftCmdJntPos7 rightCmdJntPos1 rightCmdJntPos2 rightCmdJntPos3 rightCmdJntPos4 rightCmdJntPos5 rightCmdJntPos6 rightCmdJntPos7';
+	m_header4 :STRING(300) :=' leftCurJntPos1 leftCurJntPos2 leftCurJntPos3 leftCurJntPos4 leftCurJntPos5 leftCurJntPos6 leftCurJntPos7 rightCurJntPos1 rightCurJntPos2 rightCurJntPos3 rightCurJntPos4 rightCurJntPos5 rightCurJntPos6 rightCurJntPos7';
+	m_header5 :STRING(300) :=' leftCmdCurrent1 leftCmdCurrent2 leftCmdCurrent3 leftCmdCurrent4 leftCmdCurrent5 leftCmdCurrent6 leftCmdCurrent7 rightCmdCurrent1 rightCmdCurrent2 rightCmdCurrent3 rightCmdCurrent4 rightCmdCurrent5 rightCmdCurrent6 rightCmdCurrent7';
+	m_header6 :STRING(300) :=' leftCurCurrent1 leftCurCurrent2 leftCurCurrent3 leftCurCurrent4 leftCurCurrent5 leftCurCurrent6 leftCurCurrent7 rightCurCurrent1 rightCurCurrent2 rightCurCurrent3 rightCurCurrent4 rightCurCurrent5 rightCurCurrent6 rightCurCurrent7 $L';
+	
+	
+	// status flag
+	m_stopRecord :BOOL :=FALSE;
+	m_isFinish :BOOL :=FALSE;
+	m_isInit :BOOL :=FALSE;
+	m_writeCounts :INT :=0;
+	
+	// code execute time measure
+	m_logTime : Profiler;
+	m_logTime1 : Profiler;
+	m_logTime2 : Profiler;
+	
+	stringLen :DINT;
+	testFlag :BOOL := FALSE;
+	testData:ARRAY[1..2] OF WSTRING :=[("ABS\n"), ("FEFE\n")] ;
+	
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Folder Name="property" Id="{457611db-f645-4cb5-9105-683c7c658211}" />
+    <Method Name="digits8" Id="{ca80265b-24b1-44b7-97ee-e3ca2ec9ba76}">
+      <Declaration><![CDATA[METHOD PRIVATE digits8 : LREAL
+VAR_INPUT
+	i_data: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[digits8 := LREAL_TO_DINT(i_data*1e8)/1.0e8;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{1ab7c8c3-05e6-48d6-b3bc-dcd93db3257b}">
+      <Declaration><![CDATA[// init funcition
+// NOTE: call reset before call init
+METHOD PUBLIC init : BOOL
+VAR_INPUT
+END_VAR
+VAR
+	logTimeStamp :STRING;
+	logFileFullName :STRING;
+	tmpHeaderStr :STRING(5000);
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_writeCounts :=0;
+m_timeStamp:=0;
+// get net id
+CASE m_getAmsNetIdStep OF
+	0:
+		m_getAmsNetId(bExecute:=TRUE, tTimeOut := DEFAULT_ADS_TIMEOUT);
+		m_getAmsNetIdStep:=1;
+	1:
+		m_getAmsNetId(bExecute:=FALSE, tTimeOut := DEFAULT_ADS_TIMEOUT,bBusy=>m_getAmsNetIdBusy, bError=>m_getAmsNetIdError, nErrId=>m_getAmsNetIdErrId, AddrString=>m_AmsNetIdString, AddrBytes=>m_AmsNetIdBytes);
+		IF NOT(m_getAmsNetIdBusy) THEN
+			m_getAmsNetIdStep:=2;
+		END_IF
+	2:
+	   IF NOT(m_getAmsNetIdError) THEN
+		   m_getAmsNetIdStep:=3;
+	   END_IF
+END_CASE
+
+IF m_getAmsNetIdStep<>3 THEN
+	RETURN;
+END_IF
+
+// start system clock
+m_systemTime(sNetID:=m_AmsNetIdString, bEnable:=TRUE, dwCycle:=1);
+IF NOT(m_systemTime.bValid) THEN
+	RETURN;
+END_IF
+
+// record init time
+IF NOT(m_initTimeFlag) THEN
+	m_initTimeFlag :=TRUE;
+	m_initTime := m_systemTime.systemTime;
+	CONCAT2(ADR(m_header1), ADR(m_header2), ADR(m_header),5000);
+	tmpHeaderStr := m_header;
+	CONCAT2(ADR(tmpHeaderStr), ADR(m_header3), ADR(m_header),5000);
+	tmpHeaderStr := m_header;
+	CONCAT2(ADR(tmpHeaderStr), ADR(m_header4), ADR(m_header),5000);
+	tmpHeaderStr := m_header;
+	CONCAT2(ADR(tmpHeaderStr), ADR(m_header5), ADR(m_header),5000);
+	tmpHeaderStr := m_header;
+	CONCAT2(ADR(tmpHeaderStr), ADR(m_header6), ADR(m_header),5000);
+END_IF
+
+
+CASE m_fileOPenStep OF
+	0:
+		// decide log file name
+		logTimeStamp := WORD_TO_STRING(m_initTime.wYear);
+		logTimeStamp := CONCAT(logTimeStamp, '-');
+		logTimeStamp := CONCAT(logTimeStamp, WORD_TO_STRING(m_initTime.wMonth));
+		logTimeStamp := CONCAT(logTimeStamp, '-');
+		logTimeStamp := CONCAT(logTimeStamp, WORD_TO_STRING(m_initTime.wDay));
+		logTimeStamp := CONCAT(logTimeStamp, '-');
+		logTimeStamp := CONCAT(logTimeStamp, WORD_TO_STRING(m_initTime.wHour));
+		logTimeStamp := CONCAT(logTimeStamp, '-');
+		logTimeStamp := CONCAT(logTimeStamp, WORD_TO_STRING(m_initTime.wMinute));
+		logFileFullName := CONCAT(m_logFileNamePrefix, logTimeStamp);
+		logFileFullName :=CONCAT(logFileFullName, m_logFileNameSuffix);
+		
+		// open file
+		m_FileOpen( bExecute := FALSE ); 
+		m_FileOpen( sNetId := m_AmsNetIdString, sPathName := logFileFullName, 
+					 nMode := FOPEN_MODEWRITE OR FOPEN_MODETEXT, 
+					 ePath := PATH_GENERIC, tTimeout := T#0.5S, bExecute := TRUE ); 
+		m_fileOpenStep := 1;
+	1:
+		m_FileOpen( bExecute := FALSE ); 
+		IF NOT m_FileOpen.bBusy THEN 
+		   IF m_FileOpen.bError THEN 
+				m_fileOpenStep := 0; 
+		   ELSE 
+				m_writeFileHandle := m_FileOpen.hFile; 
+				m_fileOpenStep := 2; 
+		   END_IF 
+		END_IF 
+END_CASE
+
+IF m_fileOpenStep = 2 AND m_fileWriteStep=-1 THEN
+	m_fileWriteStep:=1;
+END_IF
+	
+CASE m_fileWriteStep OF
+1:
+	m_logTime(START:=TRUE, RESET:=TRUE);
+	m_FileWrite( bExecute := FALSE ); 
+	m_FileWrite( sNetId:=m_AmsNetIdString, hFile:=m_writeFileHandle, 
+				 pWriteBuff:= ADR(m_header), cbWriteLen:= LEN2(ADR(m_header)), 
+				 bExecute:=TRUE, tTimeout:=T#1S ); 
+	m_fileWriteStep := 2; 
+2:
+	m_FileWrite( bExecute := FALSE ); 
+	IF NOT m_FileWrite.bBusy THEN 
+		IF NOT (m_FileWrite.bError) THEN 
+		   m_isInit := TRUE;
+		   m_fileWriteStep := -1;
+		END_IF
+	END_IF 
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="isFinish" Id="{96913fc0-d4fa-4ec6-ac30-f27851674755}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY isFinish : bool]]></Declaration>
+      <Get Name="Get" Id="{9b8c0434-67e9-49d9-8d44-5fb29cd5d400}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isFinish := m_isFinish;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="isInit" Id="{deb5acf6-55b8-4e21-8f25-264d2ad33166}" FolderPath="property\">
+      <Declaration><![CDATA[PROPERTY isInit : bool]]></Declaration>
+      <Get Name="Get" Id="{3c8ee1b2-c284-4d4c-bafe-860f2526dea7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[isInit := m_isInit;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="logData" Id="{e8d777a7-d623-4318-892f-e528b409dc61}">
+      <Declaration><![CDATA[METHOD PUBLIC logData : BOOL
+VAR_IN_OUT CONSTANT
+	i_cartStatus :ST_CartStatus;
+	i_masterStatus :ST_masterStatus;
+	i_masterJointData :ST_masterJointData;
+END_VAR
+
+VAR
+	singleLineDataString :ARRAY[1..g_singleLineDataNum] OF STRING(g_dataStrLength);
+	tmpData :LREAL;
+	i,j:INT;
+	curDuration :LTIME;
+	fbStrFormat :FB_FormatString;
+	tmpLREAL :LREAL;
+	tmpBOOL :BOOL;
+	tmpINT :INT;
+
+;END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT(testFlag) THEN
+//	RETURN;
+END_IF
+
+m_timeStamp := m_timeStamp + g_armCtrlCycleTime;
+
+m_systemTime();
+
+// return direcly if log file is not open
+IF m_fileOpenStep <> 2 OR m_isFinish THEN 
+	RETURN;
+END_IF
+
+
+m_logTime1(START:=TRUE, RESET:=TRUE);
+
+// time stamp
+fbStrFormat(sFormat:='%0.3f ', arg1:=F_LREAL(m_timeStamp), sOut=>singleLineDataString[1]);
+// cart status
+tmpLREAL := i_cartStatus.m_monitorAngle;
+IF m_currentBuffer = 2 THEN
+	tmpLREAL:= tmpLREAL*2;
+END_IF
+fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[2]);
+tmpINT := BOOL_TO_INT(i_cartStatus.m_surgonReady);
+fbStrFormat(sFormat:='%b ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[3]);
+tmpINT := BOOL_TO_INT(i_cartStatus.m_armSwitch);
+fbStrFormat(sFormat:='%b ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[4]);
+tmpINT := BOOL_TO_INT(i_cartStatus.m_endoscopeSwitch);
+fbStrFormat(sFormat:='%b ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[5]);
+tmpINT := BOOL_TO_INT(i_cartStatus.m_clutchSwitch);
+fbStrFormat(sFormat:='%b ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[6]);
+tmpINT := BOOL_TO_INT(i_cartStatus.m_consoleInAdjust);
+fbStrFormat(sFormat:='%b ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[7]);
+
+// arm status
+tmpINT := i_masterStatus.m_armState[1];
+fbStrFormat(sFormat:='%d ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[8]);
+tmpINT := i_masterStatus.m_armState[2];
+fbStrFormat(sFormat:='%d ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[9]);
+tmpINT := i_masterStatus.m_teleSlaveArmIdx[1];
+fbStrFormat(sFormat:='%d ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[10]);
+tmpINT := i_masterStatus.m_teleSlaveArmIdx[2];
+fbStrFormat(sFormat:='%d ', arg1:=F_INT(tmpINT), sOut=>singleLineDataString[11]);
+tmpLREAL := i_masterStatus.m_gripAngle[1];
+fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[12]);
+tmpLREAL := i_masterStatus.m_gripAngle[2];
+fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[13]);
+
+// arm joint data
+FOR i:=1 TO 2 DO
+	FOR j:=1 TO 7 DO 
+		tmpLREAL := i_masterJointData.m_cmdJntPos[i][j];
+		fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[13+(i-1)*7+j]);
+	END_FOR
+END_FOR
+FOR i:=1 TO 2 DO
+	FOR j:=1 TO 7 DO 
+		tmpLREAL := i_masterJointData.m_curJntPos[i][j];
+		fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[27+(i-1)*7+j]);
+	END_FOR
+END_FOR
+FOR i:=1 TO 2 DO
+	FOR j:=1 TO 7 DO 
+		tmpLREAL := i_masterJointData.m_cmdJntCurrent[i][j];
+		fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[41+(i-1)*7+j]);
+	END_FOR
+END_FOR
+FOR i:=1 TO 2 DO
+	FOR j:=1 TO 7 DO 
+		tmpLREAL := i_masterJointData.m_rawJntCurrent[i][j];
+		fbStrFormat(sFormat:='%0.5f ', arg1:=F_LREAL(tmpLREAL), sOut=>singleLineDataString[55+(i-1)*7+j]);
+	END_FOR
+END_FOR
+
+// line break
+singleLineDataString[g_singleLineDataNum]:= '        $L';
+
+// save data to buffer
+IF m_currentBuffer = 1 AND m_bufferIdx1 <= g_bufferLength THEN
+	FOR i:=1 TO g_singleLineDataNum DO 
+		m_masterDataBuffer1[m_bufferIdx1,i] := singleLineDataString[i];
+	END_FOR
+	
+	m_bufferIdx1 := m_bufferIdx1 +1;
+ELSIF m_currentBuffer = 2 AND m_bufferIdx2 <= g_bufferLength THEN
+	FOR i:=1 TO g_singleLineDataNum DO 
+		m_masterDataBuffer2[m_bufferIdx2,i] := singleLineDataString[i];
+	END_FOR
+	m_bufferIdx2 := m_bufferIdx2 +1;
+END_IF	
+
+// when one buffer is filled, write it to file and switch to the other buffer
+IF m_fileWriteStep = -1 THEN
+	IF m_bufferIdx1 > g_bufferLength AND m_bufferIdx2 > g_bufferLength THEN
+		m_stopRecord := TRUE;
+	ELSIF m_bufferIdx1 > g_bufferLength THEN
+		m_bufferIdx1 := 1;
+		m_currentBuffer := 2;
+		m_bufferAddr := ADR(m_masterDataBuffer1);
+		m_fileWriteStep:=1;
+	ELSIF m_bufferIdx2 > g_bufferLength THEN
+		m_bufferIdx2 := 1;
+		m_currentBuffer := 1;
+		m_bufferAddr := ADR(m_masterDataBuffer2);
+		m_fileWriteStep:=1;
+	END_IF
+END_IF
+
+
+m_logTime1(START:=FALSE); 
+CASE m_fileWriteStep OF
+	1:
+		m_logTime(START:=TRUE, RESET:=TRUE);
+	 	m_FileWrite( bExecute := FALSE ); 
+		m_FileWrite( sNetId:=m_AmsNetIdString, hFile:=m_writeFileHandle, 
+					 pWriteBuff:= m_bufferAddr, cbWriteLen:= SIZEOF(m_masterDataBuffer1), 
+					 bExecute:=TRUE, tTimeout:=T#1S ); 
+		m_fileWriteStep := 2; 
+	2:
+		m_FileWrite( bExecute := FALSE ); 
+		IF NOT m_FileWrite.bBusy THEN 
+			IF m_FileWrite.bError THEN 
+			   m_stopRecord := TRUE;
+		   	END_IF
+			
+			// check log duration
+			curDuration := DT_TO_LTIME(SYSTEMTIME_TO_DT(m_systemTime.systemTime)) - DT_TO_LTIME(SYSTEMTIME_TO_DT(m_initTime));
+			IF LTIME_TO_TIME(curDuration)> m_logDuration THEN
+				m_stopRecord := TRUE;
+			END_IF
+		   
+			// to close file
+			IF m_stopRecord THEN
+			   	m_fileWriteStep := 3;
+			// wait for next write 
+			ELSE
+				m_fileWriteStep := -1;
+		   	END_IF
+			m_logTime(START:=FALSE); 
+			m_writeCounts := m_writeCounts +1;
+		END_IF 
+		
+	3:
+		m_FileClose( bExecute := FALSE ); 
+	  	m_FileClose( sNetId:=m_AmsNetIdString, hFile:=m_writeFileHandle, bExecute:=TRUE, tTimeout:=T#1S ); 
+	  	m_fileWriteStep :=4;
+		
+	4:
+		m_FileClose( bExecute := FALSE ); 
+		IF NOT m_FileClose.bBusy THEN 
+			m_isFinish := TRUE;
+		   	m_fileWriteStep := -1; 
+		   	m_writeFileHandle := 0; 
+		END_IF 
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="reset" Id="{cdc0ca4d-b167-4c3e-8ef4-f9c23f65c2b0}">
+      <Declaration><![CDATA[// reset all member variables
+METHOD PUBLIC reset : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_getAmsNetIdStep:=0;
+m_systemTime(bEnable:=FALSE);
+m_initTimeFlag :=FALSE;
+m_fileOPenStep := 0;
+m_fileWriteStep:=-1;
+m_currentBuffer := 1;
+m_bufferIdx1 := 1;
+m_bufferIdx2 :=1;
+m_stopRecord := FALSE;
+m_isFinish := FALSE;
+m_isInit := FALSE;
+m_writeFileHandle :=0;
+m_writeCounts :=0;
+m_timeStamp:= 0;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_MasterDataLogger">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.digits8">
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.init">
+      <LineId Id="208" Count="1" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="6" Count="17" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="114" Count="2" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="108" Count="1" />
+      <LineId Id="198" Count="8" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="28" Count="3" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="141" Count="5" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="2" />
+      <LineId Id="32" Count="8" />
+      <LineId Id="43" Count="5" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="135" Count="1" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="149" Count="12" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="178" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.isFinish.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.isInit.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.logData">
+      <LineId Id="254" Count="0" />
+      <LineId Id="256" Count="1" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="215" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="76" Count="2" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="362" Count="0" />
+      <LineId Id="107" Count="0" />
+      <LineId Id="371" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="282" Count="1" />
+      <LineId Id="285" Count="0" />
+      <LineId Id="372" Count="2" />
+      <LineId Id="286" Count="0" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="326" Count="0" />
+      <LineId Id="344" Count="0" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="329" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="330" Count="0" />
+      <LineId Id="292" Count="1" />
+      <LineId Id="348" Count="0" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="349" Count="0" />
+      <LineId Id="332" Count="0" />
+      <LineId Id="350" Count="0" />
+      <LineId Id="333" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="334" Count="0" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="302" Count="3" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="309" Count="3" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="315" Count="3" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="320" Count="3" />
+      <LineId Id="357" Count="0" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="325" Count="0" />
+      <LineId Id="280" Count="0" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="275" Count="0" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="267" Count="2" />
+      <LineId Id="195" Count="2" />
+      <LineId Id="271" Count="1" />
+      <LineId Id="270" Count="0" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="205" Count="2" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="208" Count="3" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="212" Count="2" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="375" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="30" Count="5" />
+      <LineId Id="37" Count="4" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="218" Count="2" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="184" Count="1" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="187" Count="1" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="276" Count="0" />
+      <LineId Id="50" Count="9" />
+      <LineId Id="63" Count="4" />
+      <LineId Id="258" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterDataLogger.reset">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="4" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="16" Count="2" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

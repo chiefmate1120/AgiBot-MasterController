@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <Task Name="TaskLogger" Id="{588586ad-3811-4eac-91e7-e8cb4f37cbdc}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>1000</CycleTime>
+    <Priority>5</Priority>
+    <PouCall>
+      <Name>MasteDataLog</Name>
+    </PouCall>
+    <TaskFBGuid>{2d0d806e-4a46-4c04-a9d6-6f97b94a5060}</TaskFBGuid>
+    <Fb_init>{265e5739-f0f3-4aaa-ba62-277774d6ab06}</Fb_init>
+    <Fb_exit>{7ea3d11d-17d3-43ce-8cdf-2dddc076f7fb}</Fb_exit>
+    <CycleUpdate>{ca54727a-3cbe-4e8f-94f1-7486ac6905d6}</CycleUpdate>
+    <PostCycleUpdate>{4589772d-da80-4f5e-9eab-8579723b2a35}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

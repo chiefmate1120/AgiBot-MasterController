@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="MasteDataLog" Id="{f7fbd164-fc5f-4ad7-a85c-6b59444c4460}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MasteDataLog
+VAR
+	m_dataLogger :FB_MasterDataLogger;
+	m_logStep :INT := 0;
+	
+	
+	// #############test data ###############
+	// master robot information, including arm status and cartesian data
+	m_masterStatus :ST_masterStatus;
+	
+	// master robot joint data
+	m_masterJointData:ST_masterJointData;
+	
+	//cart status
+	m_cartStatus :ST_CartStatus;
+ 	i,j:INT;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m_cartStatus.m_monitorAngle := 30 *g_deg2Rad;
+m_cartStatus.m_surgonReady := TRUE;
+m_cartStatus.m_armSwitch := FALSE;
+m_cartStatus.m_endoscopeSwitch := TRUE;
+m_cartStatus.m_clutchSwitch := FALSE;
+m_cartStatus.m_consoleInAdjust := TRUE;
+
+m_masterStatus.m_armState[1]:= 4;
+m_masterStatus.m_armState[2]:= 12;
+m_masterStatus.m_teleSlaveArmIdx[1]:= 1;
+m_masterStatus.m_teleSlaveArmIdx[2]:=4;
+m_masterStatus.m_gripAngle[1] := 2.0/3.0;
+m_masterStatus.m_gripAngle[2] := 2;
+
+FOR i:= 1 TO 2 DO
+	FOR j:=1 TO 7 DO
+		m_masterJointData.m_cmdJntPos[i][j] := 45*g_deg2Rad;
+		m_masterJointData.m_curJntPos[i][j] := 0.0002033040E-14;
+		m_masterJointData.m_cmdJntCurrent[i][j] := 200;
+		m_masterJointData.m_rawJntCurrent[i][j] := 150;
+	END_FOR
+END_FOR
+
+CASE m_logStep OF 
+	0:
+		m_dataLogger.reset();
+		m_logStep := 1;
+	1:
+		m_dataLogger.init();
+		IF m_dataLogger.isInit THEN
+			m_logStep := 2;
+		END_IF
+	2:
+		m_dataLogger.logData(m_cartStatus, m_masterStatus, m_masterJointData);
+		IF m_dataLogger.isFinish THEN
+			m_logStep := 0;
+		END_IF
+END_CASE
+
+]]></ST>
+    </Implementation>
+    <LineIds Name="MasteDataLog">
+      <LineId Id="40" Count="0" />
+      <LineId Id="43" Count="4" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="3" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="66" Count="2" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="11" Count="1" />
+      <LineId Id="14" Count="6" />
+      <LineId Id="22" Count="4" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

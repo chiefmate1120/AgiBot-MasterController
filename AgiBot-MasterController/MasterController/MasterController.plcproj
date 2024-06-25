@@ -250,6 +250,9 @@
     <Compile Include="FBs_Auxiliary\FB_IOCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_Auxiliary\FB_MasterDataLogger.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_Auxiliary\FB_RiseEdgeCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -499,6 +502,9 @@
     <Compile Include="Mains\CartControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Mains\MasteDataLog.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -521,6 +527,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskDynamic.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TaskLogger.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskSafetyCheck.TcTTO">
