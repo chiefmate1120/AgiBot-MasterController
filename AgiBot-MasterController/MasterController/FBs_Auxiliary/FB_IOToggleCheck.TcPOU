@@ -12,10 +12,7 @@ VAR
 	m_IOOnCounts :INT;
 	
 	// counts threshold indicating IO is trully triggerd
-	m_IOOnCountThres :INT :=100;
-	
-	// flag if already triggered
-	m_isTrig : BOOL :=false;
+	m_IOOnCountThres :INT :=10;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -30,18 +27,14 @@ END_VAR
 
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[IF (0=m_IOType and IOValue) OR (1=m_IOType AND NOT(IOValue)) THEN
+        <ST><![CDATA[check:=false;
+IF (0=m_IOType and IOValue) OR (1=m_IOType AND NOT(IOValue)) THEN
 	m_IOOnCounts := MIN(m_IOOnCounts +1, m_IOOnCountThres);
 ELSE
+	IF m_IOOnCounts>=m_IOOnCountThres THEN
+		check:=TRUE;
+	END_IF
 	 m_IOOnCounts :=0;
-	 m_isTrig :=FALSE;
-END_IF
-
-IF NOT(m_isTrig) AND m_IOOnCounts>=m_IOOnCountThres THEN
-	check :=TRUE; 
-	m_isTrig := TRUE;
-ELSE
-	check :=FALSE;
 END_IF
 
 ]]></ST>
@@ -56,29 +49,23 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_IOType:=i_IOType;
-m_IOOnCountThres := i_triggerCounts;
-m_isTrig :=false;]]></ST>
+m_IOOnCountThres := i_triggerCounts;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_IOToggleCheck">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_IOToggleCheck.check">
-      <LineId Id="9" Count="3" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="2" />
-      <LineId Id="25" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="12" Count="1" />
       <LineId Id="15" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_IOToggleCheck.init">
       <LineId Id="5" Count="0" />
       <LineId Id="11" Count="0" />
-      <LineId Id="17" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
