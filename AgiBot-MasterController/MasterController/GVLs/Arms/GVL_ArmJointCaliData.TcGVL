@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_ArmJointCaliData" Id="{cbdf7771-6b3f-4bb7-8d8c-ddef3827d97f}">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_ArmJointCaliData" Id="{55cfa86d-31b7-48de-a3ec-71ba93fd6041}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot4 Data
 VAR_GLOBAL CONSTANT										 
@@ -12,12 +12,12 @@ VAR_GLOBAL CONSTANT
 	// absolute encoder value at maximum joint positon
 	g_maxLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[8963928, 15089072, 1747256, 7226288, 12212368, 1891360, 16777216,
-		 13022120, 3582816, 8511152, 13547040, 13305856, 13284352	, 16777216];
+		 13022120, 3582816, 8511152, 13355760, 13305856, 13284352	, 16777216];
 	
 	// absolute encoder value at calibrated positon
 	g_caliLinkEncoder :ARRAY[1..g_mArmNum, 1..g_mJntNum] OF DINT :=
 		[11829704, 1302576, 105152, 11634960, 5974256, 16596400, 9523824,
-		 15937604, 6509960, 10128944, 4071280, 7063664, 11098016, 8939696];
+		 15937604, 6523036, 10129420, 3988720, 7037424, 11098016, 8939696];
 	
 	 // if absolute encoder value cross zeros within joint motion range
 	 // NOTICE: joint 7 is always 0.

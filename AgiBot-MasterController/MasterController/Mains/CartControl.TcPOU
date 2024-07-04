@@ -1,10 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
 	// cart instance
 	m_masterCart :FB_MasterCart;
+	
+	//cart related UI
+	m_cartUIData : ST_CartUIData;
 	
 	// Output cart status
 	m_cartStatus AT%Q* : ST_CartStatus;
@@ -17,6 +20,9 @@ VAR
 	
 	// cart init flag
 	m_cartInit :BOOL :=FALSE;
+	
+	m_workHeartTon0 : TON;
+	m_workHeartTon1 : TON;
 	
 END_VAR
 ]]></Declaration>
@@ -33,20 +39,117 @@ IF m_cartInit =FALSE THEN
 	m_cartInit:=TRUE;
 END_IF
 
+// input from UI
+UIInputProcess();
+
 // cart run
-m_masterCart.run();
+m_masterCart.run(m_cartUIData);
 
 // status/joint data output
 m_masterCart.getStatus(m_cartStatus, m_cartJointData);
 ]]></ST>
     </Implementation>
+    <Method Name="UIInputProcess" Id="{572b15b0-e408-437d-abc5-fa6c233e3112}">
+      <Declaration><![CDATA[// tranform data from UI(global variable write by ADS) to ST_UIData
+METHOD UIInputProcess : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//init cart joint postion
+IF (gvl_com_upper_PC.Upper_PC_Initial_Finished=FALSE) THEN
+	gvl_com_upper_PC.Upper_PC_Initial_Finished:=TRUE;
+	//当前位置保存
+	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
+	GVL_com_upper_PC.ergonomic_control.ergonomic_info_modify:=TRUE;//初始化时将台车现在的位置赋值给UI；
+END_IF
+
+IF  GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics AND NOT GVL_com_upper_PC.ergonomic_control_last.recovery_Ergonomics THEN
+	GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished:=FALSE;
+	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
+	m_cartUIData.m_cmdJntPos[1] := GVL_com_upper_PC.command_ergonomic_data.head_height;
+	m_cartUIData.m_cmdJntPos[2] := GVL_com_upper_PC.command_ergonomic_data.head_angle;
+	m_cartUIData.m_cmdJntPos[3] := GVL_com_upper_PC.command_ergonomic_data.arm_height;
+	m_cartUIData.m_cmdJntPos[4] := GVL_com_upper_PC.command_ergonomic_data.foot_distance;
+	
+END_IF
+	m_cartUIData.m_ergonomicCrl.recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics;
+	
+IF (GVL_com_upper_PC.ergonomic_control_last.cancel_recovery_Ergonomics=FALSE) AND (GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics=TRUE) THEN
+	GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished:=FALSE;
+	m_cartUIData.m_cmdJntPos := m_cartUIData.m_cmdCancelErgonPos;
+END_IF
+m_cartUIData.m_ergonomicCrl.cancel_recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics;
+
+GVL_com_upper_PC.ergonomic_control_last:=GVL_com_upper_PC.ergonomic_control;
+GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished := m_cartStatus.m_cancelErgonAdjustArrival;
+GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished := m_cartStatus.m_ergonAdjustArrival;
+
+GVL_com_upper_PC.head_in:=m_cartStatus.m_surgonReady;
+
+GVL_com_upper_PC.actual_ergonomic_data.head_height := m_cartJointData.m_curJntPos[1];
+GVL_com_upper_PC.actual_ergonomic_data.head_angle := m_cartJointData.m_curJntPos[2];
+GVL_com_upper_PC.actual_ergonomic_data.arm_height := m_cartJointData.m_curJntPos[3];
+GVL_com_upper_PC.actual_ergonomic_data.foot_distance:= m_cartJointData.m_curJntPos[4];
+
+
+
+//work heart
+m_workHeartTon0(IN:= GVL_com_upper_PC.work_heart = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_com_upper_PC.work_heart = 0, PT:= T#1S, Q=> , ET=> );
+IF m_workHeartTon0.Q THEN
+	GVL_com_upper_PC.work_heart :=0 ;
+ELSIF m_workHeartTon1.Q THEN
+	GVL_com_upper_PC.work_heart  :=1 ;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="CartControl">
-      <LineId Id="16" Count="11" />
+      <LineId Id="16" Count="10" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="27" Count="0" />
       <LineId Id="31" Count="1" />
       <LineId Id="72" Count="0" />
       <LineId Id="71" Count="0" />
       <LineId Id="50" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="CartControl.UIInputProcess">
+      <LineId Id="33" Count="0" />
+      <LineId Id="37" Count="4" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="6" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="66" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

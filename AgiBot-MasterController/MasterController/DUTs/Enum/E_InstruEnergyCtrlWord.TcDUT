@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_InstruEnergyCtrlWord" Id="{5ce170a1-e2af-43ac-b33b-d67c3e68ceac}">
+    <Declaration><![CDATA[TYPE E_InstruEnergyCtrlWord :
+(
+	EnergyCtrlWord_NoOutput := 0,
+	EnergyCtrlWord_isMonopoleCut := 2,
+	EnergyCtrlWord_isMonopoleCoagul := 4,
+	EnergyCtrlWord_isBipolarCoagul := 1,
+	EnergyCtrlWord_isUltraMax := 64,
+	EnergyCtrlWord_isUltraMin := 16
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

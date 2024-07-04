@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
@@ -97,6 +97,8 @@ masterOutputData.m_motionScale :=masterStatus.m_motionScale;
 
 masterOutputData.m_slaveSelfCheckFlag := m_masterInputDataPool.m_UIData.m_selfCheckFlag;
 
+masterOutputData.m_pedalHover := m_masterInputDataPool.m_cartStatus.m_pedalHover;
+masterOutputData.m_electricKnifePedalTrigger := m_masterInputDataPool.m_cartStatus.m_electricKnifePedalTrigger;
 FOR i:=1 TO g_mArmNum DO
 	masterOutputData.m_armState[i] := masterStatus.m_armState[i];
 	masterOutputData.m_teleSlaveArmIdx[i] :=masterStatus.m_teleSlaveArmIdx[i];
@@ -146,6 +148,7 @@ FOR i:= 1 TO g_sArmNum DO
 	slaveStatus.m_instruStauts[i].m_fingerAngle := slaveInputData.m_instruStauts[i].m_fingerAngle;
 	slaveStatus.m_instruStauts[i].m_ready := slaveInputData.m_instruStauts[i].m_ready;
 	slaveStatus.m_instruStauts[i].m_type := slaveInputData.m_instruStauts[i].m_type;
+	slaveStatus.m_instruStauts[i].m_energyType := slaveInputData.m_instruEnergyType[i];
 	slaveStatus.m_curArmPose[i].m_pos :=slaveInputData.m_curArmPose[i].m_pos;
 	slaveStatus.m_curArmPose[i].m_rot :=slaveInputData.m_curArmPose[i].m_rot;
 	slaveStatus.m_masterSlavePoseError[i] := slaveInputData.m_masterSlavePoseError[i];
@@ -163,7 +166,8 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[// master-slave control scale
+        <ST><![CDATA[
+// master-slave control scale
 IF 2 = GVL_com_upper_PC.master_slave_scaling THEN
 	m_masterInputDataPool.m_UIData.m_motionScale := 2;
 ELSIF 3 = GVL_com_upper_PC.master_slave_scaling THEN
@@ -193,7 +197,15 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//TODO
-GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_selfCheckPass;]]></ST>
+GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_selfCheckPass;
+
+GVL_com_upper_PC.arm1_state_machine := m_masterStatus.m_armState[1];
+GVL_com_upper_PC.arm2_state_machine := m_masterStatus.m_armState[2];
+GVL_com_upper_PC.Master_Arm_Mapping_arm1 := m_masterStatus.m_teleSlaveArmIdx[1];
+GVL_com_upper_PC.Master_Arm_Mapping_arm2 := m_masterStatus.m_teleSlaveArmIdx[2];
+GVL_com_upper_PC.screen_lock_enable := (MasterArmState_MasterSlave <= m_masterStatus.m_armState[1]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[1]) OR (MasterArmState_MasterSlave <= m_masterStatus.m_armState[2]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[2]);
+
+GVL_com_upper_PC.version := '1(1.0.0.1)';]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="MasterArmControl">
@@ -234,7 +246,9 @@ GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_se
       <LineId Id="5" Count="0" />
       <LineId Id="102" Count="0" />
       <LineId Id="101" Count="0" />
+      <LineId Id="119" Count="0" />
       <LineId Id="23" Count="0" />
+      <LineId Id="120" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="26" Count="2" />
       <LineId Id="46" Count="1" />
@@ -261,6 +275,7 @@ GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_se
       <LineId Id="23" Count="0" />
       <LineId Id="26" Count="1" />
       <LineId Id="36" Count="1" />
+      <LineId Id="89" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="50" Count="0" />
@@ -271,6 +286,7 @@ GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_se
       <LineId Id="8" Count="0" />
     </LineIds>
     <LineIds Name="MasterArmControl.UIInputProcess">
+      <LineId Id="35" Count="0" />
       <LineId Id="13" Count="0" />
       <LineId Id="7" Count="0" />
       <LineId Id="5" Count="0" />
@@ -289,6 +305,11 @@ GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_se
     <LineIds Name="MasterArmControl.UIOutputProcess">
       <LineId Id="5" Count="0" />
       <LineId Id="9" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="3" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="19" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

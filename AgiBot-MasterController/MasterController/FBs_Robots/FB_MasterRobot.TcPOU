@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -90,6 +90,8 @@ ELSIF i_masterInputDataPool.m_slaveStatus.m_armState[3] = SlaveArmState_Disable 
 ELSIF i_masterInputDataPool.m_slaveStatus.m_armState[4] = SlaveArmState_Disable THEN
 	nextTeleSlaveArmIdx[2]:= MatchedSlaveArmIdx_3;
 END_IF
+
+
 
 // switch tele-controlled arm index when endoscope is mounted
 IF m_scopeArmIndex = MatchedSlaveArmIdx_1 OR m_scopeArmIndex = MatchedSlaveArmIdx_2 THEN
@@ -588,6 +590,8 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="81" Count="0" />
       <LineId Id="80" Count="0" />
       <LineId Id="75" Count="0" />
+      <LineId Id="114" Count="0" />
+      <LineId Id="111" Count="0" />
       <LineId Id="82" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="21" Count="0" />
