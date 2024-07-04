@@ -9,7 +9,7 @@ VAR_GLOBAL CONSTANT
 	g_faultTriggerCounts :INT :=2;
 	
 	// joint limit buffer(outside of joint limit)
-	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(30.0*g_deg2Rad)];
+	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(45.0*g_deg2Rad)];
 
 	// master arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.005;
