@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <FileVersion>1.0.0.0</FileVersion>
@@ -121,7 +121,13 @@
     <Compile Include="AgiMaths\sign.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Enum\E_InstruEnergyCtrlWord.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Enum\E_InstrumentEnergyType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
@@ -140,6 +146,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\TasksCommunication\ST_CartUIData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_MasterDynaData.TcDUT">
@@ -398,15 +407,15 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
+    <Compile Include="GVLs\Arms\GVL_ArmJointCaliData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
     <Compile Include="GVLs\Arms\GVL_ArmKinematic.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\Arms\GVL_ControlParameters.TcGVL">
-      <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
-    </Compile>
-    <Compile Include="GVLs\Arms\GVL_ArmJointCaliData.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -440,7 +449,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\Configs\Robot4\GVL_CartJointCaliData_4.TcGVL">
+    <Compile Include="GVLs\Configs\Robot4\GVL_CartJointCaliData_4_1.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

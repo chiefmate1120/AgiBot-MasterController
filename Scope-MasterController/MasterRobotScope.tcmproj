@@ -7,6 +7,9 @@
     <RootNamespace>Scope-MasterArmState</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="cartjointData.tcscopex">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="GravityCaliData.tcscopex">
       <SubType>Content</SubType>
     </Content>

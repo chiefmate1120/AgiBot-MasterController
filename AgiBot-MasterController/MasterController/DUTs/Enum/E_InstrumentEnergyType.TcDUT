@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="E_InstrumentEnergyType" Id="{fa30c82e-55d5-44ce-9ee5-7c02a2e0549f}">
+    <Declaration><![CDATA[TYPE E_InstrumentEnergyType :
+(
+	InstruType_isNull := 0,
+	InstruType_isMonopole := 1,
+	InstruType_isBipolar := 2,
+	InstruType_isUltraKnife := 3
+);
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

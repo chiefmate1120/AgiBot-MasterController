@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <DUT Name="ST_CartStatus" Id="{c5c522d4-cd8d-4693-8ddf-cc40ab1df9b3}">
     <Declaration><![CDATA[// Output from cart control task
 // Input to master arm control task  
@@ -13,6 +13,10 @@ STRUCT
 	m_instrumentPowerSwitch:BOOL := FALSE;
 	m_surgonReady :BOOL :=false;
 	m_consoleInAdjust:BOOL := FALSE;
+	m_ergonAdjustArrival :BOOL;
+	m_cancelErgonAdjustArrival :BOOL;
+	m_pedalHover : ARRAY [1..2] OF BOOL;
+	m_electricKnifePedalTrigger : ARRAY [1..2] OF INT;
 END_STRUCT
 END_TYPE
 ]]></Declaration>
