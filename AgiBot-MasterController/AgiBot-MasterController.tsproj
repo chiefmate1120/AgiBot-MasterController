@@ -1351,7 +1351,7 @@
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
-					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="92"/>
+					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="92" DongleSystemId="{0AD6B6BD-3C28-518F-8832-1E051E007FDE}"/>
 				</Target>
 			</Licenses>
 			<Tasks>
@@ -1371,7 +1371,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{4F202A4E-8220-FA27-B605-EDD9B2557D82}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{CAE92F1D-0A87-FD30-F942-FAD349B69C68}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">

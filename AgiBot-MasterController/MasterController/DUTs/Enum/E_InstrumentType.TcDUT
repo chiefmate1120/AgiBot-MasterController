@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="E_InstrumentType" Id="{d0857a03-19bb-4ed9-915e-05d1b2d79b50}">
     <Declaration><![CDATA[TYPE E_InstrumentType :
 (
@@ -16,8 +16,10 @@
 	InstruType_CauteryHook :=16,
 	InstruType_CauterySpatula :=17,
 	InstruType_Endoscope := 20,
+	InstruType_UltrasoundKnifeS :=42,
+	InstruType_UltrasoundKnifeU :=43,
 	InstruType_First := InstruType_CadiereForceps,
-	InstruType_Last := InstruType_Endoscope
+	InstruType_Last := InstruType_UltrasoundKnifeU
 );
 END_TYPE
 ]]></Declaration>

@@ -124,10 +124,10 @@
     <Compile Include="DUTs\Enum\E_InstruEnergyCtrlWord.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
+    <Compile Include="DUTs\Enum\E_InstrumentEnergyType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Enum\E_InstrumentEnergyType.TcDUT">
+    <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Enum\E_MasterArmState.TcDUT">
