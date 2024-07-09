@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="MasterArmControl" Id="{6192c11b-cd6e-4883-b627-958acfb9caf3}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM MasterArmControl
 VAR
@@ -197,7 +197,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//TODO
-GVL_com_upper_PC.self_check_finished := m_masterInputDataPool.m_slaveStatus.m_selfCheckPass;
+GVL_com_upper_PC.slaver_systemcheck_ok := BOOL_TO_UINT(m_masterInputDataPool.m_slaveStatus.m_selfCheckPass);
 
 GVL_com_upper_PC.arm1_state_machine := m_masterStatus.m_armState[1];
 GVL_com_upper_PC.arm2_state_machine := m_masterStatus.m_armState[2];
