@@ -179,6 +179,9 @@ END_IF
 // self-check
 m_masterInputDataPool.m_UIData.m_selfCheckFlag := GVL_com_upper_PC.slaver_systemcheck_enable;
 
+// hand clutch
+m_masterInputDataPool.m_UIData.m_enableHandClutch := GVL_com_upper_PC.finger_clutch;
+
 // arm disable
 m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[1]:=FALSE;
 m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[2]:=FALSE;
@@ -294,6 +297,9 @@ GVL_com_upper_PC.version := '1(1.0.0.1)';]]></ST>
       <LineId Id="16" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="14" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="42" Count="0" />
       <LineId Id="20" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="27" Count="1" />

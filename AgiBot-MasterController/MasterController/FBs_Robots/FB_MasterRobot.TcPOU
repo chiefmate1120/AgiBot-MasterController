@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -378,6 +378,7 @@ VAR_IN_OUT CONSTANT
 END_VAR
 VAR
 	i:INT;
+	enableClutch :BOOL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[// get instrument arm state
@@ -405,6 +406,10 @@ MSCtrlTriggerCheck(i_masterInputDataPool);
 
 // State machine transit 
 FOR i:=1 TO g_mArmNum DO
+	
+	// flag if enable clutch
+	enableClutch :=  i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR (m_masterArms[i].handClutchSwitch AND i_masterInputDataPool.m_UIData.m_enableHandClutch);
+	
 	CASE m_masterArmState[i] OF
 		// error
 		MasterArmState_Error:
@@ -435,7 +440,7 @@ FOR i:=1 TO g_mArmNum DO
 			IF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState THEN
 				m_nextMasterArmState[i]:=MasterArmState_Matching;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
+			ELSIF enableClutch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -463,7 +468,7 @@ FOR i:=1 TO g_mArmNum DO
 					OR m_armSwitchFlag[i] THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
+			ELSIF enableClutch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -482,7 +487,7 @@ FOR i:=1 TO g_mArmNum DO
 				OR m_armSwitchFlag[i] THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
+			ELSIF enableClutch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -492,7 +497,7 @@ FOR i:=1 TO g_mArmNum DO
 		//Clutch
 		MasterArmState_Clutch:
 			// to standby
-			IF NOT(i_masterInputDataPool.m_cartStatus.m_clutchSwitch) AND NOT(m_masterArms[i].handClutchSwitch) THEN
+			IF NOT(enableClutch) THEN
 				m_nextMasterArmState[i]:=MasterArmState_Standby;
 			END_IF
 		
@@ -503,7 +508,7 @@ FOR i:=1 TO g_mArmNum DO
 				OR (SlaveArmState_ScopeReady <> m_scopeArmState AND SlaveArmState_EndoScope <> m_scopeArmState) THEN
 				m_nextMasterArmState[i] := MasterArmState_Standby;
 			// to clutch
-			ELSIF i_masterInputDataPool.m_cartStatus.m_clutchSwitch OR m_masterArms[i].handClutchSwitch THEN
+			ELSIF enableClutch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to cart
 			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
@@ -748,6 +753,10 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="252" Count="0" />
       <LineId Id="189" Count="0" />
       <LineId Id="5" Count="0" />
+      <LineId Id="368" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="369" Count="0" />
+      <LineId Id="371" Count="0" />
       <LineId Id="15" Count="0" />
       <LineId Id="253" Count="1" />
       <LineId Id="258" Count="0" />
