@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_StateCtrlPerformance" Id="{76cdc613-4328-4a9c-b1dd-1e8dae775112}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_StateCtrlPerformance EXTENDS FB_MasterArmCtrlBase
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR CONSTANT
+	//max number of data recording points
+	m_dataSum:INT:=8000;
+END_VAR
+
+VAR
+	//test step
+	m_testStep:INT:=-1;
+	
+	//test joint
+	m_testJnt:INT;
+	
+	//Extreme joint position
+	m_minJntPos: ARRAY[1..g_mJntNum] OF LREAL;
+	m_maxJntPos: ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//home position
+	m_homeJntPos:ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//Joint motion speed, acceleration, and jerk
+	m_caliMaxjntVel:Vec7d:=[7(3.0*g_deg2rad)];
+	m_caliMaxjntAcc:Vec7d:=[7(1.0)];
+	m_caliMaxjntJerk:Vec7d:=[7(2.0)];
+	
+	//arm parameters
+	m_armId:INT;
+	
+	//index
+	i,j,id,idx:INT;
+	
+	//trajectory planner
+	m_caliTrajIdx: INT := 1;
+	m_jntIdx:INT:=1;
+	m_caliMotionSegs :INT :=4;
+	m_caliPlanner: ARRAY[1..7,1..g_mJntNum] OF FB_TrajMoveJ;
+	m_caliPlannerStart: FB_TrajMoveJ;
+	
+	//speed test variable
+	m_speedMaxTest:BOOL;
+	
+	//sampling interval
+	m_samplingInterval:INT:=80;
+	
+	//Number of data records
+	m_dataRecordNum_2,m_dataRecordNum_3:ARRAY[1..g_mJntNum] OF INT;
+			
+	//The current values of the second and third trajectories
+	m_jntCurrentId2:ARRAY[1..m_dataSum,1..g_mJntNum] OF LREAL;
+	m_jntCurrentId3:ARRAY[1..m_dataSum,1..g_mJntNum] OF LREAL;
+	
+	//friction record value
+	m_CoulombFriction,m_ViscousFriction:ARRAY[1..m_dataSum,1..g_mJntNum] OF LREAL;
+	
+	//friction summation
+	m_CoulombFrictionSum,m_ViscousFrictionSum:ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//friction averange
+	m_CoulombFrictionAve,m_ViscousFrictionAve:ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//friction maxmum value
+	m_CoulombFrictionMax,m_ViscousFrictionMax:ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//Dynamic performance testing time
+	m_t:LREAL;
+	
+	//Dynamic performance testing motion range
+	m_motionRange:ARRAY[1..g_mJntNum] OF LREAL:=[0.1,0.1,0.1,0.1,0.1,0.1,0.1];
+	
+	//Starting point for dynamic performance testing
+	m_posOffset:ARRAY[1..g_mJntNum] OF LREAL;
+	
+	//Number of dynamic performance tests
+	m_testNum:INT:=5;
+	
+	//motion Frequency and angular frequency
+	//m_Frequency:LREAL:=3; 	m_w:LREAL;
+	m_Frequency:LREAL:=1; 	m_w:LREAL;
+	
+	//motion Frequency and angular frequency for speed test
+	m_FrequencySpeed:LREAL:=0.5; 	m_wSpeed:LREAL;
+	
+	//motion range for maximum speed test
+	//m_motionRangeSpeed:ARRAY[1..g_mJntNum] OF LREAL:=[0.6,0.6,0.6,0.6,0.6,0.6,0.6];
+	m_motionRangeSpeed:ARRAY[1..g_mJntNum] OF LREAL:=[0.5,0.5,0.5,0.5,0.5,0.5,0.5];
+	
+	//joint posotion
+	initJntPos,startJntPos,endJntPos :Vec7d;
+	
+	//Motion amplitude and frequency
+	m_motionAmplitude:ARRAY[1..g_mJntNum] OF LREAL;
+	m_motionRadiusFre:LREAL;	
+	m_Fre:LREAL;
+	m_testTime:LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+
+
+]]></ST>
+    </Implementation>
+    <Method Name="calcCmdJntPos" Id="{491e3b68-2ded-4802-9555-f99c24017f37}">
+      <Declaration><![CDATA[// override this function in each exact controller
+METHOD PROTECTED calcCmdJntPos : BOOL
+
+VAR_IN_OUT CONSTANT
+	i_slaveIdx :INT;
+	i_shoulderPose :ST_Frame;
+	i_masterArm :FB_MasterArm;
+	i_slaveStatus :ST_SlaveStatus;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+CASE m_testStep OF 
+	0: //test the motion range/joint friction/joint gap
+		IF m_caliPlanner[m_jntIdx,m_caliTrajIdx].isGene = FALSE THEN
+			calcCmdJntPos:=FALSE;
+			RETURN;
+		END_IF
+		
+		// traj plan
+		calcCmdJntPos :=m_caliPlanner[m_jntIdx,m_caliTrajIdx].evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);
+		
+		// check if to transit to next segment		
+		IF(m_timePeriod > m_caliPlanner[m_jntIdx,m_caliTrajIdx].duration) THEN
+			m_caliTrajIdx:=m_caliTrajIdx+1;
+			m_timePeriod:=0;
+			idx:=0;
+			id:=0;
+			IF (m_caliTrajIdx>m_caliMotionSegs) THEN
+				m_jntIdx:=m_jntIdx+1;
+				m_caliTrajIdx:=1;				
+			END_IF			
+		END_IF
+		
+		//If all joints have been tested, enter the data processing flow
+		IF (m_jntIdx>g_mJntNum) THEN
+			m_testStep:=10;
+		END_IF
+		
+		//Record the current value during the testing process
+		IF (m_caliTrajIdx=2) THEN
+			idx:=idx+1;
+			IF (idx>=m_samplingInterval) THEN
+				idx:=0;
+				id:=id+1;
+				m_dataRecordNum_2[m_jntIdx]:=id;
+				m_jntCurrentId2[id,m_jntIdx]:=i_masterArm.filtJntCurrent[m_jntIdx]*GVL_ArmJointParameters.g_motorDir[m_armId,m_jntIdx];
+			END_IF			
+		ELSIF (m_caliTrajIdx=3) THEN
+			idx:=idx+1;
+			IF (idx>=m_samplingInterval) THEN
+				idx:=0;
+				id:=id+1;
+				m_dataRecordNum_3[m_jntIdx]:=id;
+				m_jntCurrentId3[id,m_jntIdx]:=i_masterArm.filtJntCurrent[m_jntIdx]*GVL_ArmJointParameters.g_motorDir[m_armId,m_jntIdx];
+			END_IF			
+		END_IF
+		
+	
+	10: //Process the data from the above steps
+		FOR j:=1 TO g_mJntNum BY 1 DO
+			id:=0;
+			FOR i:=1 TO m_dataRecordNum_2[j] BY 1 DO 
+				idx:=m_dataRecordNum_3[j]-i+1;
+				IF (idx>0) THEN
+					id:=id+1; //Number of groups for recording data
+					m_CoulombFriction[i,j]:=(m_jntCurrentId2[i,j]-m_jntCurrentId3[idx,j])/2;
+					m_ViscousFriction[i,j]:=(m_jntCurrentId2[i,j]+m_jntCurrentId3[idx,j])/2;
+					
+					m_CoulombFrictionSum[j]:=m_CoulombFrictionSum[j]+m_CoulombFriction[i,j];
+					m_ViscousFrictionSum[j]:=m_ViscousFrictionSum[j]+m_ViscousFriction[i,j];
+					
+					IF (m_CoulombFriction[i,j]>m_CoulombFrictionMax[j]) THEN
+						m_CoulombFrictionMax[j]:=m_CoulombFriction[i,j];
+					END_IF
+					
+					IF (m_ViscousFriction[i,j]>m_ViscousFrictionMax[j]) THEN
+						m_ViscousFrictionMax[j]:=m_ViscousFriction[i,j];
+					END_IF				
+				END_IF				
+			END_FOR			
+			//Calculate the mean of frictional force
+			m_CoulombFrictionAve[j]:=m_CoulombFrictionSum[j]/id;
+			m_ViscousFrictionAve[j]:=m_ViscousFrictionSum[j]/id;			
+		END_FOR		
+		
+		i:=1; m_t:=0;
+		m_speedMaxTest:=FALSE;
+		m_testStep:=20;
+		
+		
+	20: //m_caliPlannerStart initialization		
+		IF (m_speedMaxTest=FALSE) THEN
+			m_motionAmplitude:=m_motionRange;
+        	m_motionRadiusFre:=m_w;
+			m_Fre:=m_Frequency;
+		ELSE
+			m_motionAmplitude:=m_motionRangeSpeed; 
+			m_motionRadiusFre:=m_wSpeed;
+			m_Fre:=m_FrequencySpeed;
+		END_IF
+		
+		startJntPos:=i_masterArm.curJntPos; 
+		endJntPos:=m_homeJntPos; //m_homeJntPos---m_posOffset
+		IF (i=1) THEN
+			endJntPos[2]:=-1.657;
+			endJntPos[3]:=-0.522;
+		END_IF		
+		m_caliPlannerStart.init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+		m_timePeriod:=0;
+		m_testStep:=30;
+		
+		
+	30: //move to the start point
+		IF m_caliPlannerStart.isGene = FALSE THEN
+			calcCmdJntPos:=FALSE;
+			RETURN;
+		END_IF
+		calcCmdJntPos :=m_caliPlannerStart.evaluate(m_timePeriod, jntPos=> m_cmdJntPos, jntVel=>m_cmdJntVel, jntAcc=> m_cmdJntAcc);			
+		IF(m_timePeriod > m_caliPlannerStart.duration) THEN			
+			m_timePeriod:=0;			
+			m_testStep:=40;
+		END_IF
+		
+		
+	40: //Dynamic tracking capability test---3HZ
+		m_t:=m_t+g_armCtrlCycleTime;
+		sinusoidalMotion(posOffset:= endJntPos[i], amplitude:= m_motionAmplitude[i], t:= m_t, w:= m_motionRadiusFre, pos=> m_cmdJntPos[i], vel=> m_cmdJntVel[i], acc=> m_cmdJntAcc[i]);
+		m_testTime:=(m_testNum+0.25)/m_Fre;
+		
+		IF (m_t>m_testTime) THEN
+			m_cmdJntVel[i]:=0; 	m_cmdJntAcc[i]:=0;
+			i:=i+1;
+			m_t:=0;
+			m_testStep:=20;
+			IF (i=8) AND (m_speedMaxTest=FALSE) THEN
+				i:=1;
+				m_speedMaxTest:=TRUE;
+				m_testStep:=20;
+			ELSIF (i=8) AND (m_speedMaxTest=TRUE) THEN
+				i:=1;
+				m_testStep:=-1;
+				m_isFinished:=TRUE;
+			END_IF
+		END_IF
+	
+		
+	50: //
+		
+	
+	-1: //
+END_CASE
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{d910faf7-3b91-4fe3-a706-4b415fe49d9b}">
+      <Declaration><![CDATA[// override this function in each exact controller
+// NOTICE: set joint control mode here, and do some initialization if needed
+METHOD PUBLIC init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm	:FB_MasterArm;
+END_VAR
+VAR_IN_OUT 
+	r_masterArmCtrlCmd :ST_ArmCtrlCmds;
+END_VAR
+VAR
+	//
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+
+
+//arm id and joint position initial
+m_armId:=i_masterArm.armIdx;
+initJntPos:=i_masterArm.curJntPos;
+startJntPos:=initJntPos;
+endJntPos:=initJntPos;
+
+
+//Assignment of joint position limit values and home position
+FOR j:=1 TO g_mJntNum BY 1 DO
+	m_minJntPos[j]:=GVL_ArmJointParameters.g_minJntPos[m_armId,j]+20*g_deg2Rad;
+	m_maxJntPos[j]:=GVL_ArmJointParameters.g_maxJntPos[m_armId,j]-20*g_deg2Rad;
+	m_posOffset[j]:=(m_minJntPos[j]+m_maxJntPos[j])/2;
+	m_homeJntPos[j]:=GVL_ArmJointCaliData.g_linkEncCaliJntPos[m_armId,j];
+END_FOR
+
+
+//Joint 7 has a wide range of motion and requires special treatment
+m_minJntPos[7]:=50*g_deg2Rad;
+m_maxJntPos[7]:=-50*g_deg2Rad;
+
+
+//step/joint id/ trajectory id
+m_testStep:=0;
+m_caliTrajIdx :=1;
+m_jntIdx:=1;
+
+
+//Trajectory generator initialization
+FOR j:=1 TO g_mJntNum BY 1 DO
+	FOR id:=1 TO 4 BY 1 DO
+		startJntPos:=endJntPos;
+		endJntPos:=m_homeJntPos;
+		
+		IF (j=1) THEN
+			endJntPos[2]:=-1.657;
+			endJntPos[3]:=-0.522;
+		END_IF
+		
+		IF (id=1) THEN
+			endJntPos[j]:=m_minJntPos[j]; //minimum
+		ELSIF (id=2) THEN
+			endJntPos[j]:=m_maxJntPos[j]; //maximum
+		ELSIF (id=3) THEN
+			endJntPos[j]:=m_minJntPos[j]; //minimum
+		ELSIF (id=4) THEN
+			endJntPos[j]:=m_homeJntPos[j]; //home---m_posOffset
+		END_IF
+		m_caliPlanner[j,id].init(startJntPos,endJntPos,m_caliMaxjntVel, m_caliMaxJntAcc, m_caliMaxJntJerk);
+	END_FOR
+END_FOR
+
+
+//Initialization of calculation results
+FOR j:=1 TO g_mJntNum BY 1 DO
+	m_CoulombFrictionSum[j]:=0; 	m_CoulombFrictionMax[j]:=0; 	m_CoulombFrictionAve[j]:=0;	
+	m_ViscousFrictionSum[j]:=0;	 m_ViscousFrictionMax[j]:=0;	 m_ViscousFrictionAve[j]:=0;
+END_FOR
+
+
+//motion frequency
+m_w:=2.0*pi*m_Frequency;
+m_wSpeed:=2.0*pi*m_FrequencySpeed;
+
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="sinusoidalMotion" Id="{87e17a15-12ec-4e4b-a396-a289a8505a82}">
+      <Declaration><![CDATA[METHOD sinusoidalMotion : BOOL
+VAR_INPUT
+	posOffset:LREAL;
+	amplitude:LREAL;
+	t:LREAL; //time
+	w:LREAL; //angular frequency
+END_VAR
+
+VAR_OUTPUT
+	pos:LREAL;
+	vel:LREAL;
+	acc:LREAL;
+END_VAR
+
+VAR
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+pos:=posOffset+amplitude*SIN(w*t);
+vel:=amplitude*w*COS(w*t);
+acc:=-amplitude*w*w*SIN(w*t);
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_StateCtrlPerformance">
+      <LineId Id="10" Count="3" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlPerformance.calcCmdJntPos">
+      <LineId Id="12" Count="1" />
+      <LineId Id="36" Count="18" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="59" Count="2" />
+      <LineId Id="55" Count="1" />
+      <LineId Id="62" Count="16" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="80" Count="24" />
+      <LineId Id="117" Count="1" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="157" Count="12" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="152" Count="2" />
+      <LineId Id="175" Count="8" />
+      <LineId Id="172" Count="2" />
+      <LineId Id="184" Count="21" />
+      <LineId Id="155" Count="1" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="218" Count="1" />
+      <LineId Id="217" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlPerformance.init">
+      <LineId Id="12" Count="1" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="3" />
+      <LineId Id="18" Count="1" />
+      <LineId Id="28" Count="4" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="104" Count="0" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="87" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="51" Count="5" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="123" Count="0" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="57" Count="10" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="45" Count="3" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="72" Count="1" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="15" Count="1" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlPerformance.sinusoidalMotion">
+      <LineId Id="15" Count="3" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
