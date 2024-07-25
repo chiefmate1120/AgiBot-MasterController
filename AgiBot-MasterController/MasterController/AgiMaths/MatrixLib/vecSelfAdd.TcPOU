@@ -18,6 +18,7 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(vecA,1);
+ASSERT(UPPER_BOUND(VecB,1)=m);
 
 FOR i:=1 TO m DO
 		vecA[i]:=vecA[i]+vecB[i];
@@ -25,6 +26,7 @@ END_FOR]]></ST>
     </Implementation>
     <LineIds Name="vecSelfAdd">
       <LineId Id="53" Count="0" />
+      <LineId Id="68" Count="0" />
       <LineId Id="52" Count="0" />
       <LineId Id="29" Count="0" />
       <LineId Id="31" Count="0" />

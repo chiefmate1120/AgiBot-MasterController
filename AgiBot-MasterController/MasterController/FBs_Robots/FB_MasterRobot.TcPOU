@@ -452,6 +452,9 @@ FOR i:=1 TO g_mArmNum DO
 			// to ready
 			IF m_armCtrl[i].isFinished THEN
 				m_nextMasterArmState[i]:=MasterArmState_Ready;
+			// to clutch
+			ELSIF enableClutch THEN
+				m_nextMasterArmState[i] := MasterArmState_Clutch; 
 			// to standby
 			ELSIF SlaveArmState_InstruReady <> m_instruArmState[i] OR SlaveArmState_ScopeReady <> m_scopeArmState
 						OR m_armSwitchFlag[i] THEN
@@ -556,8 +559,8 @@ END_FOR
 
 // To Endoscope Control 
 IF SlaveArmState_ScopeReady = m_scopeArmState AND i_masterInputDataPool.m_cartStatus.m_endoscopeSwitch AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND
-  (MasterArmState_Standby = m_masterArmState[1] OR MasterArmState_Ready = m_masterArmState[1] OR MasterArmState_MasterSlave = m_masterArmState[1]) AND 
-  (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
+  (MasterArmState_Standby = m_masterArmState[1] OR MasterArmState_Ready = m_masterArmState[1] OR MasterArmState_Matching = m_masterArmState[1] OR MasterArmState_MasterSlave = m_masterArmState[1]) AND 
+  (MasterArmState_Standby = m_masterArmState[2] OR MasterArmState_Ready = m_masterArmState[2] OR MasterArmState_Matching = m_masterArmState[2] OR MasterArmState_MasterSlave = m_masterArmState[2]) THEN
 	m_nextMasterArmState[1] := MasterArmState_Endoscope;
 	m_nextMasterArmState[2] := MasterArmState_Endoscope;
 END_IF]]></ST>
@@ -781,6 +784,8 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="130" Count="0" />
       <LineId Id="208" Count="0" />
       <LineId Id="131" Count="1" />
+      <LineId Id="381" Count="1" />
+      <LineId Id="380" Count="0" />
       <LineId Id="210" Count="0" />
       <LineId Id="212" Count="0" />
       <LineId Id="333" Count="0" />

@@ -24,6 +24,9 @@ END_VAR
       <ST><![CDATA[m:=UPPER_BOUND(matA,1);
 p:=UPPER_BOUND(matA,2);
 n:=UPPER_BOUND(matB,2);
+ASSERT(UPPER_BOUND(matB,1)=p);
+ASSERT(UPPER_BOUND(matC,1)=m);
+ASSERT(UPPER_BOUND(matC,2)=n);
 
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
@@ -42,6 +45,9 @@ END_FOR]]></ST>
     </Implementation>
     <LineIds Name="matMultiply">
       <LineId Id="78" Count="2" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="117" Count="0" />
       <LineId Id="96" Count="0" />
       <LineId Id="75" Count="0" />
       <LineId Id="82" Count="2" />

@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="ASSERT" Id="{ba49b7c8-3131-4df5-a3e8-52027de90f57}" SpecialFunc="None">
+    <Declaration><![CDATA[// this function is used to check if input statament is true.
+// if false, the code will trigger a zero-devide exception and stop the whole program by PLC
+FUNCTION ASSERT : BOOL
+VAR_INPUT
+	statement:BOOL;
+END_VAR
+VAR
+	zero:INT :=0;
+	res :REAL:=0;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT(statement) THEN
+	res := 1/zero;
+END_IF
+
+ASSERT := true;]]></ST>
+    </Implementation>
+    <LineIds Name="ASSERT">
+      <LineId Id="7" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="18" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
