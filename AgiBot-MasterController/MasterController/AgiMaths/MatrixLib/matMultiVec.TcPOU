@@ -19,7 +19,7 @@ END_VAR]]></Declaration>
       <ST><![CDATA[m:=UPPER_BOUND(matA,1);
 n:= UPPER_BOUND(matA,2);
 ASSERT(UPPER_BOUND(vecA,1)=n);
-ASSERT(UPPER_BOUND(vecB,1)=n);
+ASSERT(UPPER_BOUND(vecB,1)=m);
 FOR i:=1 TO m DO
 	vecB[i]:=0.0;
 	FOR j:=1 TO n DO
