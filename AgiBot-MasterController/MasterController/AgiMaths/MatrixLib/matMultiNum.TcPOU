@@ -22,6 +22,9 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(matB,1);
 n:= UPPER_BOUND(matB,2);
+ASSERT(UPPER_BOUND(matA,1)=m);
+ASSERT(UPPER_BOUND(matA,2)=n);
+
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
 		matB[i,j]:=num*matA[i,j];
@@ -30,6 +33,9 @@ END_FOR]]></ST>
     </Implementation>
     <LineIds Name="matMultiNum">
       <LineId Id="53" Count="1" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="74" Count="0" />
       <LineId Id="29" Count="2" />
       <LineId Id="35" Count="0" />
       <LineId Id="26" Count="0" />

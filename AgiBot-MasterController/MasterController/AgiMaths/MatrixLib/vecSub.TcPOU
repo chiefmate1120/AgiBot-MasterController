@@ -20,13 +20,17 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(VecA,1);
+ASSERT(UPPER_BOUND(VecB,1)=m);
+ASSERT(UPPER_BOUND(VecC,1)=m);
 
 FOR i:=1 TO m DO
 	vecC[i]:=vecA[i]-vecB[i];
 END_FOR]]></ST>
     </Implementation>
     <LineIds Name="vecSub">
-      <LineId Id="69" Count="2" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="70" Count="1" />
       <LineId Id="73" Count="0" />
       <LineId Id="68" Count="0" />
     </LineIds>

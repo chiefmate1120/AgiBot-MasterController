@@ -22,13 +22,16 @@ END_VAR
 ]]></Declaration>
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(vecA,1);
+ASSERT(UPPER_BOUND(VecB,1)=m);
 
 FOR i:=1 TO m DO
 		vecB[i]:=num*vecA[i];
 END_FOR]]></ST>
     </Implementation>
     <LineIds Name="vecMultiNum">
-      <LineId Id="53" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="54" Count="0" />
       <LineId Id="29" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="26" Count="0" />

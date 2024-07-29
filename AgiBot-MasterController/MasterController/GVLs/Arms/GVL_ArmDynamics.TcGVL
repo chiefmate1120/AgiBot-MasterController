@@ -1,9 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<<<<<<< HEAD
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_ArmDynamics" Id="{82cdd38f-f1c8-4393-b13b-936f3f0512c5}">
+=======
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <GVL Name="GVL_ArmDynamics" Id="{4676821f-db1e-4a84-94f4-713e56b9e2e1}">
+>>>>>>> origin/develop
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
-// Robot4 Data
+// Robot5 Data
 VAR_GLOBAL CONSTANT
 	// arm gravity parameters
 	(*graParam=[ 2.7244*m3 + 2.7244*m4 + 2.7244*m5 + 2.7244*m6 + 9.8*mx2 + 9.8*mx9,
@@ -13,6 +18,7 @@ VAR_GLOBAL CONSTANT
 				mz5-my4,	my5+mz6,  	mx4,   	mx5, 	mx6,   	my6
 				preF2,   k2,   preF3,    k3,    preF5   k5]*)
 	g_gravityParam :ARRAY[1..2, 1..16] OF REAL := 
+<<<<<<< HEAD
 		[ 6.3392449, -0.0002385075, 3.0933659, 0.70940223, -0.034834554, 0.025682828, 0.0000375, 0.0000351, 0.00001, -0.015893351, 
 		  7.7845, 3169.461, 15.57162, 1727.0133, 1.112, 542.07868,
 		  6.2170758, -0.0002385075, 3.7070752, 0.91604839, -0.035060927, 0.025794159, 0.0000125, 0.0000117, -0.0000099999997, -0.015224975, 
@@ -23,8 +29,20 @@ VAR_GLOBAL CONSTANT
 	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
 	[ 0.28041195, 0.0099822733, 0.34005097, 0.0093373104,
 	0.25987842, 0.010223684, 0.24576829, 0.0051638863];
-	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
+=======
+		[  6.233821, -0.0007155225, 2.1490133, 0.48504608, -0.04459068, 0.026744535, 0.0000125, 0.0000117, -0.00001, -0.016609005, 
+		  7.7845, 3195.0, 7.7845, 1307.2023, 1.112, 559.81848,
+		  6.1554212, -0.0007155225, 2.7407729, 0.48504608, -0.036823967, 0.023888653, 0.0000375, 0.0000117, -0.00001, -0.016609005, 
+		  7.7845252, 3194.9998, 7.7845, 1621.7158, 3.336, 454.73229];
 	
+	// arm friction parameters [a1,b1,...a7,b7];
+	// friction = a * gravity + b; only joint 5 and 6 is identified
+	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=
+	[0.26783306, 0.010838125, 0.16823959, 0.014497874,
+	 0.23963001, 0.010367281, 0.32339166, 0.0044046397];
+>>>>>>> origin/develop
+	g_maxJntFriction : Vec7d :=[0, 0, 0, 0, 0.05, 0.05, 0];
+
 	//################ dynamic reference model parameters below ###########################
 	// link mass [m1, m2, m3, m4, m5, m6, m7, m8, m9]
 	g_linkMass :ARRAY[1..9] OF LREAL :=[2.676, 0.825, 0.547, 0.25, 0.195, 0.194, 0.05, 0.111, 0.09] ;

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="matAdd" Id="{17cd4287-e232-42e8-b50d-782248cceaa0}" SpecialFunc="None">
+  <POU Name="matAdd" Id="{4e22d7b7-80d8-4535-9c7a-bbfaf09d968a}" SpecialFunc="None">
     <Declaration><![CDATA[// C = A + B;
 FUNCTION matAdd : BOOL
 VAR_IN_OUT CONSTANT
@@ -21,14 +21,24 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(matC,1);
 n:= UPPER_BOUND(matC,2);
+ASSERT(UPPER_BOUND(matA,1)=m);
+ASSERT(UPPER_BOUND(matA,2)=n);
+ASSERT(UPPER_BOUND(matB,1)=m);
+ASSERT(UPPER_BOUND(matB,2)=n);
+
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
-		matC[i,j]:=matA[i,j]+ matB[i,j];
+		matC[i,j]:=matA[i,j] + matB[i,j];
 	END_FOR
 END_FOR]]></ST>
     </Implementation>
     <LineIds Name="matAdd">
-      <LineId Id="69" Count="5" />
+      <LineId Id="69" Count="1" />
+      <LineId Id="95" Count="1" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="71" Count="3" />
       <LineId Id="68" Count="0" />
     </LineIds>
   </POU>

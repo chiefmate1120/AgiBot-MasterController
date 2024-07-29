@@ -18,6 +18,8 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(matA,1);
 n:= UPPER_BOUND(matA,2);
+ASSERT(UPPER_BOUND(vecA,1)=n);
+ASSERT(UPPER_BOUND(vecB,1)=m);
 FOR i:=1 TO m DO
 	vecB[i]:=0.0;
 	FOR j:=1 TO n DO
@@ -28,6 +30,7 @@ END_FOR]]></ST>
     <LineIds Name="matMultiVec">
       <LineId Id="46" Count="0" />
       <LineId Id="45" Count="0" />
+      <LineId Id="60" Count="1" />
       <LineId Id="7" Count="0" />
       <LineId Id="19" Count="0" />
       <LineId Id="15" Count="0" />

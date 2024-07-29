@@ -16,8 +16,10 @@
 	InstruType_CauteryHook :=16,
 	InstruType_CauterySpatula :=17,
 	InstruType_Endoscope := 20,
+	InstruType_UltrasoundKnifeS :=42,
+	InstruType_UltrasoundKnifeU :=43,
 	InstruType_First := InstruType_CadiereForceps,
-	InstruType_Last := InstruType_Endoscope
+	InstruType_Last := InstruType_UltrasoundKnifeU
 );
 END_TYPE
 ]]></Declaration>

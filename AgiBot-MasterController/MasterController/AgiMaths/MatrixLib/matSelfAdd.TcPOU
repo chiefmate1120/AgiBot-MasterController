@@ -20,6 +20,8 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(matA,1);
 n:= UPPER_BOUND(matA,2);
+ASSERT(UPPER_BOUND(matB,1)=m);
+ASSERT(UPPER_BOUND(matB,2)=n);
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
 		matA[i,j]:=matA[i,j]+matB[i,j];
@@ -29,6 +31,7 @@ END_FOR]]></ST>
     <LineIds Name="matSelfAdd">
       <LineId Id="53" Count="0" />
       <LineId Id="52" Count="0" />
+      <LineId Id="69" Count="1" />
       <LineId Id="29" Count="2" />
       <LineId Id="35" Count="0" />
       <LineId Id="26" Count="0" />

@@ -4,6 +4,7 @@
   <FileName></FileName>
   <Children>
     <Node>
+<<<<<<< HEAD
       <Title>cartjointData</Title>
       <Expanded>False</Expanded>
       <FileName>C:\Robot\mCrlSfteware\VerHistory\YANGXZ\AgiBot-MasterController6.29\Scope-MasterController\cartjointData.tcscopex</FileName>
@@ -300,6 +301,12 @@
           <Children />
         </Node>
       </Children>
+=======
+      <Title>cartjointData.tcscopex</Title>
+      <Expanded>False</Expanded>
+      <FileName></FileName>
+      <Children />
+>>>>>>> origin/develop
     </Node>
     <Node>
       <Title>GravityCaliData</Title>
@@ -864,19 +871,67 @@
           <FileName></FileName>
           <Children>
             <Node>
-              <Title>m_masterArmState[1]</Title>
+              <Title>cartTrackVel</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_masterArmState[2]</Title>
+              <Title>cartTrackVel[1]</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
             </Node>
             <Node>
-              <Title>m_scopeArmState</Title>
+              <Title>cartTrackVel[2]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>cartTrackVel[3]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>errAngle</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>jntTrackVel[1]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>jntTrackVel[2]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>jntTrackVel[3]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>jntTrackVel[4]</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_jnt6bias</Title>
+              <Expanded>False</Expanded>
+              <FileName></FileName>
+              <Children />
+            </Node>
+            <Node>
+              <Title>m_redunJnt4Vel</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
               <Children />
@@ -894,19 +949,19 @@
               <FileName></FileName>
               <Children>
                 <Node>
-                  <Title>m_masterArmState[1]</Title>
+                  <Title>cartTrackVel[1]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_masterArmState[2]</Title>
+                  <Title>cartTrackVel[2]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
                 </Node>
                 <Node>
-                  <Title>m_scopeArmState</Title>
+                  <Title>cartTrackVel[3]</Title>
                   <Expanded>False</Expanded>
                   <FileName></FileName>
                   <Children />
@@ -917,13 +972,45 @@
               <Title>Axis Group (2)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
-              <Children />
+              <Children>
+                <Node>
+                  <Title>jntTrackVel[1]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>jntTrackVel[2]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>jntTrackVel[3]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+                <Node>
+                  <Title>jntTrackVel[4]</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+              </Children>
             </Node>
             <Node>
               <Title>Axis Group (3)</Title>
               <Expanded>False</Expanded>
               <FileName></FileName>
-              <Children />
+              <Children>
+                <Node>
+                  <Title>errAngle</Title>
+                  <Expanded>False</Expanded>
+                  <FileName></FileName>
+                  <Children />
+                </Node>
+              </Children>
             </Node>
           </Children>
         </Node>

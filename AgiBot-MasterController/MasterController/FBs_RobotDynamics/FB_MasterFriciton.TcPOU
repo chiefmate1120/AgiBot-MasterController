@@ -8,7 +8,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// joint friction compensation scale
-	m_frictionCompScale :Vec7d :=[0, 0, 0, 0, 0.8, 0.8, 0];
+	m_frictionCompScale :Vec7d :=[0, 0, 0, 0, 0.8, 0.4, 0];
 	
 	// joint velocity threshold for coulomb friction transition
 	m_cFrictionVelThres : LREAL := 5.0 * g_deg2Rad;

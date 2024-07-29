@@ -21,6 +21,8 @@ END_VAR
     <Implementation>
       <ST><![CDATA[m:=UPPER_BOUND(matB,1);
 n:= UPPER_BOUND(matB,2);
+ASSERT(UPPER_BOUND(matA,1)=n);
+ASSERT(UPPER_BOUND(matA,2)=m);
 FOR i:=1 TO m DO
 	FOR j:=1 TO n DO
 		matB[i,j]:=matA[j,i];
@@ -30,6 +32,8 @@ END_FOR]]></ST>
     <LineIds Name="matTranspose">
       <LineId Id="53" Count="0" />
       <LineId Id="52" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="70" Count="0" />
       <LineId Id="29" Count="2" />
       <LineId Id="35" Count="0" />
       <LineId Id="26" Count="0" />

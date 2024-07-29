@@ -38,7 +38,11 @@ VAR
 	m_cartLockSignalLeft AT %I* :BOOL;
 	m_cartLockSignalRight AT %I* :BOOL;
 	
+<<<<<<< HEAD
 	m_eleKnifeCrlWord AT %Q* :DINT;
+=======
+	m_elecKnifeCtrlWord AT %Q* :DINT;
+>>>>>>> origin/develop
 	
 	// cart status
 	m_cartStatus  : ST_CartStatus;
@@ -77,7 +81,10 @@ VAR
 	m_UIData : ST_CartUIData;
 	m_jntSoftwareLimit :ARRAY [1..4] OF LREAL := [0.002, 2*g_deg2Rad, 0.002, 0.005];
 	m_cmdArrival : Vec4b;
+<<<<<<< HEAD
 	m_cartCmdArrival : BOOL;
+=======
+>>>>>>> origin/develop
 	
 	// cart joint status data
 	m_curMotorPos :Vec4d;
@@ -95,6 +102,7 @@ END_VAR
       <ST><![CDATA[]]></ST>
     </Implementation>
     <Folder Name="property" Id="{37b9f91a-fbe1-4cae-807d-574d49e247d7}" />
+<<<<<<< HEAD
     <Method Name="curAndUiCmdCheck" Id="{58f1d629-33ee-4e90-90f3-a5c453c13e46}">
       <Declaration><![CDATA[METHOD curAndUiCmdCheck : Vec4b
 VAR_INput
@@ -121,6 +129,8 @@ END_FOR
 	]]></ST>
       </Implementation>
     </Method>
+=======
+>>>>>>> origin/develop
     <Method Name="eleKnifeCtrl" Id="{802e30d4-05e6-4f42-9cf9-00572025b770}">
       <Declaration><![CDATA[METHOD eleKnifeCtrl : DINT
 VAR_IN_OUT CONSTANT
@@ -348,6 +358,23 @@ X0:=ACOS((E*E+X12*X12-X9*X9)/(2*E*X12));
 monitorAngMotor2Link:=X0-offset;]]></ST>
       </Implementation>
     </Method>
+    <Method Name="reachUITargetCheck" Id="{58f1d629-33ee-4e90-90f3-a5c453c13e46}">
+      <Declaration><![CDATA[METHOD reachUITargetCheck : bool
+VAR
+	i :INT;
+	err:Vec4d;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[vecSub(m_UIData.m_cmdJntPos,m_curJntPos, err);
+
+// joint error check
+FOR i:=1 TO 4 DO 
+	m_cmdArrival[i] :=  ABS(err[i]) < m_jntSoftwareLimit[i];
+END_FOR
+	]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="run" Id="{5adedbe6-c484-4199-b427-bc8af7c6d1b0}">
       <Declaration><![CDATA[METHOD PUBLIC run : BOOL
 VAR_IN_OUT CONSTANT
@@ -399,8 +426,12 @@ VAR
 	i:INT;
 END_VAR]]></Declaration>
       <Implementation>
+<<<<<<< HEAD
         <ST><![CDATA[
 FOR i := 1 TO 4 DO
+=======
+        <ST><![CDATA[FOR i := 1 TO 4 DO
+>>>>>>> origin/develop
 	IF m_jntCmdMotionDir[i] <> 0 THEN
 		manualAdjust(i);
 	ELSIF m_UIData.m_ergonomicCrl.recovery_Ergonomics OR m_UIData.m_ergonomicCrl.cancel_recovery_Ergonomics THEN
@@ -408,7 +439,11 @@ FOR i := 1 TO 4 DO
 	END_IF
 END_FOR
 
+<<<<<<< HEAD
 m_cmdArrival := curAndUiCmdCheck(i_cmdJntPos:= m_UIData.m_cmdJntPos, i_curJntPos:= m_curJntPos);
+=======
+reachUITargetCheck();
+>>>>>>> origin/develop
 IF m_cmdArrival[1] AND m_cmdArrival[2] AND m_cmdArrival[3] AND m_cmdArrival[4] THEN
 	m_cartStatus.m_ergonAdjustArrival := m_UIData.m_ergonomicCrl.recovery_Ergonomics;
 	m_cartStatus.m_cancelErgonAdjustArrival := m_UIData.m_ergonomicCrl.cancel_recovery_Ergonomics;
@@ -436,7 +471,11 @@ m_cartStatus.m_armSwitch :=m_armSwitchCheck.check(m_armSwitchIO);
 m_UIData := i_cartUIData;
 
 //updata Electrotome control
+<<<<<<< HEAD
 m_eleKnifeCrlWord := eleKnifeCtrl(MasterArmControl.m_masterStatus.m_armState , MasterArmControl.m_masterStatus.m_teleSlaveArmIdx , MasterArmControl.m_masterInputDataPool.m_slaveStatus.m_instruStauts );
+=======
+m_elecKnifeCtrlWord := eleKnifeCtrl(MasterArmControl.m_masterStatus.m_armState , MasterArmControl.m_masterStatus.m_teleSlaveArmIdx , MasterArmControl.m_masterInputDataPool.m_slaveStatus.m_instruStauts );
+>>>>>>> origin/develop
 
 //updata pedal hover and pedal trigger
 m_cartStatus. m_pedalHover[1] := m_electricCutLeftAllow OR m_electricCoagulLeftAllow;
@@ -544,6 +583,7 @@ END_FOR]]></ST>
     <LineIds Name="FB_MasterCart">
       <LineId Id="9" Count="0" />
     </LineIds>
+<<<<<<< HEAD
     <LineIds Name="FB_MasterCart.curAndUiCmdCheck">
       <LineId Id="123" Count="0" />
       <LineId Id="125" Count="3" />
@@ -553,6 +593,8 @@ END_FOR]]></ST>
       <LineId Id="134" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
+=======
+>>>>>>> origin/develop
     <LineIds Name="FB_MasterCart.eleKnifeCtrl">
       <LineId Id="9" Count="0" />
       <LineId Id="8" Count="0" />
@@ -645,6 +687,13 @@ END_FOR]]></ST>
       <LineId Id="19" Count="0" />
       <LineId Id="18" Count="0" />
     </LineIds>
+    <LineIds Name="FB_MasterCart.reachUITargetCheck">
+      <LineId Id="123" Count="0" />
+      <LineId Id="125" Count="2" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
     <LineIds Name="FB_MasterCart.run">
       <LineId Id="33" Count="0" />
       <LineId Id="35" Count="0" />
@@ -669,7 +718,10 @@ END_FOR]]></ST>
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.updateCmds">
+<<<<<<< HEAD
       <LineId Id="114" Count="0" />
+=======
+>>>>>>> origin/develop
       <LineId Id="108" Count="2" />
       <LineId Id="112" Count="1" />
       <LineId Id="111" Count="0" />

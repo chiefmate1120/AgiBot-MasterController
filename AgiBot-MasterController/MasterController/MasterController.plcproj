@@ -94,25 +94,25 @@
     <Compile Include="AgiMaths\MatrixLib\rot2AngAxis.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecAdd.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="AgiMaths\MatrixLib\norm.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\normalize.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\vecAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecSelfSub.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\vecMultiNum.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecSelfAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSelfMultiNum.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="AgiMaths\MatrixLib\vecMultiNum.TcPOU">
+    <Compile Include="AgiMaths\MatrixLib\vecSelfSub.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecSub.TcPOU">
@@ -124,6 +124,12 @@
     <Compile Include="DUTs\Enum\E_InstruEnergyCtrlWord.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+<<<<<<< HEAD
+=======
+    <Compile Include="DUTs\Enum\E_InstrumentEnergyType.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+>>>>>>> origin/develop
     <Compile Include="DUTs\Enum\E_InstrumentType.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -509,6 +515,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Mains\SafetyCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\ASSERT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">

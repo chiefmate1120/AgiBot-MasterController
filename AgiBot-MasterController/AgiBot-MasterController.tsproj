@@ -1351,11 +1351,11 @@
 			</Settings>
 			<Licenses CacheOrCheckLicensesOnStartup="true">
 				<Target>
-					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="92"/>
+					<LicenseDevice DongleHardwareId="2" DongleDevice="#x03020014" DongleLevel="92" DongleSystemId="{0AD6B6BD-3C28-518F-8832-1E051E007FDE}"/>
 				</Target>
 			</Licenses>
 			<Tasks>
-				<Task Id="3" Priority="1" CycleTime="10000" AmsPort="350" Affinity="#x00000040" AdtTasks="true">
+				<Task Id="3" Priority="1" CycleTime="2500" AmsPort="350" Affinity="#x00000040" AdtTasks="true">
 					<Name>TaskArmControl</Name>
 				</Task>
 				<Task Id="4" Priority="2" CycleTime="10000" AmsPort="351" Affinity="#x00000002" AdtTasks="true">
@@ -1371,7 +1371,11 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+<<<<<<< HEAD
 				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc">
+=======
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{6DB22053-4A00-5199-8B20-2FD45BFBA709}">
+>>>>>>> origin/develop
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1707,7 +1711,11 @@
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
 						<Name>TaskCartControl Outputs</Name>
 						<Var>
+<<<<<<< HEAD
 							<Name>CartControl.m_masterCart.m_eleKnifeCrlWord</Name>
+=======
+							<Name>CartControl.m_masterCart.m_elecKnifeCtrlWord</Name>
+>>>>>>> origin/develop
 							<Type>DINT</Type>
 						</Var>
 						<Var>
@@ -1785,6 +1793,16 @@
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
+<<<<<<< HEAD
+=======
+					<UnrestoredVarLinks ImportTime="2024-07-04T20:25:23">
+						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
+							<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 45 (AX58200_MotorControl)">
+								<Link VarA="CartControl.m_masterCart.m_eleKnifeCrlWord" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
+							</OwnerB>
+						</OwnerA>
+					</UnrestoredVarLinks>
+>>>>>>> origin/develop
 					<Contexts>
 						<Context>
 							<Id NeedCalleeCall="true">0</Id>
@@ -1793,7 +1811,7 @@
 								<OTCID>#x02010030</OTCID>
 							</ManualConfig>
 							<Priority>1</Priority>
-							<CycleTime>1000000</CycleTime>
+							<CycleTime>250000</CycleTime>
 						</Context>
 						<Context>
 							<Id NeedCalleeCall="true">1</Id>
@@ -4380,9 +4398,15 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008B0000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0320-500811000403}" Id="#x02030090"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0320-500821000403}" Id="#x02030060"/>
+<<<<<<< HEAD
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030040" Watchdog="04000000040000000400000004000000"/>
+=======
+		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030040" Watchdog="10000000040000000400000004000000"/>
+>>>>>>> origin/develop
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x02030070" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterController^MasterController Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1">
@@ -4464,7 +4488,11 @@
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[7].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 45 (AX58200_MotorControl)">
+<<<<<<< HEAD
 				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_eleKnifeCrlWord" VarB="RxPdoMappingCspCsv^Target velocity"/>
+=======
+				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_elecKnifeCtrlWord" VarB="RxPdoMappingCspCsv^Target velocity"/>
+>>>>>>> origin/develop
 			</OwnerB>
 			<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 46 (EL6695-0002)">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_slaveRobotData" VarB="IO Inputs^SlaveRobotData"/>
