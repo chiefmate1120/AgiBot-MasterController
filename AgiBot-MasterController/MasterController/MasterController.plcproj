@@ -358,6 +358,9 @@
     <Compile Include="FBs_StateControllers\FB_StateCtrlError.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FBs_StateControllers\FB_StateCtrlPerformance.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FBs_StateControllers\FB_StateCtrlReady.TcPOU">
       <SubType>Code</SubType>
     </Compile>

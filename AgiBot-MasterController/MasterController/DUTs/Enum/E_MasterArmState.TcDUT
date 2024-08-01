@@ -18,8 +18,9 @@ TYPE E_MasterArmState :
 	MasterArmState_GravityCali := 11,
 	MasterArmState_Test :=12,
 	MasterArmState_Disable :=13,
+	MasterArmState_Performance :=14,
 	
-	MasterArmState_totalNum :=MasterArmState_Disable
+	MasterArmState_totalNum :=MasterArmState_Performance
 );
 END_TYPE
 ]]></Declaration>
