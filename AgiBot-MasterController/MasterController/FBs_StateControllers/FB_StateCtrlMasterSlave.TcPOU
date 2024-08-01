@@ -9,7 +9,7 @@ VAR_OUTPUT
 END_VAR
 VAR
 	// joint4 controller
-	m_redunJntCtrl : FB_RedunJntControlNew;
+	m_redunJntCtrl : FB_RedunJntControl;
 	
 	// flag if project joint4 torque to nullspace
 	m_nullspaceCtrl : BOOL :=FALSE;

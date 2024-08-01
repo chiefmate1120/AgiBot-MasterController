@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_RedunJntControl_bak" Id="{d0b0d8e9-bad5-4551-a3a8-7016dc443775}" SpecialFunc="None">
+    <Declaration><![CDATA[// Author: Feijian Ni
+// Date: 2023.11.22
+FUNCTION_BLOCK FB_RedunJntControl_bak
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// joint4 backlash
+	m_joint4Backlash :LREAL :=10*g_deg2rad;
+	
+	// control paramters for redundant joint4 position control
+(*	m_redunJntKp: LREAL:=8.0;
+	m_redunJntKd:LREAL:=0.2;
+	m_redunJntKi:LREAL:=100; *)
+	m_redunJntKp: LREAL:=3.0;
+	m_redunJntKd:LREAL:=0.1;
+	m_redunJntKi:LREAL:=10;
+	m_redunJntKiLimit: LREAL:=200;
+	m_redunJntCtrlLimit:LREAL:=1000;
+	
+	m_jntLimitBuffer : LREAL :=5.0*g_deg2Rad;
+	
+	// arm static variables
+	m_staticVelThres :LREAL := 5.0 *g_deg2Rad;
+	m_staticTimeThres :LREAL :=0.2;
+	m_staticTime :LREAL;
+	m_staticFlag :BOOL;
+		
+	// max vel and acc for joint4 motion
+	m_jnt4MaxFollowVel :LREAL :=2*pi;
+	m_jnt4MaxFollowAcc :LREAL :=6*pi;
+	m_jnt4MinFollowAcc :LREAL :=3*pi;
+	m_jnt4MinAccVel:LREAL:= 0.5*pi;
+	m_jnt4MaxAccVel:LREAL:= 1.0*pi;
+
+	// final target position of joint4 in motor (not DH , same for below defination) 
+	m_jnt4TargetPos: LREAL;
+	
+	// OTG for joint4 motion
+	m_trajFilter :FB_secOrdTrajFilter;
+	
+	// command joint4 position and veloicty in motor for next cycle
+	m_cmdJntPos: LREAL;
+	m_cmdJntVel: LREAL;
+	m_cmdJntAcc: LREAL;
+
+	// PID for joint position
+	m_jntPIDCtrl: FB_PID;
+	m_jntCtrlTrq: LREAL;
+
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="calcRedunPos" Id="{3c615aea-9f05-4654-a255-32bd4f9794aa}">
+      <Declaration><![CDATA[METHOD PROTECTED calcRedunPos : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+
+VAR 
+	j6Bias,j5Bias :LREAL;
+	curJntPos : Vec7d;
+	jnt4LinkPos, jnt4TargetLinkPos :LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// compute desired joint4 link position
+curJntPos :=  i_masterArm.curLinkPos;
+jnt4LinkPos:=i_masterArm.jnt4MotorToLink(curJntPos[2],curJntPos[3],curJntPos[4]);
+IF 1= i_masterArm.armIdx THEN
+	j6Bias :=curJntPos[6]+PI/2;
+ELSE 
+	j6Bias := curJntPos[6]-PI/2;
+END_IF
+
+// scale track motion near redundant singularity
+j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
+j6Bias := j6Bias * ABS(COS(j5Bias));
+jnt4TargetLinkPos := LIMIT(GVL_ArmJointParameters.g_minJntPos[i_masterArm.armIdx,4]+m_jntLimitBuffer, 
+			jnt4LinkPos-j6Bias,GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4]-m_jntLimitBuffer); 
+			
+// convert from link position to motor position
+m_jnt4TargetPos:=i_masterArm.jnt4LinkToMotor(curJntPos[2], curJntPos[3], jnt4TargetLinkPos);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="init" Id="{5103b443-21cf-4df9-b774-fea3cd2a7afe}">
+      <Declaration><![CDATA[METHOD init : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+VAR
+	currentRatioMotor2Jnt:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[m_cmdJntPos:=i_masterArm.curJntPos[4];
+m_jnt4TargetPos:=m_cmdJntPos;
+m_cmdJntVel:=0;
+
+// init controller
+currentRatioMotor2Jnt:=GVL_ArmJointParameters.g_motorTrqConst[4]*GVL_ArmJointParameters.g_motorReduction[4]/1000;
+m_jntPIDCtrl.init(g_armCtrlCycleTime,m_redunJntKp,m_redunJntKd,m_redunJntKi,
+		m_redunJntKiLimit* currentRatioMotor2Jnt,	m_redunJntCtrlLimit*currentRatioMotor2Jnt);
+
+// init OTG
+m_trajFilter.init(m_cmdJntPos,m_cmdJntVel,m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,g_armCtrlCycleTime);
+
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="isStatic" Id="{3fb5e0cf-c706-4c47-9782-7b802c37152a}">
+      <Declaration><![CDATA[METHOD isStatic : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+VAR
+	wVelWrd, wVelLocal :Vec3d;
+	rotT :Mat3d;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[wVelWrd[1]:=i_masterArm.curCartTwist[4];
+wVelWrd[2]:=i_masterArm.curCartTwist[5];
+wVelWrd[3]:=i_masterArm.curCartTwist[6];
+matTranspose(i_masterArm.curCartPose.m_rot, rotT);
+matMultiVec(rotT, wVelWrd, wVelLocal);
+wVelLocal[3]:=0;
+
+IF norm(wVelLocal) <m_staticVelThres THEN
+	m_staticTime := m_staticTime + g_armCtrlCycleTime;
+ELSE
+	m_staticTime :=0;
+END_IF
+
+isStatic := m_staticTime >= m_staticTimeThres;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="run" Id="{5f9aa1ff-6063-4ad9-b508-aa0f4aac0554}">
+      <Declaration><![CDATA[METHOD run : LREAL
+VAR_IN_OUT CONSTANT
+	i_masterArm :FB_MasterArm;
+END_VAR
+VAR_INPUT
+	i_followEnable :BOOL;
+END_VAR
+
+
+VAR
+	maxAcc, minDec:LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// check if arm is static
+m_staticFlag := isStatic(i_masterArm);
+	
+// determin target position of joint4
+IF i_followEnable THEN
+	// no control in static state
+	IF  m_staticFlag THEN
+		m_jnt4TargetPos := i_masterArm.curJntPos[4];
+		m_cmdJntPos :=i_masterArm.curJntPos[4];
+		m_cmdJntVel:=0;
+		m_jntPIDCtrl.reset();
+		m_trajFilter.init(m_cmdJntPos,m_cmdJntVel,m_jnt4MaxFollowVel,m_jnt4MinFollowAcc,g_armCtrlCycleTime);
+	// update target redundant joint position
+	ELSE
+		calcRedunPos(i_masterArm);
+	END_IF
+END_IF
+	
+// scale following acceleration based on yaw velocity
+maxAcc:=(m_jnt4MaxFollowAcc-m_jnt4MinFollowAcc)*(ABS(i_masterArm.curCartTwist[6])-m_jnt4MinAccVel)/(m_jnt4MaxAccVel-m_jnt4MinAccVel)+m_jnt4MinFollowAcc;
+maxAcc := LIMIT(m_jnt4MinFollowAcc,maxAcc, m_jnt4MaxFollowAcc);
+minDec:=m_trajFilter.minDec(m_jnt4TargetPos);
+maxAcc := MAX(maxAcc, minDec);
+
+// run OTG
+m_trajFilter.maxA:=maxAcc;
+m_trajFilter.run(m_jnt4TargetPos, 0.0, o_cmdAcc=>m_cmdJntAcc,o_cmdVel=>m_cmdJntVel, o_cmdPos=>m_cmdJntPos);
+
+// joint position control torque control
+m_jntCtrlTrq:=m_jntPIDCtrl.run(m_cmdJntPos,i_masterArm.curJntPos[4], m_cmdJntVel, i_masterArm.curJntVel[4]);
+//m_jntCtrlTrq:= m_jntCtrlTrq+i_masterArm.massMat[4,4]*m_cmdJntAcc;
+
+run:=m_jntCtrlTrq;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_RedunJntControl_bak">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RedunJntControl_bak.calcRedunPos">
+      <LineId Id="41" Count="0" />
+      <LineId Id="66" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="15" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="67" Count="0" />
+      <LineId Id="77" Count="1" />
+      <LineId Id="90" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RedunJntControl_bak.init">
+      <LineId Id="51" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="83" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="86" Count="0" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RedunJntControl_bak.isStatic">
+      <LineId Id="50" Count="13" />
+      <LineId Id="28" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_RedunJntControl_bak.run">
+      <LineId Id="389" Count="0" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="343" Count="0" />
+      <LineId Id="342" Count="0" />
+      <LineId Id="386" Count="0" />
+      <LineId Id="390" Count="0" />
+      <LineId Id="344" Count="0" />
+      <LineId Id="383" Count="2" />
+      <LineId Id="388" Count="0" />
+      <LineId Id="381" Count="0" />
+      <LineId Id="403" Count="0" />
+      <LineId Id="380" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="322" Count="2" />
+      <LineId Id="327" Count="0" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="328" Count="0" />
+      <LineId Id="416" Count="0" />
+      <LineId Id="329" Count="1" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="42" Count="1" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="212" Count="0" />
+      <LineId Id="125" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

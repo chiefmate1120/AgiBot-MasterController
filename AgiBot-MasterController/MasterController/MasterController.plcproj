@@ -304,10 +304,10 @@
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_RedunJntControlNew.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FBs_BasicControllers\FB_RedunJntControlNew.TcPOU">
+    <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Observer\FB_JntObserver.TcPOU">
@@ -520,6 +520,9 @@
     <Compile Include="SafetyCheck\FB_MasterArmCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Sandbox\FB_RedunJntControl_bak.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TaskArmControl.TcTTO">
       <SubType>Code</SubType>
     </Compile>
@@ -566,6 +569,7 @@
     <Folder Include="GVLs\Configs\Robot3" />
     <Folder Include="GVLs\Configs\Robot4" />
     <Folder Include="GVLs\Configs\Robot5" />
+    <Folder Include="Sandbox" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />

@@ -304,7 +304,7 @@ FOR i:=1 TO 9 DO
     T:=m_jntFrame[i];
 	// mass center world position
     matMultiVec(T.m_rot,m_linkCOM[i], Pc);
-	vecAdd(Pc,T.m_pos,Pc);
+	vecSelfAdd(Pc, T.m_pos);
     FOR j:=1 TO i DO
         IF (i>7 AND j>1 AND j<8) THEN
 			Jp[1,j]:=0;
@@ -382,7 +382,9 @@ END_FOR]]></ST>
     <LineIds Name="FB_MasterDynamic.updateKinematic">
       <LineId Id="6" Count="29" />
       <LineId Id="128" Count="28" />
-      <LineId Id="36" Count="44" />
+      <LineId Id="36" Count="5" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="43" Count="37" />
       <LineId Id="5" Count="0" />
     </LineIds>
   </POU>
