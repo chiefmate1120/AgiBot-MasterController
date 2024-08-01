@@ -369,24 +369,24 @@ vecAdd(m_masterPoseInView[1].m_pos, m_masterPoseInView[2].m_pos, tipCenter);
 vecSelfMultiNum(tipCenter,0.5);
 
 FOR i:=1 TO 2 DO 
-// steering wheel center 
-m_wheelCenter[i]:=tipCenter;
-m_wheelCenter[i][3]:=m_wheelCenter[i][3]+m_wheelHeight[i];
-
-// compute current virtual fixture points on wheel 
-vecSub(m_masterPoseInView[i].m_pos, m_wheelCenter[i], tmpVFPt[i]);
-tmpVFPt[i][3]:=0;
-IF NOT(normalize(tmpVFPt[i])) THEN
-	steeringWheelCalc := FALSE;
-	RETURN;
-END_IF
-vecSelfMultiNum(tmpVFPt[i], m_wheelRadius);
-vecAdd(m_wheelCenter[i], tmpVFPt[i], m_VFPts[i]);
-
-// compute current deviation from VF points in shoulder coordinate
-vecSub(m_VFPts[i], m_masterPoseInView[i].m_pos, VFDeviationInView);
-matTranspose(i_shoulderPose[i].m_rot , rotT);
-matMultiVec(rotT, VFDeviationInView, m_VFDeviation[i]);
+	// steering wheel center 
+	m_wheelCenter[i]:=tipCenter;
+	m_wheelCenter[i][3]:=m_wheelCenter[i][3]+m_wheelHeight[i];
+	
+	// compute current virtual fixture points on wheel 
+	vecSub(m_masterPoseInView[i].m_pos, m_wheelCenter[i], tmpVFPt[i]);
+	tmpVFPt[i][3]:=0;
+	IF NOT(normalize(tmpVFPt[i])) THEN
+		steeringWheelCalc := FALSE;
+		RETURN;
+	END_IF
+	vecSelfMultiNum(tmpVFPt[i], m_wheelRadius);
+	vecAdd(m_wheelCenter[i], tmpVFPt[i], m_VFPts[i]);
+	
+	// compute current deviation from VF points in shoulder coordinate
+	vecSub(m_VFPts[i], m_masterPoseInView[i].m_pos, VFDeviationInView);
+	matTranspose(i_shoulderPose[i].m_rot , rotT);
+	matMultiVec(rotT, VFDeviationInView, m_VFDeviation[i]);
 
 END_FOR
 ]]></ST>
