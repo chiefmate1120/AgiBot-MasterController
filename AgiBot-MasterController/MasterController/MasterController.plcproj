@@ -145,6 +145,9 @@
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\ST_EtherCATState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -245,6 +248,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec4b.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Type\Vec7di.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
@@ -514,10 +520,40 @@
     <Compile Include="SafetyCheck\ASSERT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkDelay.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkDelayTime.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkInputVariable.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkPermit.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\ST_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\T_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SafetyCheck\Fb_dataRecord.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_EtherCATCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SafetyCheck\FB_MasterArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\Fb_SafetyCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_Writer.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TaskArmControl.TcTTO">
@@ -567,10 +603,15 @@
     <Folder Include="GVLs\Configs\Robot4" />
     <Folder Include="GVLs\Configs\Robot5" />
     <Folder Include="SafetyCheck" />
+    <Folder Include="SafetyCheck\safetyCheckDUT" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
   </ItemGroup>
   <ItemGroup>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Math">
       <DefaultResolution>Tc2_Math, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_Math</Namespace>
@@ -590,12 +631,6 @@
     <PlaceholderReference Include="Tc3_Module">
       <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_Module</Namespace>
-    </PlaceholderReference>
-    <PlaceholderReference Include="UML State Chart Types">
-      <DefaultResolution>UML Statechart Types, 4.1.1.0 (3S - Smart Software Solutions GmbH)</DefaultResolution>
-      <Namespace>UML_SC</Namespace>
-      <SystemLibrary>true</SystemLibrary>
-      <ResolverGuid>d9a6b70a-92f0-4827-8ca3-8ce8a61652d9</ResolverGuid>
     </PlaceholderReference>
   </ItemGroup>
   <ItemGroup>

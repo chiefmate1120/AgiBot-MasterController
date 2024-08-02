@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <GVL Name="GVL_SafetyParameters" Id="{4906139b-c485-4ef4-98db-c81851105e40}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49991'}
 //TODO: safety check parameters need to be reviewd
@@ -8,13 +8,25 @@ VAR_GLOBAL CONSTANT
 	// safety error counts threshold to trigger fault
 	g_faultTriggerCounts :INT :=2;
 	
+	// arm joint safety error
+	g_armMaxJntEncErr :vec7d:=[7(50*g_deg2Rad)];
+	g_armMaxJntFollowErr :vec7d:=[7(10*g_deg2Rad)];
+	
 	// joint limit buffer(outside of joint limit)
 	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(45.0*g_deg2Rad)];
 
+	//arm joint link encoder maximum and minimum values
+	g_maxLinkEnc : DINT:=16777215;
+	g_minLinkEnc : DINT:=0;
+	
+	//drive error word
+	g_driveErrWord : UDINT:=32;
+	
 	// master arm cartesion control safety error 
 	g_maxCartPosErr :LREAL := 0.005;
 	g_maxCartOriErr :LREAL := 5.0*g_deg2Rad;
 	
+
 	// master joint safety error
 	g_maxJntCtrlErr :LREAL := 15.0*g_deg2Rad;
 	g_maxJntEncErr :LREAL := 30.0*g_deg2Rad;
@@ -28,6 +40,45 @@ VAR_GLOBAL CONSTANT
 	
 	// cart joint velocity limit
 	g_cartMaxJntVel :Vec4d :=[0.03, 4*g_deg2Rad,0.02,0.015];
+	
+	// cart joint limit
+	g_cartMinJntLimit : Vec4d :=[0-0.1, -(31+5)*g_deg2Rad, 0-0.1, 0-0.1];
+	g_cartMaxJntLimit : Vec4d :=[0.38+0.1, (2+5)*g_deg2Rad, 0.24+0.1, 0.2+0.1];
+	
+	//cart joint follow error
+	g_cartMaxJntFollowErr : Vec4d :=[0.01, 5*g_deg2rad, 0.01, 0.01];
+	
+	//cart joint current limit
+	g_cartMaxJntCurrent : Vec4d :=[3800*2,3800*2,3800*2,3800*2];
+	
+	//cart joint encoder detetion value
+	g_cartMaxLinkEnc : ARRAY [1..4] OF DINT := [67108863,16777215,67108863,67108863];
+	g_cartMinLinkEnc : ARRAY [1..4] OF DINT := [4(0)];
+END_VAR
+
+VAR_GLOBAL
+	//motor current limit
+	g_motorCurrentLimit : Vec7d ;	
+
+	g_arrayErrCodeArm:ARRAY [1..g_maxNum] OF ARRAY [0..100] OF UDINT;	
+END_VAR
+
+VAR_GLOBAL CONSTANT
+	g_maxNum:INT:=3;
+	g_maxArmNum:INT:=2;
+	g_maxArmJoint:INT:=7; g_maxCartJoint:INT:=4;
+	g_cartNum:UDINT:=3;
+	MAX_CSV_ROWS 			: UDINT := 10000;(*最大行数(任务周期为20ms)即10分钟的buffer*)
+	MAX_CSV_COLUMNS 		: UDINT := 130;(*最大列数*)
+	MAX_CSV_FIELD_LENGTH	: UDINT := 35;(*每个字段的字符长度*)
+	MAX_CSV_RING_BUFFER		: UDINT := 5;
+	g_ArmNetID: ARRAY[1..g_maxArmNum] OF T_AmsNetId:=['192.168.0.10.4.1','192.168.0.10.9.1'];
+	g_JointNetPort:ARRAY[1..g_maxArmNum,1..g_maxArmJoint] OF UINT :=[
+											1001,    1002,	1003,	1004,	1005,	1006,	1007,
+											1012,    1013,	1014,	1015,	1016,	1017,	1018	];
+	g_cartNetID : T_AmsNetId := '192.168.0.10.9.1';
+	g_cartJointNetPort:ARRAY[1..g_maxCartJoint] OF UINT :=[1008,    1009,	1010,	1011];
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

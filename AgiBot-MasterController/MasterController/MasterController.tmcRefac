@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Refactors>
+  <Renames>
+    <RenamedType>
+      <Type guid="1102e175-6107-4706-a6ad-ea5e8fc76a1b">MASTERSAFETYCHECK</Type>
+      <From>masterSafetyCheck</From>
+      <To>armSafetyCheck</To>
+    </RenamedType>
+  </Renames>
+</Refactors>

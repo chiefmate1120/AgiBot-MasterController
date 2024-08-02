@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_EtherCATCheck" Id="{439b82da-b334-4605-8920-d50ed36120b2}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_EtherCATCheck
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	//drive EtherCAT communition detection
+	m_commuEtherCATState:FB_EcGetSlaveState;
+	m_EcSlaveState : ST_EcSlaveState;
+	
+	m_crcVerify : FB_EcGetSlaveCrcError;
+	m_crcError : ST_EcCrcError;
+	
+	m_EtherCATVerify : ST_EtherCATState;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="EtherCATVerify" Id="{700221e4-3451-4ebe-a364-9420b7ed5cfc}">
+      <Declaration><![CDATA[METHOD EtherCATVerify : ST_EtherCATState
+VAR_INPUT
+	armsNetID:T_AmsNetID;
+	jntAddr:UINT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+m_commuEtherCATState(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> , state=> m_EcSlaveState);
+
+IF NOT m_commuEtherCATState.bBusy THEN
+	m_commuEtherCATState(bExecute:=FALSE);
+	IF m_EcSlaveState.deviceState = EC_DEVICE_STATE_OP THEN
+		m_EtherCATVerify.EtherCATState := TRUE;
+	ELSE
+		m_EtherCATVerify.EtherCATState := FALSE;
+	END_IF
+END_IF
+
+
+m_crcVerify(sNetId:= armsNetID, nSlaveAddr:= jntAddr, bExecute:= TRUE, tTimeout:= , bBusy=> , bError=> , nErrId=> , crcError=> m_crcError);
+IF NOT m_crcVerify.bBusy THEN
+	m_crcVerify(bExecute:=FALSE);
+	m_EtherCATVerify.CRCPortA := MAX(EtherCATVerify.CRCPortA,m_crcError.portA);
+	m_EtherCATVerify.CRCPortB := MAX(EtherCATVerify.CRCPortB,m_crcError.portB);
+	m_EtherCATVerify.CRCPortC := MAX(EtherCATVerify.CRCPortC,m_crcError.portC);
+END_IF
+
+EtherCATVerify := m_EtherCATVerify;]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EtherCATCheck">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EtherCATCheck.EtherCATVerify">
+      <LineId Id="7" Count="1" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="48" Count="3" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="22" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

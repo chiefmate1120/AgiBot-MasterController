@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="checkPermit" Id="{596a4f78-9ed2-462f-bcbc-6fb090f26916}">
+    <Declaration><![CDATA[TYPE checkPermit :
+STRUCT
+	m_armJntEncErr :vec7b;
+	m_driveErr :vec7b;
+	m_jntStatusErr :vec7b;
+	m_currentIsNotUpdate :vec7b;
+	m_linkEncErr :vec7b;
+	m_motPhieErr:vec7b;
+	m_outOfLimit :vec7b;
+	m_armJntFollowErr :vec7b;
+	m_jntVelErr :vec7b;
+	m_jntCurrentErr :vec7b;
+	m_cmdJntSaltation:vec7b;
+	m_spacePoseErr:vec7b;
+	
+
+	m_cartJntStatus : vec4b:=[4(TRUE)];
+	m_cartCurrentIsNotUpdate : vec4b:=[4(TRUE)];
+	m_cartLinkEncErr : vec4b:=[4(TRUE)];
+	m_cartDriveErr : vec4b:=[4(TRUE)];
+	m_cartJntEncErr : vec4b:=[4(TRUE)];
+	m_cartOutOfLimit : vec4b:=[4(TRUE)];
+	m_cartFollowErr : vec4b:=[4(TRUE)];
+	m_cartJntVelErr : vec4b:=[4(TRUE)];
+	m_cartJntCurrentErr : vec4b:=[4(FALSE)];
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

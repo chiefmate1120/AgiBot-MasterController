@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterRobot" Id="{8cbdb2ba-9735-46e3-8cbc-296330acc8cc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterRobot
 VAR
@@ -215,7 +215,9 @@ FOR i:=1 TO g_mArmNum DO
 	r_masterJointsData.m_cmdJntVel[i]:=m_masterArms[i].m_cmdJntVel;
 	r_masterJointsData.m_cmdJntTrq[i]:=m_masterArms[i].m_cmdJntTrq;
 	r_masterJointsData.m_cmdJntCurrent[i]:=m_masterArms[i].cmdJntCurrent;
-	
+	//data to safety check
+	r_masterStatus.m_gripHallSensor[i] := m_masterArms[i].m_gripHallSensorIO;
+	r_masterStatus.m_selfCheckStatus
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -654,6 +656,7 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="39" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="40" Count="0" />
+      <LineId Id="124" Count="1" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
