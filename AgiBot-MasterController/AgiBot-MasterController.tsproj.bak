@@ -704,10 +704,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}" AutoDeleteType="true">ST_MasterStatus</Name>
+			<Name GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}" AutoDeleteType="true">ST_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
-			<BitSize>4864</BitSize>
+			<BitSize>4992</BitSize>
 			<SubItem>
 				<Name>m_motionScale</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
@@ -715,7 +715,7 @@
 				<BitSize>64</BitSize>
 				<BitOffs>0</BitOffs>
 				<Default>
-					<Value>1</Value>
+					<Value>1.5</Value>
 				</Default>
 			</SubItem>
 			<SubItem>
@@ -728,6 +728,16 @@
 				<Comment><![CDATA[ state machine]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>64</BitOffs>
+				<Default>
+					<SubItem>
+						<Name>[1]</Name>
+						<EnumText>E_MasterArmState.MasterArmState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[2]</Name>
+						<EnumText>E_MasterArmState.MasterArmState_Error</EnumText>
+					</SubItem>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_teleSlaveArmIdx</Name>
@@ -794,6 +804,28 @@
 				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in shoulder coordinate]]></Comment>
 				<BitSize>768</BitSize>
 				<BitOffs>4096</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_selfCheckStatus</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[self check status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>4864</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_gripHallSensor</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[grip Hall Sensor]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>4896</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1342,7 +1374,7 @@
 		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
 		<ImageData Id="1005">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddd88888888dddddddd77777778d9dddddd77888778d99ddddd778889999999dddd77888778d99dddd977777778d9ddddd997888778dddd999999888778ddddddd997888778ddddddd977777778dddddddd777a7778dddddddd777a7778dddddddd777a7778dddddddd77777778dddd</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="8" NonWinCpus="2">
 				<Cpu CpuId="1" RtLimit="90"/>
@@ -1492,7 +1524,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}">ST_MasterStatus</Type>
+							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
@@ -1580,19 +1612,39 @@
 					<Vars VarGrpType="1" ContextId="2" AreaNo="32">
 						<Name>TaskSafetyCheck Inputs</Name>
 						<Var>
+							<Name>SafetyCheck.m_stopButton</Name>
+							<Comment><![CDATA[stop botton]]></Comment>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[1].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[2].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[3].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[4].m_motorInputs</Name>
+							<Comment><![CDATA[ motor IO]]></Comment>
+							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
+						</Var>
+						<Var>
 							<Name>SafetyCheck.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}">ST_MasterStatus</Type>
+							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterJointData</Name>
 							<Comment><![CDATA[ master robot joint data]]></Comment>
 							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[cart status]]></Comment>
-							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointData</Name>
@@ -1602,6 +1654,22 @@
 					</Vars>
 					<Vars VarGrpType="2" ContextId="2" AreaNo="33">
 						<Name>TaskSafetyCheck Outputs</Name>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs</Name>
+							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs</Name>
+							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs</Name>
+							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
+						</Var>
+						<Var>
+							<Name>CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs</Name>
+							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
+						</Var>
 						<Var>
 							<Name>SafetyCheck.m_safetyCheckData</Name>
 							<Comment><![CDATA[ error check result]]></Comment>
@@ -1678,30 +1746,15 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[1].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[2].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[3].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[4].m_motorInputs</Name>
-							<Comment><![CDATA[ motor IO]]></Comment>
-							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
-						</Var>
-						<Var>
 							<Name>CartControl.m_masterCart.m_cartJointCtrlIO</Name>
 							<Comment><![CDATA[ cart joint motion control IO
 [monitor_up, monitor_down, monitor_cwRotate, monitor_ccwRotate, armset_up, armset_down, pedal_in, pedal_out]]]></Comment>
 							<Type GUID="{71B58F72-0E49-50EB-B8E4-1CCD027538EC}">ARRAY [1..8] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[cart status]]></Comment>
+							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
@@ -1709,22 +1762,6 @@
 						<Var>
 							<Name>CartControl.m_masterCart.m_elecKnifeCtrlWord</Name>
 							<Type>DINT</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs</Name>
-							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs</Name>
-							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs</Name>
-							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs</Name>
-							<Type GUID="{4CE39040-C42E-0F49-A5E0-4BD6D1293DCD}">ST_MotorOutputs</Type>
 						</Var>
 						<Var>
 							<Name>CartControl.m_cartStatus</Name>
@@ -1854,6 +1891,9 @@
 				</Image>
 				<Image Id="1" AddrType="10" ImageType="3">
 					<Name>Image-2</Name>
+				</Image>
+				<Image Id="3" AddrType="10" ImageType="3">
+					<Name>Image-3</Name>
 				</Image>
 				<Box Id="19" BoxType="9099">
 					<Name>Term 19 (EK1100)</Name>
@@ -4385,8 +4425,9 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500860000403}" Id="#x02030050"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-500890000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008B0000403}" Id="#x02030080"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0320-500811000403}" Id="#x02030090"/>
+		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030090"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0320-500821000403}" Id="#x02030060"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0320-500832000403}" Id="#x020300a0"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030040" Watchdog="10000000040000000400000004000000"/>
@@ -4585,44 +4626,44 @@
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJointCtrlIO[8]" VarB="Channel 6^pedalOut"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 25 (EK1122)^CartArmSet">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[3].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[3].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 25 (EK1122)^CartMonitorLift">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[1].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[1].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 25 (EK1122)^CartMonitorRotate">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[2].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[2].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 25 (EK1122)^CartPedal">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
-				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_linkEncoder" VarB="TxPdoMappingCspCsv^ENC2"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_motorEncoder" VarB="TxPdoMappingCspCsv^Position actual value"/>
+				<Link VarA="TaskSafetyCheck Inputs^CartControl.m_masterCart.m_cartJoints[4].m_motorInputs^m_statusWord" VarB="TxPdoMappingCspCsv^Statusword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_cmdCurrent" VarB="RxPdoMappingCspCsv^Target torque"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_cmdMotorEncoder" VarB="RxPdoMappingCspCsv^Target position"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_controlWord" VarB="RxPdoMappingCspCsv^Controlword"/>
+				<Link VarA="TaskSafetyCheck Outputs^CartControl.m_masterCart.m_cartJoints[4].m_motorOutputs^m_opMode" VarB="RxPdoMappingCspCsv^Modes of operation"/>
 			</OwnerB>
 			<OwnerB Name="TIPC^MasterController^MasterController Instance">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterInputDataPool.m_cartStatus" VarB="TaskCartControl Outputs^CartControl.m_cartStatus"/>

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
@@ -359,7 +359,7 @@ updateCmds();
 // send command to joint driver
 FOR i:=1 TO 4 DO
 	// joint enable
-	IF NOT(m_jntErrFlag[i]) AND m_jntEnableFlag[i] THEN
+	IF NOT(m_jntErrFlag[i]) AND m_jntEnableFlag[i] AND NOT(SafetyCheck.m_safetyCheckData.m_cartErrFlag[i]) THEN
 		m_cartJoints[i].enable();
 	ELSE
 		m_cartJoints[i].disable();

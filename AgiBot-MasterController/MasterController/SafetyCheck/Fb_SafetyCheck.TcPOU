@@ -103,9 +103,9 @@ END_FOR
 
 //关节运动超限位
 FOR i:=1 TO g_mJntNum BY 1 DO
-	m_checkDelay[i_armId].T_outOfLimit[i](IN:= i_masterJointData.m_curJntPos[i_armId][i]>= (GVL_ArmJointParameters.g_maxJntPos[i_armId,i] + g_armJntPosLimitBuffer[i]) OR i_masterJointData.m_curJntPos[i_armId][i]<=(GVL_ArmJointParameters.g_minJntPos[i_armId,i] - g_armJntPosLimitBuffer[i]) AND m_checkPermit[i_ArmId].m_outOfLimit[i], PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
+	m_checkDelay[i_armId].T_outOfLimit[i](IN:= i_masterJointData.m_curJntPos[i_armId][i]>= (g_maxJntPos[i_armId,i] + g_armJntPosLimitBuffer[i]) OR i_masterJointData.m_curJntPos[i_armId][i]<=(g_minJntPos[i_armId,i] - g_armJntPosLimitBuffer[i]) AND m_checkPermit[i_ArmId].m_outOfLimit[i], PT:=m_checkDelayTime.Ti_outofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_outOfLimit[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3006, m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3006, m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -114,7 +114,7 @@ END_FOR
 FOR i:=1 TO g_mJntNum BY 1 DO
 	m_checkDelay[i_armId].T_currentIsNotUpdate[i](IN:= (i_safetyCheckVar[i_ArmId].m_masterDriverInput[i].m_current=m_curJntTorqueIOlast[i_ArmId][i] AND m_checkPermit[i_ArmId].m_currentIsNotUpdate[i]), PT:=m_checkDelayTime.Ti_currentIsNotUpdate , Q=> , ET=> );
 	IF  m_checkDelay[i_armId].T_currentIsNotUpdate[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3009 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3009 ,m_unrcvLevel );
 	END_IF
 	m_curJntTorqueIOlast[i_armId][i]:=i_safetyCheckVar[i_armId].m_masterDriverInput[i].m_current;
 END_FOR
@@ -124,7 +124,7 @@ END_FOR
 FOR i:=1 TO g_mJntNum BY 1 DO
 	m_checkDelay[i_ArmId].T_armJntFollowErr[i](IN:= ABS(i_masterJointData.m_cmdJntPos[i_armId][i]- i_masterJointData.m_curJntPos[i_armId][i])>g_armMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_armJntFollowErr[i], PT:=m_checkDelayTime.Ti_armJntFollowErr , Q=> , ET=> );
 	IF m_checkDelay[i_ArmId].T_armJntFollowErr[i].Q THEN
-		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2002, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId,  0, i, 16#2002, m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -133,7 +133,7 @@ END_FOR
 //FOR i:=1 TO g_mJntNum BY 1 DO
 //	m_checkDelay[i_ArmId].T_jntVelErr[i](IN:= ABS (i_masterJointData.m_curJntVel[i_armId][i])>g_safetyJntVel[i+g_setupJntNum] AND m_checkPermit[i_ArmId].m_jntVelErr[i], PT:=m_checkDelayTime.Ti_jntVelErr , Q=> , ET=> );
 //	IF m_checkDelay[i_ArmId].T_jntVelErr[i].Q THEN
-//		errCodeAssign(i_ArmId, i_ArmId+3,  0, i, 16#2003, m_rcvLevel );
+//		errCodeAssign(i_ArmId, i_ArmId,  0, i, 16#2003, m_rcvLevel );
 //	END_IF
 //END_FOR
 
@@ -142,7 +142,7 @@ END_FOR
 //FOR i:=1 TO 6 BY 1 DO
 //	m_checkDelay[i_ArmId].T_spacePoseErr[i](IN:= i_safetyCheckVar[i_ArmId].m_spacePoseErr[i]> g_maxCartPoseErr[i] AND m_checkPermit[i_ArmId].m_spacePoseErr[i], PT:=m_checkDelayTime.Ti_spacePoseErr , Q=> , ET=> );
 //	IF m_checkDelay[i_ArmId].T_spacePoseErr[i].Q THEN
-//		errCodeAssign(i_ArmId, i_ArmId+3, 1, i, 16#2004, m_rcvLevel );
+//		errCodeAssign(i_ArmId, i_ArmId, 1, i, 16#2004, m_rcvLevel );
 //	END_IF
 //END_FOR
 
@@ -151,7 +151,7 @@ END_FOR
 FOR i:=1 TO g_mJntNum BY 1 DO
 	m_checkDelay[i_armId].T_jntCurrentErr[i](IN:= ABS(i_safetyCheckVar[i_armId].m_motorCurrentIntegral[i])>g_motorCurrentLimit[i] AND m_checkPermit[i_ArmId].m_jntCurrentErr[i], PT:=m_checkDelayTime.Ti_jntCurrentErr , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_jntCurrentErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2005, m_rcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#2005, m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -159,14 +159,14 @@ END_FOR
 //Ethercat通讯检测
 FOR i:=1 TO g_mJntNum BY 1 DO
 	IF NOT i_safetyCheckVar[i_ArmId].m_EtherCATState[i].EtherCATState THEN
-		errCodeAssign(i_ArmId, i_ArmId+3, 0, i, 16#2006, m_rcvLevel );
+		errCodeAssign(i_ArmId, i_ArmId, 0, i, 16#2006, m_rcvLevel );
 	END_IF
 END_FOR
 
 
 //自检未完成
-IF i_safetyCheckVar[i_armId].m_selfCheckFail[i] THEN
-	errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2008, m_rcvLevel );
+IF i_safetyCheckVar[i_armId].m_selfCheckFail THEN
+	errCodeAssign(i_armId, i_ArmId,  0, i, 16#2008, m_rcvLevel );
 END_IF
 
 ]]></ST>
@@ -283,7 +283,7 @@ END_VAR]]></Declaration>
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartJntStatusErr[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_statusWord=0 AND m_checkPermit[i_ArmId].m_cartJntStatus[i]), PT:=m_checkDelayTime.Ti_CarJntStatus , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartJntStatusErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3002 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3002 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -293,7 +293,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartLinkEncErr[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_linkEncoder=g_cartMaxLinkEnc[i] OR i_safetyCheckVar.m_cartDriverInput[i].m_linkEncoder=g_cartMinLinkEnc[i]) AND m_checkPermit[i_ArmId].m_cartJntEncErr[i], PT:=m_checkDelayTime.Ti_CarActSec , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartLinkEncErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3003 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3003 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -302,7 +302,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartDriveErr[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_driverError AND 16#20)=32 AND m_checkPermit[i_ArmId].m_cartDriveErr[i] , PT:=m_checkDelayTime.Ti_CarDriveErr , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartDriveErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3004 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3004 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -312,7 +312,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartJntEncErr[i](IN:= ABS (i_cartJointData.m_curLinkPos[i]-i_cartJointData.m_curJntPos[i])>g_cartMaxJntEncErr[i] AND m_checkPermit[i_ArmId].m_cartJntEncErr[i], PT:=m_checkDelayTime.Ti_CarDualEncDev , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartJntEncErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3005 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3005 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -321,7 +321,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartOutOfLimit[i](IN:= (i_cartJointData.m_curJntPos[i]>=g_cartMaxJntLimit[i] OR i_cartJointData.m_curJntPos[i]<=g_cartMinJntLimit[i]) AND m_checkPermit[i_ArmId].m_cartOutOfLimit[i] , PT:=m_checkDelayTime.Ti_CaroutofLimit , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartOutOfLimit[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3006 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3006 ,m_unrcvLevel );
 	END_IF
 END_FOR
 
@@ -330,23 +330,17 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartCurrentIsNotUpdate[i](IN:= (i_safetyCheckVar.m_cartDriverInput[i].m_current=m_cartCurJntTorqueIOlast[i] AND m_checkPermit[i_ArmId].m_cartCurrentIsNotUpdate[i]), PT:=m_checkDelayTime.Ti_CarTorMotor , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartCurrentIsNotUpdate[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#3009 ,m_unrcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#3009 ,m_unrcvLevel );
 	END_IF
 	m_cartCurJntTorqueIOlast[i]:=i_safetyCheckVar.m_cartDriverInput[i].m_current;
 END_FOR
-
-
-//StopButton
-IF NOT i_safetyCheckVar.SlaveStopButton OR i_safetyCheckVar.PCStopButton=0 OR i_safetyCheckVar.MasterStopButton THEN
-	errCodeAssign(i_armId, 16#FF, 0, 0, 16#2001, m_rcvLevel );
-END_IF
 
 
 //关节跟随误差过大
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartJntFollowErr[i](IN:= ABS(i_cartJointData.m_cmdJntPos[i]- i_cartJointData.m_curJntPos[i])>g_cartMaxJntFollowErr[i]  AND m_checkPermit[i_ArmId].m_cartFollowErr[i], PT:=m_checkDelayTime.Ti_CarFollowDev , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartJntFollowErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2002 ,m_rcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#2002 ,m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -355,7 +349,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartJntVelErr[i](IN:= ABS(i_cartJointData.m_curJntVel[i])>g_cartMaxJntVel[i] AND m_checkPermit[i_ArmId].m_cartJntVelErr[i], PT:=m_checkDelayTime.Ti_CarJntVel , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartJntVelErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2003 ,m_rcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#2003 ,m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -364,7 +358,7 @@ END_FOR
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	m_checkDelay[i_armId].T_cartJntCurrentErr[i](IN:= ABS(i_cartJointData.m_curJntTrq[i])>g_cartMaxJntCurrent[i] AND m_checkPermit[i_ArmId].m_cartJntCurrentErr[i], PT:=m_checkDelayTime.Ti_CarJntCurrent , Q=> , ET=> );
 	IF m_checkDelay[i_armId].T_cartJntCurrentErr[i].Q THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2005 ,m_rcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#2005 ,m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -372,7 +366,7 @@ END_FOR
 //Ethercat通讯检测
 FOR i:=1 TO g_maxCartJoint BY 1 DO
 	IF NOT i_safetyCheckVar.m_cartEtherCATState[i].EtherCATState THEN
-		errCodeAssign(i_armId, i_ArmId+3,  0, i, 16#2006 ,m_rcvLevel );
+		errCodeAssign(i_armId, i_ArmId,  0, i, 16#2006 ,m_rcvLevel );
 	END_IF
 END_FOR
 
@@ -488,7 +482,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[
-FOR i := 1 TO g_maxArmNum DO
+FOR i := 1 TO g_maxNum DO
 	FOR j :=0 TO g_maxArmJoint DO
 		m_jntErrFlag[i, j, 2]:=FALSE;
 	END_FOR
@@ -589,13 +583,11 @@ IF i_armId =g_cartNum THEN
 ELSE
 	//master arms safety check
 	armSafetyCheck(i_armId,i_safetyCheckVar,i_masterJointData);
-	
+END_IF
 	//StopButton
-	IF NOT i_safetyCheckVar[i_ArmId].SlaveStopButton OR i_safetyCheckVar[i_ArmId].PCStopButton=0 OR i_safetyCheckVar[i_ArmId].MasterStopButton THEN
+	IF  i_safetyCheckVar[i_ArmId].PCStopButton=0 OR NOT i_safetyCheckVar[i_ArmId].MasterStopButton THEN
 		errCodeAssign(i_ArmId, 16#0C, 0, 0, 16#2001, m_rcvLevel );
 	END_IF
-END_IF
-
 
 //prompt message
 FOR i:=1 TO 20 BY 1 DO
@@ -725,9 +717,6 @@ END_FOR
       <LineId Id="168" Count="0" />
       <LineId Id="170" Count="7" />
       <LineId Id="169" Count="0" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="181" Count="3" />
-      <LineId Id="180" Count="0" />
       <LineId Id="68" Count="0" />
       <LineId Id="75" Count="0" />
       <LineId Id="77" Count="3" />
@@ -837,10 +826,8 @@ END_FOR
       <LineId Id="388" Count="0" />
       <LineId Id="391" Count="0" />
       <LineId Id="389" Count="0" />
-      <LineId Id="393" Count="0" />
-      <LineId Id="395" Count="2" />
-      <LineId Id="394" Count="0" />
       <LineId Id="387" Count="0" />
+      <LineId Id="410" Count="2" />
       <LineId Id="210" Count="0" />
       <LineId Id="266" Count="0" />
       <LineId Id="268" Count="0" />

@@ -704,10 +704,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}" AutoDeleteType="true">ST_MasterStatus</Name>
+			<Name GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}" AutoDeleteType="true">ST_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
-			<BitSize>4864</BitSize>
+			<BitSize>4992</BitSize>
 			<SubItem>
 				<Name>m_motionScale</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
@@ -715,7 +715,7 @@
 				<BitSize>64</BitSize>
 				<BitOffs>0</BitOffs>
 				<Default>
-					<Value>1</Value>
+					<Value>1.5</Value>
 				</Default>
 			</SubItem>
 			<SubItem>
@@ -728,6 +728,16 @@
 				<Comment><![CDATA[ state machine]]></Comment>
 				<BitSize>32</BitSize>
 				<BitOffs>64</BitOffs>
+				<Default>
+					<SubItem>
+						<Name>[1]</Name>
+						<EnumText>E_MasterArmState.MasterArmState_Error</EnumText>
+					</SubItem>
+					<SubItem>
+						<Name>[2]</Name>
+						<EnumText>E_MasterArmState.MasterArmState_Error</EnumText>
+					</SubItem>
+				</Default>
 			</SubItem>
 			<SubItem>
 				<Name>m_teleSlaveArmIdx</Name>
@@ -794,6 +804,28 @@
 				<Comment><![CDATA[ current arm twist[linear velocity; angular veloicty] in shoulder coordinate]]></Comment>
 				<BitSize>768</BitSize>
 				<BitOffs>4096</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_selfCheckStatus</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[self check status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>4864</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_gripHallSensor</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[grip Hall Sensor]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>4896</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -1342,7 +1374,7 @@
 		<ImageData Id="1004">424dd6020000000000003600000028000000100000000e0000000100180000000000a0020000120b0000120b00000000000000000000ff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ff0000ff0000ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ff0000ff0000ffff00ffff00ff0000ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ffff00ff0000ffff00ffff00ffff00ff0000ffff00ff008000008000008000008000008000008000008000008000404040404040404040404040404040404040404040404040008000007fff007fff00800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404000800000800000800000800000800000800040404000800000800000800000800000800000800000800000800040404040404040404040404040404040404040404040404000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff00800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000800000ffff00800000ffff00800000800000ffff00800000ffff00800000800000800000ffff00800000ffff008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000008000</ImageData>
 		<ImageData Id="1005">424de6000000000000007600000028000000100000000e000000010004000000000070000000120b0000120b0000100000001000000000000000000080000080000000808000800000008000800080800000c0c0c000808080000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00dddd88888888dddddddd77777778d9dddddd77888778d99ddddd778889999999dddd77888778d99dddd977777778d9ddddd997888778dddd999999888778ddddddd997888778ddddddd977777778dddddddd777a7778dddddddd777a7778dddddddd777a7778dddddddd77777778dddd</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" ShowHideConfigurations="#x6">
+	<Project ProjectGUID="{33418E7D-C79D-4569-90F7-EA8084A60D49}" Target64Bit="true" ShowHideConfigurations="#x6">
 		<System>
 			<Settings MaxCpus="8" NonWinCpus="2">
 				<Cpu CpuId="1" RtLimit="90"/>
@@ -1492,7 +1524,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}">ST_MasterStatus</Type>
+							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
@@ -1607,17 +1639,12 @@
 						<Var>
 							<Name>SafetyCheck.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}">ST_MasterStatus</Type>
+							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterJointData</Name>
 							<Comment><![CDATA[ master robot joint data]]></Comment>
 							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[cart status]]></Comment>
-							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointData</Name>
@@ -1723,6 +1750,11 @@
 							<Comment><![CDATA[ cart joint motion control IO
 [monitor_up, monitor_down, monitor_cwRotate, monitor_ccwRotate, armset_up, armset_down, pedal_in, pedal_out]]]></Comment>
 							<Type GUID="{71B58F72-0E49-50EB-B8E4-1CCD027538EC}">ARRAY [1..8] OF BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[cart status]]></Comment>
+							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
@@ -4572,7 +4604,7 @@
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutLeft" VarB="Channel 5^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutRight" VarB="Channel 6^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_endoScopePedalIO" VarB="Channel 3^endoscopePedaoIO"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_stopButton" VarB="Channel 1^CartControl.m_masterCart.m_stopButton"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_stopButton" VarB="Channel 1^CartControl.m_masterCart.m_stopButton"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 22 (EL1008)">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartLockSignalLeft" VarB="Channel 7^Input"/>

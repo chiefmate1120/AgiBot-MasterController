@@ -217,7 +217,7 @@ FOR i:=1 TO g_mArmNum DO
 	r_masterJointsData.m_cmdJntCurrent[i]:=m_masterArms[i].cmdJntCurrent;
 	//data to safety check
 	r_masterStatus.m_gripHallSensor[i] := m_masterArms[i].m_gripHallSensorIO;
-	r_masterStatus.m_selfCheckStatus
+	//r_masterStatus.m_selfCheckStatus
 END_FOR]]></ST>
       </Implementation>
     </Method>

@@ -12,7 +12,7 @@
     <Node>
       <Title>GravityCaliData</Title>
       <Expanded>False</Expanded>
-      <FileName>D:\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
+      <FileName>C:\Robot\mRobotCrlsoftware\VerHistory\yangxz\AgiBot-MasterController\Scope-MasterController\GravityCaliData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>
@@ -564,7 +564,7 @@
     <Node>
       <Title>RobotJointData</Title>
       <Expanded>False</Expanded>
-      <FileName>D:\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
+      <FileName>C:\Robot\mRobotCrlsoftware\VerHistory\yangxz\AgiBot-MasterController\Scope-MasterController\RobotJointData.tcscopex</FileName>
       <Children>
         <Node>
           <Title>DataPool</Title>

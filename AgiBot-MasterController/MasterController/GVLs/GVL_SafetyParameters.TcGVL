@@ -10,7 +10,7 @@ VAR_GLOBAL CONSTANT
 	
 	// arm joint safety error
 	g_armMaxJntEncErr :vec7d:=[7(50*g_deg2Rad)];
-	g_armMaxJntFollowErr :vec7d:=[7(10*g_deg2Rad)];
+	g_armMaxJntFollowErr :vec7d:=[7(20*g_deg2Rad)];
 	
 	// joint limit buffer(outside of joint limit)
 	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(45.0*g_deg2Rad)];
@@ -31,6 +31,12 @@ VAR_GLOBAL CONSTANT
 	g_maxJntCtrlErr :LREAL := 15.0*g_deg2Rad;
 	g_maxJntEncErr :LREAL := 30.0*g_deg2Rad;
 	
+	g_minJntPos: ARRAY[1..2,1..7] OF LREAL:=[-60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad, 	0, 	-135*g_deg2Rad+pi,		-45*g_deg2Rad-pi/2,		-330*g_deg2Rad,
+											 -60*g_deg2Rad,	-45*g_deg2Rad-pi/2,		-45*g_deg2Rad,	0,		-135*g_deg2Rad+pi,		-45*g_deg2Rad+pi/2,	-330*g_deg2Rad];
+	g_maxJntPos: ARRAY[1..2,1..7] OF LREAL:=[60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		2*pi,			135*g_deg2Rad+pi,		45*g_deg2Rad-pi/2,		330*g_deg2Rad,
+								             60*g_deg2Rad,	60*g_deg2Rad-pi/2,		60*g_deg2Rad,		2*pi,			135*g_deg2Rad+pi,		45*g_deg2Rad+pi/2,		330*g_deg2Rad];
+
+	
 	// cart joint safety error
 	g_cartMaxJntCtrlErr :Vec4d := [0.005, 5*g_deg2Rad,0.005, 0.005];
 	g_cartMaxJntEncErr :Vec4d :=  [0.005, 5*g_deg2Rad,0.005, 0.005];
@@ -42,8 +48,8 @@ VAR_GLOBAL CONSTANT
 	g_cartMaxJntVel :Vec4d :=[0.03, 4*g_deg2Rad,0.02,0.015];
 	
 	// cart joint limit
-	g_cartMinJntLimit : Vec4d :=[0-0.1, -(31+5)*g_deg2Rad, 0-0.1, 0-0.1];
-	g_cartMaxJntLimit : Vec4d :=[0.38+0.1, (2+5)*g_deg2Rad, 0.24+0.1, 0.2+0.1];
+	g_cartMinJntLimit : Vec4d :=[0-0.1, -(0+5)*g_deg2Rad, 0-0.1, 0-0.1];
+	g_cartMaxJntLimit : Vec4d :=[0.38+0.1, (30+5)*g_deg2Rad, 0.24+0.1, 0.2+0.1];
 	
 	//cart joint follow error
 	g_cartMaxJntFollowErr : Vec4d :=[0.01, 5*g_deg2rad, 0.01, 0.01];

@@ -24,8 +24,7 @@
   <ImageAutoDeleteCapacity>0</ImageAutoDeleteCapacity>
   <ImageAutoDeleteOlderThan>0</ImageAutoDeleteOlderThan>
   <ImagesDeleteMode>Disabled</ImagesDeleteMode>
-  <KeepPreviousExports>false</KeepPreviousExports>
-  <KeepPreviousImageExports>false</KeepPreviousImageExports>
+  <IsTemplate>false</IsTemplate>
   <Layout>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;Layout&gt;
   &lt;Window Guid="e1bf842e-5c15-474b-8716-e74433426c87" LastFocused="133648911290541919" DockedSize="200" PopupSize="0" FloatingLocation="-1, -1" FloatingSize="550, 400" LastOpenDockSituation="Document" LastFixedDockSituation="Document" LastFixedDockLocation="Right" LastFloatingWindowGuid="00000000-0000-0000-0000-000000000000" LastDockContainerCount="0" LastDockContainerIndex="0" DockedWorkingSize="250, 400" DockedWindowGroupGuid="00000000-0000-0000-0000-000000000000" DockedIndexInWindowGroup="0" DockedSplitPath="0" DocumentWorkingSize="250, 400" DocumentWindowGroupGuid="39cc1225-a45a-48fd-b964-28df78328647" DocumentIndexInWindowGroup="0" DocumentSplitPath="0" FloatingWorkingSize="250, 400" FloatingWindowGroupGuid="00000000-0000-0000-0000-000000000000" FloatingIndexInWindowGroup="0" FloatingSplitPath="0" /&gt;
@@ -970,16 +969,13 @@
       <Title>TriggerModule_174</Title>
     </TriggerModule>
     <YTChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-      <AnchorTimestamp>0</AnchorTimestamp>
       <AssignedCore>0</AssignedCore>
       <AutoStart>true</AutoStart>
       <Comment />
-      <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-1118478</DisplayColor>
+      <DisplayColor>-986896</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
-      <DurationLength>0</DurationLength>
-      <ForeColor>-14803426</ForeColor>
+      <ForeColor>-16777216</ForeColor>
       <Guid>e1bf842e-5c15-474b-8716-e74433426c87</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>YT Chart</Name>
@@ -988,8 +984,8 @@
       <SubMember>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-657931</DisplayColor>
-          <ForeColor>-14803426</ForeColor>
+          <DisplayColor>-1</DisplayColor>
+          <ForeColor>-16777216</ForeColor>
           <Guid>65073bba-3526-4dcb-bd25-74935467d3cc</Guid>
           <Name>Overview Chart</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -1026,7 +1022,6 @@
               <EnabledButtons>RunButton PauseButton Splitter1 DisplaywidthTextBox Splitter2 ScrollBackBig ScrollBackSmall ScrollForwardSmall ScrollForwardBig Splitter3 PositionTextBox Splitter4 UndoButton RedoButton Splitter5 PanXButton PanXYButton ZoomXButton ZoomXYButton UnzoomButton ZoomOutMaxButton OverviewButton CopyToClipboard</EnabledButtons>
               <EnabledTimeLabels>All</EnabledTimeLabels>
               <Guid>c73d3469-815c-490d-9999-28697e434141</Guid>
-              <IndexNavigation>false</IndexNavigation>
               <Name>Chartmenu Style</Name>
               <SortPriority>100</SortPriority>
               <TimeStripFontSize>8.25</TimeStripFontSize>
@@ -1050,13 +1045,11 @@
           <Title>MarkerContainer_336</Title>
         </MarkerContainer>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-657931</DisplayColor>
+          <DisplayColor>-1</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>ba4d342f-f465-43c8-8fee-cf1327545d51</Guid>
           <Name>Axis Group (1)</Name>
-          <ShowTitle>False</ShowTitle>
           <SortPriority>11</SortPriority>
           <SubMember>
             <TimeAxis AssemblyName="TwinCAT.Measurement.Scope.API.Model">
@@ -1073,24 +1066,21 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
-                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-14803426</DisplayColor>
+                  <DisplayColor>-16777216</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-14803426</GridColor>
+                  <GridColor>-16777216</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>f0ffe40e-090a-4d5a-ad87-73beca2f9705</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style</Name>
                   <Precision>6</Precision>
-                  <ShowName>False</ShowName>
+                  <ShowName>false</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_342</Title>
-                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -1110,24 +1100,21 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
-                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-14803426</DisplayColor>
+                  <DisplayColor>-16777216</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-14803426</GridColor>
+                  <GridColor>-16777216</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>beae823d-5a96-4417-95ce-291a7bacc621</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (2)</Name>
                   <Precision>6</Precision>
-                  <ShowName>False</ShowName>
+                  <ShowName>false</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_398</Title>
-                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -1156,6 +1143,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>d9acaa42-5cad-414d-87f4-038f36997100</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: cartTrackVel[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1264,6 +1252,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>37db4002-e29d-464d-8dbb-63b5d12f617c</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: cartTrackVel[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1372,6 +1361,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>69a75d82-8447-44b0-8fd4-73c2ef2294da</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: cartTrackVel[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1470,13 +1460,11 @@
           <Title>AxisGroup_394</Title>
         </AxisGroup>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-657931</DisplayColor>
+          <DisplayColor>-1</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>cf19b188-100f-4be7-9d0a-b414e671a06d</Guid>
           <Name>Axis Group (2)</Name>
-          <ShowTitle>False</ShowTitle>
           <SortPriority>12</SortPriority>
           <SubMember>
             <RefGuid-TimeAxis>6d9454a1-96ca-43db-9054-7dfdd8bf4ff7</RefGuid-TimeAxis>
@@ -1494,24 +1482,21 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
-                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-14803426</DisplayColor>
+                  <DisplayColor>-16777216</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-14803426</GridColor>
+                  <GridColor>-16777216</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>bacc5304-960c-40d6-b7e4-82a6db41cf02</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (3)</Name>
                   <Precision>6</Precision>
-                  <ShowName>False</ShowName>
+                  <ShowName>false</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_398</Title>
-                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -1540,6 +1525,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c09c199f-9fc0-40cb-80be-ee3cb979b3da</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: jntTrackVel[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1648,6 +1634,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>ae89f61a-340a-4b12-85b9-0dc7383a00ac</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: jntTrackVel[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1756,6 +1743,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>d582bd8a-0970-42bc-95a2-856b54524e9d</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: jntTrackVel[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1864,6 +1852,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>66c499b4-6f33-4db9-b7dc-2c9c3e8f726e</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: jntTrackVel[4]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1962,13 +1951,11 @@
           <Title>AxisGroup_394</Title>
         </AxisGroup>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-657931</DisplayColor>
+          <DisplayColor>-1</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>88afbd22-fa0b-4b02-8bbe-bc21e7b43b9f</Guid>
           <Name>Axis Group (3)</Name>
-          <ShowTitle>False</ShowTitle>
           <SortPriority>13</SortPriority>
           <SubMember>
             <RefGuid-TimeAxis>6d9454a1-96ca-43db-9054-7dfdd8bf4ff7</RefGuid-TimeAxis>
@@ -1986,24 +1973,21 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
-                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
-                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-14803426</DisplayColor>
+                  <DisplayColor>-16777216</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-14803426</GridColor>
+                  <GridColor>-16777216</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>2a808ecf-af06-40ce-b941-2349cbfb9588</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style (4)</Name>
                   <Precision>6</Precision>
-                  <ShowName>False</ShowName>
+                  <ShowName>false</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_533</Title>
-                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -2032,6 +2016,7 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>bb6e49a2-96bb-4c3a-bb45-3e6b637b7173</Guid>
+                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: errAngle</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2130,10 +2115,7 @@
           <Title>AxisGroup_529</Title>
         </AxisGroup>
       </SubMember>
-      <TimeOffset>0</TimeOffset>
-      <TimeRefreshMode>Explicit</TimeRefreshMode>
       <Title>YTChart_328</Title>
-      <TriggerGroupOffset>0</TriggerGroupOffset>
     </YTChart>
   </SubMember>
   <SynchronisationMode>Default</SynchronisationMode>
@@ -2141,6 +2123,7 @@
   <Title>ScopeProject_3</Title>
   <UseAutoSave>false</UseAutoSave>
   <UseFileStore>true</UseFileStore>
+  <UseUserSettings>true</UseUserSettings>
   <Version>1.0.0.3</Version>
   <ViewDetailLevel>Default</ViewDetailLevel>
 </ScopeProject>

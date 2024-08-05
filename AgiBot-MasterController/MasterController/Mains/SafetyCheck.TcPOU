@@ -78,11 +78,15 @@ GVL_com_upper_PC.error_ID_type3:=m_SafetyCheck.o_ErrCode[3];
 GVL_com_upper_PC.error_ID_type2:=m_SafetyCheck.o_ErrCode[2];
 GVL_com_upper_PC.error_ID_type1:=m_SafetyCheck.o_ErrCode[1];
 
+//clear fault
+IF GVL_com_upper_PC.ui_reset_fault=1 THEN
+	m_safetyCheck.errFlagReset();
+	GVL_com_upper_PC.ui_reset_fault :=0;
+END_IF
 
-
-m_masterArmCheck.check(m_masterStatus,m_masterJointData, o_errorFlag=>m_safetyCheckData.m_masterErrFlag);
-
-m_cartCheck.check(m_cartStatus, m_cartJointData, o_errorFlag=>m_safetyCheckData.m_cartErrFlag);]]></ST>
+//m_masterArmCheck.check(m_masterStatus,m_masterJointData, o_errorFlag=>m_safetyCheckData.m_masterErrFlag);
+//
+//m_cartCheck.check(m_cartStatus, m_cartJointData, o_errorFlag=>m_safetyCheckData.m_cartErrFlag);]]></ST>
     </Implementation>
     <Method Name="armSafetyCheckAllowed" Id="{c2ebef6f-e712-49e3-9955-377a0083e93a}">
       <Declaration><![CDATA[METHOD armSafetyCheckAllowed : BOOL
@@ -133,26 +137,25 @@ FOR i := 1 TO g_maxArmNum DO
 	m_checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
 	//m_checkVariable[i].SlaveStopButton := m_stopButton;
 	m_checkVariable[i].MasterStopButton := m_stopButton;
-		
 	m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_masterStatus.m_cmdArmPose[i], m_masterStatus.m_curArmPose[i] );
 	FOR j:=1 TO  g_mJntNum DO 		
 		m_checkVariable[i].m_masterDriverInput[j] := MasterArmControl.m_masterRobot.m_masterArms[i].m_joints[j].m_motorInputs;
 		m_checkVariable[i].m_masterDriverOutput[j] := MasterArmControl.m_masterRobot.m_masterArms[i].m_joints[j].m_motorOutputs;
-		
 		m_checkVariable[i].m_EtherCATState[j] := m_EtherCATCheck[i,j].EtherCATVerify(g_ArmNetID[i],g_JointNetPort[i,j]);
 			
 		//The sum of the square of the motor current
 		g_motorCurrentLimit[j] := EXPT((GVL_ArmJointParameters.g_motorMaxCurrent[j]/1000),2)*15000;
 		IF ABS(m_checkVariable[i].m_masterDriverInput[j].m_current) > GVL_ArmJointParameters.g_motorMaxCurrent[j] THEN
-			m_checkVariable[i].m_motorCurrentIntegral[j] := m_checkVariable[i].m_motorCurrentIntegral[j] + ABS (EXPT(m_checkVariable[i].m_masterDriverInput[j].m_current/1000,2));
+			m_checkVariable[i].m_motorCurrentIntegral[j] := m_checkVariable[i].m_motorCurrentIntegral[j] + ABS (EXPT((DINT_TO_LREAL(m_checkVariable[i].m_masterDriverInput[j].m_current)/1000),2));
 		ELSE
 			m_checkVariable[i].m_motorCurrentIntegral[j] := 0;
 		END_IF
 	END_FOR
-
 END_FOR
 
 FOR j:=1 TO  g_maxCartJoint DO
+	m_checkVariable[g_cartNum].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[g_cartNum].MasterStopButton := m_stopButton;
 	m_checkVariable[g_cartNum].m_cartDriverInput[j] := CartControl.m_masterCart.m_cartJoints[j].m_motorInputs;
 	m_checkVariable[g_cartNum].m_cartDriverOutput[j] := CartControl.m_masterCart.m_cartJoints[j].m_motorOutputs;
 	m_checkVariable[g_cartNum].m_cartEtherCATState[j] := m_EtherCATCheck[g_cartNum,j].EtherCATVerify(g_cartNetID,g_cartJointNetPort[j]);
@@ -170,8 +173,8 @@ END_VAR
 FOR i:=1  TO g_mArmNum DO
 	m_safetyCheckData.m_masterErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
 END_FOR
-FOR i:=1  TO g_mArmNum DO
-	m_safetyCheckData.m_cartErrFlag[i] := m_SafetyCheck.m_armErrFlag[i,2] OR m_SafetyCheck.m_armErrFlag[i,3];
+FOR i:=1  TO g_maxCartJoint DO
+	m_safetyCheckData.m_cartErrFlag[i] := m_SafetyCheck.m_jntErrFlag[g_cartNum,i,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,i,3] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,2] OR m_SafetyCheck.m_jntErrFlag[g_cartNum,0,3];
 END_FOR
 ]]></ST>
       </Implementation>
@@ -236,6 +239,9 @@ END_FOR
       <LineId Id="98" Count="0" />
       <LineId Id="127" Count="0" />
       <LineId Id="126" Count="0" />
+      <LineId Id="164" Count="1" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="166" Count="0" />
       <LineId Id="26" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="60" Count="0" />
@@ -261,14 +267,13 @@ END_FOR
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckInputCast">
-      <LineId Id="220" Count="0" />
-      <LineId Id="95" Count="1" />
-      <LineId Id="98" Count="1" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="207" Count="0" />
+      <LineId Id="272" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="274" Count="2" />
+      <LineId Id="273" Count="0" />
       <LineId Id="248" Count="0" />
       <LineId Id="197" Count="2" />
-      <LineId Id="211" Count="1" />
+      <LineId Id="212" Count="0" />
       <LineId Id="249" Count="0" />
       <LineId Id="252" Count="0" />
       <LineId Id="259" Count="0" />
@@ -276,9 +281,11 @@ END_FOR
       <LineId Id="257" Count="1" />
       <LineId Id="256" Count="0" />
       <LineId Id="200" Count="0" />
-      <LineId Id="139" Count="0" />
       <LineId Id="12" Count="0" />
-      <LineId Id="221" Count="3" />
+      <LineId Id="221" Count="1" />
+      <LineId Id="278" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="223" Count="1" />
       <LineId Id="241" Count="0" />
       <LineId Id="176" Count="0" />
       <LineId Id="164" Count="0" />
