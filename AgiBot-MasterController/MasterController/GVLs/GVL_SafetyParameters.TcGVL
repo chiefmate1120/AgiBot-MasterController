@@ -9,12 +9,18 @@ VAR_GLOBAL CONSTANT
 	g_faultTriggerCounts :INT :=2;
 	
 	// arm joint safety error
-	g_armMaxJntEncErr :vec7d:=[7(50*g_deg2Rad)];
+	g_armMaxJntEncErr :vec7d:=[7(30*g_deg2Rad)];
 	g_armMaxJntFollowErr :vec7d:=[7(20*g_deg2Rad)];
 	
 	// joint limit buffer(outside of joint limit)
 	g_armJntPosLimitBuffer :vec7d:=[3(10.0*g_deg2Rad), 4(45.0*g_deg2Rad)];
 
+	//max joint encoder current  saltation
+	g_maxJntCurSalta : vec7d:=[7(60000)];
+	
+	// self check timeout time limit
+	g_selfCheckTimeLimit : LREAL:= 15.0;
+	
 	//arm joint link encoder maximum and minimum values
 	g_maxLinkEnc : DINT:=16777215;
 	g_minLinkEnc : DINT:=0;

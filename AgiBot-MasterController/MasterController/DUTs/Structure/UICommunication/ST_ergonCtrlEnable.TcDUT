@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_ergonCtrlEnable" Id="{a38163c8-97f6-4276-a969-fa396dc7b1fa}">
+    <Declaration><![CDATA[TYPE ST_ergonCtrlEnable :
+STRUCT
+	//recovery ergonomics enable 
+	m_recovErgonEnable : BOOL;
+
+	//recovery ergonomics finshed
+	m_recovErgonFinshed : BOOL;
+	
+	//cancel recovery ergonomics enable 
+	m_cancelRecovErgonEnable : BOOL;
+	
+	//cancel recovery ergonomics finshed
+	m_cancelRecovErgonFinshed : BOOL;
+	
+	//ergonomics information modify
+	m_ergonInfoModify : BOOL;
+
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

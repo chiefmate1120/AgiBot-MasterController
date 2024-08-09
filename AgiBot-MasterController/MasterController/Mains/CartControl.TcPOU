@@ -57,50 +57,50 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//init cart joint postion
-IF (gvl_com_upper_PC.Upper_PC_Initial_Finished=FALSE) THEN
-	gvl_com_upper_PC.Upper_PC_Initial_Finished:=TRUE;
+IF (GVL_interactUI.Upper_PC_Initial_Finished=FALSE) THEN
+	GVL_interactUI.Upper_PC_Initial_Finished:=TRUE;
 	//当前位置保存
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
-	GVL_com_upper_PC.ergonomic_control.ergonomic_info_modify:=TRUE;//初始化时将台车现在的位置赋值给UI；
+	GVL_interactUI.g_ergonomicCtrlEnable.m_ergonInfoModify:=TRUE;//初始化时将台车现在的位置赋值给UI；
 END_IF
 
-IF  GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics AND NOT GVL_com_upper_PC.ergonomic_control_last.recovery_Ergonomics THEN
-	GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished:=FALSE;
+IF  GVL_interactUI.g_ergonomicCtrlEnable.m_recovErgonEnable AND NOT GVL_interactUI.g_ergonomicCtrlEnableLast.m_recovErgonEnable THEN
+	GVL_interactUI.g_ergonomicCtrlEnable.m_recovErgonFinshed:=FALSE;
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
-	m_cartUIData.m_cmdJntPos[1] := GVL_com_upper_PC.command_ergonomic_data.head_height;
-	m_cartUIData.m_cmdJntPos[2] := GVL_com_upper_PC.command_ergonomic_data.head_angle;
-	m_cartUIData.m_cmdJntPos[3] := GVL_com_upper_PC.command_ergonomic_data.arm_height;
-	m_cartUIData.m_cmdJntPos[4] := GVL_com_upper_PC.command_ergonomic_data.foot_distance;
+	m_cartUIData.m_cmdJntPos[1] := GVL_interactUI.g_ergonomicCtrlData.m_monitorHeight;
+	m_cartUIData.m_cmdJntPos[2] := GVL_interactUI.g_ergonomicCtrlData.m_headAngle;
+	m_cartUIData.m_cmdJntPos[3] := GVL_interactUI.g_ergonomicCtrlData.m_handrailHeight;
+	m_cartUIData.m_cmdJntPos[4] := GVL_interactUI.g_ergonomicCtrlData.m_footDistance;
 	
 END_IF
-	m_cartUIData.m_ergonomicCrl.recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics;
+	m_cartUIData.m_ergonomicCrl.m_recovErgonEnable := GVL_interactUI.g_ergonomicCtrlEnable.m_recovErgonEnable;
 	
-IF (GVL_com_upper_PC.ergonomic_control_last.cancel_recovery_Ergonomics=FALSE) AND (GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics=TRUE) THEN
-	GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished:=FALSE;
+IF (GVL_interactUI.g_ergonomicCtrlEnableLast.m_cancelRecovErgonEnable=FALSE) AND (GVL_interactUI.g_ergonomicCtrlEnable.m_cancelRecovErgonEnable=TRUE) THEN
+	GVL_interactUI.g_ergonomicCtrlEnable.m_cancelRecovErgonFinshed:=FALSE;
 	m_cartUIData.m_cmdJntPos := m_cartUIData.m_cmdCancelErgonPos;
 END_IF
-m_cartUIData.m_ergonomicCrl.cancel_recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics;
+m_cartUIData.m_ergonomicCrl.m_cancelRecovErgonEnable := GVL_interactUI.g_ergonomicCtrlEnable.m_cancelRecovErgonEnable;
 
-GVL_com_upper_PC.ergonomic_control_last:=GVL_com_upper_PC.ergonomic_control;
-GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished := m_cartStatus.m_cancelErgonAdjustArrival;
-GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished := m_cartStatus.m_ergonAdjustArrival;
+GVL_interactUI.g_ergonomicCtrlEnableLast:=GVL_interactUI.g_ergonomicCtrlEnable;
+GVL_interactUI.g_ergonomicCtrlEnable.m_cancelRecovErgonFinshed := m_cartStatus.m_cancelErgonAdjustArrival;
+GVL_interactUI.g_ergonomicCtrlEnable.m_recovErgonFinshed := m_cartStatus.m_ergonAdjustArrival;
 
-GVL_com_upper_PC.head_in:=m_cartStatus.m_surgonReady;
+GVL_interactUI.g_surgonHeadIn:=m_cartStatus.m_surgonReady;
 
-GVL_com_upper_PC.actual_ergonomic_data.head_height := m_cartJointData.m_curJntPos[1];
-GVL_com_upper_PC.actual_ergonomic_data.head_angle := m_cartJointData.m_curJntPos[2];
-GVL_com_upper_PC.actual_ergonomic_data.arm_height := m_cartJointData.m_curJntPos[3];
-GVL_com_upper_PC.actual_ergonomic_data.foot_distance:= m_cartJointData.m_curJntPos[4];
+GVL_interactUI.g_ergonomicCurData.m_monitorHeight := m_cartJointData.m_curJntPos[1];
+GVL_interactUI.g_ergonomicCurData.m_headAngle := m_cartJointData.m_curJntPos[2];
+GVL_interactUI.g_ergonomicCurData.m_handrailHeight := m_cartJointData.m_curJntPos[3];
+GVL_interactUI.g_ergonomicCurData.m_footDistance:= m_cartJointData.m_curJntPos[4];
 
 
 
 //work heart
-m_workHeartTon0(IN:= GVL_com_upper_PC.work_heart = 1, PT:= T#1S, Q=> , ET=> );
-m_workHeartTon1(IN:= GVL_com_upper_PC.work_heart = 0, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon0(IN:= GVL_interactUI.g_heartBeat = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_interactUI.g_heartBeat = 0, PT:= T#1S, Q=> , ET=> );
 IF m_workHeartTon0.Q THEN
-	GVL_com_upper_PC.work_heart :=0 ;
+	GVL_interactUI.g_heartBeat :=0 ;
 ELSIF m_workHeartTon1.Q THEN
-	GVL_com_upper_PC.work_heart  :=1 ;
+	GVL_interactUI.g_heartBeat  :=1 ;
 END_IF
 ]]></ST>
       </Implementation>

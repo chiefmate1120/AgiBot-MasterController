@@ -217,6 +217,9 @@ FOR i:=1 TO g_mArmNum DO
 	r_masterJointsData.m_cmdJntCurrent[i]:=m_masterArms[i].cmdJntCurrent;
 	//data to safety check
 	r_masterStatus.m_gripHallSensor[i] := m_masterArms[i].m_gripHallSensorIO;
+	r_masterStatus.m_slaveOnLine := m_slaveOnLine;
+	r_masterStatus.m_IKSuccess[i] := m_armMatching[i].IKSuccess;
+	r_masterStatus.m_timePeriod[i] := m_armMatching[i].timePeriod;
 	//r_masterStatus.m_selfCheckStatus
 END_FOR]]></ST>
       </Implementation>
@@ -480,7 +483,7 @@ FOR i:=1 TO g_mArmNum DO
 				m_nextMasterArmState[i] := MasterArmState_Cart;
 			// to master-slave
 			ELSIF SlaveArmState_InstruReady = m_instruArmState[i] AND SlaveArmState_ScopeReady = m_scopeArmState 
-					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_MSCtrlTriggerFlag[i] THEN
+					AND i_masterInputDataPool.m_cartStatus.m_surgonReady AND m_MSCtrlTriggerFlag[i] AND i_masterInputDataPool.m_slaveStatus.m_asepticDeployCompleteFlag THEN
 				m_nextMasterArmState[i] := MasterArmState_MasterSlave;
 			END_IF
 		
@@ -494,9 +497,6 @@ FOR i:=1 TO g_mArmNum DO
 			// to clutch
 			ELSIF enableClutch THEN
 				m_nextMasterArmState[i] := MasterArmState_Clutch; 
-			// to cart
-			ELSIF i_masterInputDataPool.m_cartStatus.m_consoleInAdjust THEN
-				m_nextMasterArmState[i] := MasterArmState_Cart;
 			END_IF
 			
 		//Clutch
@@ -656,7 +656,10 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="39" Count="0" />
       <LineId Id="110" Count="0" />
       <LineId Id="40" Count="0" />
-      <LineId Id="124" Count="1" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="153" Count="1" />
+      <LineId Id="125" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterRobot.Init">
@@ -816,8 +819,6 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="221" Count="0" />
       <LineId Id="246" Count="1" />
       <LineId Id="245" Count="0" />
-      <LineId Id="272" Count="1" />
-      <LineId Id="271" Count="0" />
       <LineId Id="140" Count="0" />
       <LineId Id="159" Count="0" />
       <LineId Id="157" Count="1" />

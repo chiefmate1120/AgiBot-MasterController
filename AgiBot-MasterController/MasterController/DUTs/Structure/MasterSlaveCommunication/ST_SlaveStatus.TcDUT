@@ -29,6 +29,9 @@ STRUCT
 	// master slave pose error [position, angle*axis] in endoscope coordinate
 	m_masterSlavePoseError :ARRAY[1..g_sArmNum] OF Vec6d; 
 	
+	//slave aseptic deployment complete flag
+	m_asepticDeployCompleteFlag : BOOL;
+	
 END_STRUCT
 END_TYPE]]></Declaration>
   </DUT>

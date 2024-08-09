@@ -2,9 +2,19 @@
 <Refactors>
   <Renames>
     <RenamedType>
-      <Type guid="1102e175-6107-4706-a6ad-ea5e8fc76a1b">MASTERSAFETYCHECK</Type>
-      <From>masterSafetyCheck</From>
-      <To>armSafetyCheck</To>
+      <Type guid="b6fc928c-802a-4bca-a5ad-5de470837f32">GVL_COM_UPPER_PC</Type>
+      <From>GVL_com_upper_PC</From>
+      <To>GVL_interactUI</To>
+    </RenamedType>
+    <RenamedType>
+      <Type guid="a38163c8-97f6-4276-a969-fa396dc7b1fa">ST_ERGONOMIC_CONTROL</Type>
+      <From>ST_Ergonomic_control</From>
+      <To>ST_ergonCtrlEnable</To>
+    </RenamedType>
+    <RenamedType>
+      <Type guid="476619f7-fa03-4b2e-ad16-ef2a94d0f41f">ST_ERGONOMIC_DATA</Type>
+      <From>ST_ergonomic_data</From>
+      <To>ST_ergonomicCtrlData</To>
     </RenamedType>
   </Renames>
 </Refactors>

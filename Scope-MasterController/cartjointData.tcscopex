@@ -24,7 +24,8 @@
   <ImageAutoDeleteCapacity>0</ImageAutoDeleteCapacity>
   <ImageAutoDeleteOlderThan>0</ImageAutoDeleteOlderThan>
   <ImagesDeleteMode>Disabled</ImagesDeleteMode>
-  <IsTemplate>false</IsTemplate>
+  <KeepPreviousExports>false</KeepPreviousExports>
+  <KeepPreviousImageExports>false</KeepPreviousImageExports>
   <Layout>&lt;?xml version="1.0" encoding="utf-16"?&gt;
 &lt;Layout&gt;
   &lt;Window Guid="3773dcd5-ac5d-4259-bd92-b335f86e1f3b" LastFocused="133641217547818372" DockedSize="200" PopupSize="0" FloatingLocation="-1, -1" FloatingSize="550, 400" LastOpenDockSituation="Document" LastFixedDockSituation="Document" LastFixedDockLocation="Right" LastFloatingWindowGuid="00000000-0000-0000-0000-000000000000" LastDockContainerCount="0" LastDockContainerIndex="0" DockedWorkingSize="250, 400" DockedWindowGroupGuid="00000000-0000-0000-0000-000000000000" DockedIndexInWindowGroup="0" DockedSplitPath="0" DocumentWorkingSize="250, 400" DocumentWindowGroupGuid="2b029563-1202-49f5-9eeb-156d12cc8441" DocumentIndexInWindowGroup="0" DocumentSplitPath="0" FloatingWorkingSize="250, 400" FloatingWindowGroupGuid="00000000-0000-0000-0000-000000000000" FloatingIndexInWindowGroup="0" FloatingSplitPath="0" /&gt;
@@ -1706,13 +1707,16 @@
       <Title>DataPool_369</Title>
     </DataPool>
     <YTChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+      <AnchorTimestamp>0</AnchorTimestamp>
       <AssignedCore>0</AssignedCore>
       <AutoStart>true</AutoStart>
       <Comment />
+      <ConnectedTimeMemberGuid>00000000-0000-0000-0000-000000000000</ConnectedTimeMemberGuid>
       <DefaultDisplayWidth>100000000</DefaultDisplayWidth>
-      <DisplayColor>-986896</DisplayColor>
+      <DisplayColor>-1118478</DisplayColor>
       <DisplayOverwriteMode>false</DisplayOverwriteMode>
-      <ForeColor>-16777216</ForeColor>
+      <DurationLength>0</DurationLength>
+      <ForeColor>-14803426</ForeColor>
       <Guid>3773dcd5-ac5d-4259-bd92-b335f86e1f3b</Guid>
       <MasterChart>00000000-0000-0000-0000-000000000000</MasterChart>
       <Name>YT Chart</Name>
@@ -1720,11 +1724,13 @@
       <SortPriority>10</SortPriority>
       <SubMember>
         <AxisGroup AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+          <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
           <Comment />
-          <DisplayColor>-1</DisplayColor>
+          <DisplayColor>-657931</DisplayColor>
           <Enabled>true</Enabled>
           <Guid>7de27a4d-7fd4-4cb5-969e-0cbfc43a8bc6</Guid>
           <Name>Axis Group</Name>
+          <ShowTitle>False</ShowTitle>
           <SortPriority>10</SortPriority>
           <SubMember>
             <TimeAxis AssemblyName="TwinCAT.Measurement.Scope.API.Model">
@@ -1741,21 +1747,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>bf66fe03-a2a7-475e-880f-3804f14b7b03</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_373</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -1775,21 +1784,24 @@
               <SortPriority>100</SortPriority>
               <SubMember>
                 <AxisStyle AssemblyName="TwinCAT.Measurement.Scope.API.Model">
+                  <ChannelRelatedGuid>00000000-0000-0000-0000-000000000000</ChannelRelatedGuid>
+                  <ColorMode>CustomColor</ColorMode>
                   <Comment />
-                  <DisplayColor>-16777216</DisplayColor>
+                  <DisplayColor>-14803426</DisplayColor>
                   <Grid>true</Grid>
-                  <GridColor>-16777216</GridColor>
+                  <GridColor>-14803426</GridColor>
                   <GridDivisions>10</GridDivisions>
                   <GridLineWidth>1</GridLineWidth>
                   <Guid>8e0b4dd5-1de8-40da-bd9c-7d25db8182d6</Guid>
                   <LineWidth>1</LineWidth>
                   <Name>Axis Style</Name>
                   <Precision>6</Precision>
-                  <ShowName>false</ShowName>
+                  <ShowName>False</ShowName>
                   <SortPriority>100</SortPriority>
                   <SubGrid>false</SubGrid>
                   <SubGridDivisions>5</SubGridDivisions>
                   <Title>AxisStyle_375</Title>
+                  <UseScientificNotation>true</UseScientificNotation>
                   <Visible>true</Visible>
                 </AxisStyle>
               </SubMember>
@@ -1818,7 +1830,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>23033c1a-f6c5-43a8-aeb3-5382968123e0</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_jntCmdMotionDir[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -1927,7 +1938,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c555b5f5-ca5c-4200-a3ca-a9303a6871d5</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_jntCmdMotionDir[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2036,7 +2046,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>dfe91a1c-0479-428f-8653-440d4a96b865</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_jntCmdMotionDir[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2145,7 +2154,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>2d3d1f5a-062b-4713-bfc3-65843d267476</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_jntCmdMotionDir[4]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2254,7 +2262,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>b937095e-9c78-40f5-9587-3f51180b27c5</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[8]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2363,7 +2370,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>7067877c-1a21-41fb-9dca-c609dd7bd78a</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2472,7 +2478,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>2f763276-9146-4882-9b6e-cc5f93c17672</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2581,7 +2586,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>88b2b7da-7b1c-419c-99ea-43b6ffcc54a5</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2690,7 +2694,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>328ddc4d-d391-4052-babc-06f224b5ae25</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[4]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2799,7 +2802,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>43fc698c-888d-403f-803c-8125546639cd</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[5]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -2908,7 +2910,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>3116968f-6a15-4523-aaf3-a7756ea94599</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[6]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3017,7 +3018,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>109ebfbd-effe-46a4-bdae-15b2f62438ef</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cartJointCtrlIO[7]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3126,7 +3126,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>fa3aac3c-e799-414b-bebd-2da0ec9760b7</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntVel[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3235,7 +3234,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>15f05e54-fc6a-47d2-b57a-dd346db814f3</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntVel[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3344,7 +3342,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c4e08ab6-96d7-4684-9740-fe0988201de4</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntVel[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3453,7 +3450,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>8fa8740a-8e9b-461c-9b90-b8066e9e9567</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntVel[4]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3562,7 +3558,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>932fadb9-e51b-4ca6-b1a4-13252f706afb</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[1]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3671,7 +3666,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>0b44e4df-427b-41eb-8a2a-3511994bc39c</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[2]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3780,7 +3774,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>778ea9f9-0130-4cbd-8c47-f8352066cb95</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[3]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3889,7 +3882,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>c47a6c75-5561-4f9c-9f4a-193702f6c547</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[4]</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -3998,7 +3990,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>30e053a6-ddd9-4c84-be72-01bceb67def2</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[1] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4107,7 +4098,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>8a6d94c9-f708-4d38-9ebd-18d544bea290</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[2] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4216,7 +4206,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>507d23d4-99d1-4f22-9079-fbbadfa036da</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[3] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4325,7 +4314,6 @@
                   <Comment />
                   <DisplayColor>Black</DisplayColor>
                   <Guid>5a4f4a65-151d-4c95-882e-fb0e4586f9d4</Guid>
-                  <HideInHierarchy>false</HideInHierarchy>
                   <Name>Y: m_cmdJntPos[4] (1)</Name>
                   <Offset>0</Offset>
                   <ResultingUnit>
@@ -4425,8 +4413,8 @@
         </AxisGroup>
         <OverviewChart AssemblyName="TwinCAT.Measurement.Scope.API.Model">
           <Comment />
-          <DisplayColor>-1</DisplayColor>
-          <ForeColor>-16777216</ForeColor>
+          <DisplayColor>-657931</DisplayColor>
+          <ForeColor>-14803426</ForeColor>
           <Guid>7e6c9656-1ac8-411a-8936-99c75fc5a35a</Guid>
           <Name>Overview Chart</Name>
           <OverviewVisible>false</OverviewVisible>
@@ -4463,6 +4451,7 @@
               <EnabledButtons>RunButton PauseButton Splitter1 DisplaywidthTextBox Splitter2 ScrollBackBig ScrollBackSmall ScrollForwardSmall ScrollForwardBig Splitter3 PositionTextBox Splitter4 UndoButton RedoButton Splitter5 PanXButton PanXYButton ZoomXButton ZoomXYButton UnzoomButton ZoomOutMaxButton OverviewButton CopyToClipboard</EnabledButtons>
               <EnabledTimeLabels>All</EnabledTimeLabels>
               <Guid>98b470b8-644d-4a33-a5c8-d43994ea649e</Guid>
+              <IndexNavigation>false</IndexNavigation>
               <Name>Chartmenu Style</Name>
               <SortPriority>100</SortPriority>
               <TimeStripFontSize>8.25</TimeStripFontSize>
@@ -4477,7 +4466,10 @@
           <ToolTipEnabled>true</ToolTipEnabled>
         </ChartStyle>
       </SubMember>
+      <TimeOffset>0</TimeOffset>
+      <TimeRefreshMode>Explicit</TimeRefreshMode>
       <Title>YTChart_370</Title>
+      <TriggerGroupOffset>0</TriggerGroupOffset>
     </YTChart>
     <TriggerModule AssemblyName="TwinCAT.Measurement.Scope.API.Model">
       <Comment />
@@ -4494,7 +4486,6 @@
   <Title>ScopeProject_3</Title>
   <UseAutoSave>false</UseAutoSave>
   <UseFileStore>true</UseFileStore>
-  <UseUserSettings>true</UseUserSettings>
   <Version>1.0.0.3</Version>
   <ViewDetailLevel>Default</ViewDetailLevel>
 </ScopeProject>

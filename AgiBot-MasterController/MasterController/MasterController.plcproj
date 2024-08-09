@@ -190,16 +190,10 @@
     <Compile Include="DUTs\Structure\UICommunication\ST_arm_distribution.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_DH.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_ergonCtrlEnable.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_energy_data.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_Ergonomic_control.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_ergonomic_data.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_ergonomicCtrlData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\UICommunication\ST_instrument_info.TcDUT">
@@ -471,7 +465,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
+    <Compile Include="GVLs\GVL_interactUI.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>

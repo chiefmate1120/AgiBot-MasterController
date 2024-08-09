@@ -35,9 +35,6 @@ VAR
 	m_electricCoagulRight AT %I* :BOOL;
 	m_electricCoagulRightAllow AT %I* :BOOL;
 	
-	m_cartLockSignalLeft AT %I* :BOOL;
-	m_cartLockSignalRight AT %I* :BOOL;
-	
 	m_elecKnifeCtrlWord AT %Q* :DINT;
 	
 	// cart status
@@ -392,15 +389,15 @@ END_VAR]]></Declaration>
         <ST><![CDATA[FOR i := 1 TO 4 DO
 	IF m_jntCmdMotionDir[i] <> 0 THEN
 		manualAdjust(i);
-	ELSIF m_UIData.m_ergonomicCrl.recovery_Ergonomics OR m_UIData.m_ergonomicCrl.cancel_recovery_Ergonomics THEN
+	ELSIF m_UIData.m_ergonomicCrl.m_recovErgonEnable OR m_UIData.m_ergonomicCrl.m_cancelRecovErgonEnable THEN
 		ergonomicAdjust(i);
 	END_IF
 END_FOR
 
 reachUITargetCheck();
 IF m_cmdArrival[1] AND m_cmdArrival[2] AND m_cmdArrival[3] AND m_cmdArrival[4] THEN
-	m_cartStatus.m_ergonAdjustArrival := m_UIData.m_ergonomicCrl.recovery_Ergonomics;
-	m_cartStatus.m_cancelErgonAdjustArrival := m_UIData.m_ergonomicCrl.cancel_recovery_Ergonomics;
+	m_cartStatus.m_ergonAdjustArrival := m_UIData.m_ergonomicCrl.m_recovErgonEnable;
+	m_cartStatus.m_cancelErgonAdjustArrival := m_UIData.m_ergonomicCrl.m_cancelRecovErgonEnable;
 ELSE
 	m_cartStatus.m_ergonAdjustArrival := FALSE;
 	m_cartStatus.m_cancelErgonAdjustArrival := FALSE;
@@ -461,7 +458,7 @@ END_FOR
 
 // update joint enable flag
 FOR i:= 1 TO 4 DO
-	IF m_jntCmdMotionDir[i] <> 0 OR m_UIData.m_ergonomicCrl.recovery_Ergonomics OR m_UIData.m_ergonomicCrl.cancel_recovery_Ergonomics THEN
+	IF m_jntCmdMotionDir[i] <> 0 OR m_UIData.m_ergonomicCrl.m_recovErgonEnable OR m_UIData.m_ergonomicCrl.m_cancelRecovErgonEnable THEN
 		m_jntEnableFlag[i] := TRUE;
 		m_jntEnableCounts[i]:= LIMIT(0, m_jntEnableCounts[i]+1, m_jntEnableCountsThres);
 		m_jntDisableCounts[i]:=m_jntEnableCountsThres;

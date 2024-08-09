@@ -26,7 +26,6 @@ STRUCT
 	torque_max:ARRAY[1..5] OF REAL;
 	ratio:ARRAY[1..5] OF REAL;
 
-	DH:ST_DH;
 	name:STRING;
 	type_1:STRING;
 	serial_number:STRING;

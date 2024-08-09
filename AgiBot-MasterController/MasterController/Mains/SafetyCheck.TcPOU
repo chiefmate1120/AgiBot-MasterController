@@ -22,6 +22,9 @@ VAR
 	//stop botton
 	m_stopButton AT %I*: BOOL;
 	
+	m_cartLockSignalLeft AT %I* :BOOL;
+	m_cartLockSignalRight AT %I* :BOOL;
+	
 	m_initFlag:bool;
 	m_cartCheck :FB_CartCheck;
 	m_masterArmCheck:FB_MasterArmCheck;
@@ -31,6 +34,9 @@ VAR
 	m_EtherCATCheck :ARRAY [1..g_maxNum,1..g_maxArmJoint] OF Fb_EtherCATCheck;
 	m_errCode :ARRAY [1..3] OF UDINT;
 
+	//error robot data record
+	m_dataRecord : Fb_dataRecord;
+	
 	m_armsRS:ARRAY [1..g_maxArmNum,1..20] OF RS;//复位优先双稳态器
 	m_cartRS:ARRAY [1..20] OF RS;//复位优先双稳态器
 	
@@ -55,7 +61,7 @@ armSafetyCheckInputCast();
 
 armSafetyCheckAllowed();
 
-//robotPromptMassageCast();
+robotPromptMassageCast();
 
 // wait communication to be stable
 IF(m_safetyCheckInitWaitTime<g_robotSafetyCheckWaitTime) THEN
@@ -64,7 +70,7 @@ IF(m_safetyCheckInitWaitTime<g_robotSafetyCheckWaitTime) THEN
 END_IF
 
 FOR i:=1  TO g_maxNum DO
-	m_SafetyCheck.systemSafetyCheck(i,m_checkVariable,m_cartJointData,m_masterJointData);
+	m_SafetyCheck.systemSafetyCheck(i,m_checkVariable,m_masterStatus,m_cartJointData,m_masterJointData);
 END_FOR
 
 //error flag to control
@@ -74,19 +80,19 @@ readErrFlag();
 m_SafetyCheck.errCodeUpdating();
 
 //The fault code is sent to the UI
-GVL_com_upper_PC.error_ID_type3:=m_SafetyCheck.o_ErrCode[3];
-GVL_com_upper_PC.error_ID_type2:=m_SafetyCheck.o_ErrCode[2];
-GVL_com_upper_PC.error_ID_type1:=m_SafetyCheck.o_ErrCode[1];
+GVL_interactUI.g_errIdType3:=m_SafetyCheck.o_ErrCode[3];
+GVL_interactUI.g_errIdType2:=m_SafetyCheck.o_ErrCode[2];
+GVL_interactUI.g_errIdType1:=m_SafetyCheck.o_ErrCode[1];
 
 //clear fault
-IF GVL_com_upper_PC.ui_reset_fault=1 THEN
+IF GVL_interactUI.g_uiResetFault=1 THEN
 	m_safetyCheck.errFlagReset();
-	GVL_com_upper_PC.ui_reset_fault :=0;
+	GVL_interactUI.g_uiResetFault :=0;
 END_IF
 
-//m_masterArmCheck.check(m_masterStatus,m_masterJointData, o_errorFlag=>m_safetyCheckData.m_masterErrFlag);
-//
-//m_cartCheck.check(m_cartStatus, m_cartJointData, o_errorFlag=>m_safetyCheckData.m_cartErrFlag);]]></ST>
+//robot record information
+m_dataRecord.run(m_checkVariable , m_cartStatus , m_cartJointData , m_masterStatus , m_masterJointData );
+]]></ST>
     </Implementation>
     <Method Name="armSafetyCheckAllowed" Id="{c2ebef6f-e712-49e3-9955-377a0083e93a}">
       <Declaration><![CDATA[METHOD armSafetyCheckAllowed : BOOL
@@ -134,7 +140,7 @@ END_VAR]]></Declaration>
         <ST><![CDATA[
 FOR i := 1 TO g_maxArmNum DO
 	//stop button and ui stop 
-	m_checkVariable[i].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[i].PCStopButton := GVL_interactUI.g_masterStopButton;
 	//m_checkVariable[i].SlaveStopButton := m_stopButton;
 	m_checkVariable[i].MasterStopButton := m_stopButton;
 	m_checkVariable[i].m_spacePoseErr := m_SafetyCheck.poseErrCheck(m_masterStatus.m_cmdArmPose[i], m_masterStatus.m_curArmPose[i] );
@@ -154,7 +160,7 @@ FOR i := 1 TO g_maxArmNum DO
 END_FOR
 
 FOR j:=1 TO  g_maxCartJoint DO
-	m_checkVariable[g_cartNum].PCStopButton := GVL_com_upper_PC.stop_button;
+	m_checkVariable[g_cartNum].PCStopButton := GVL_interactUI.g_masterStopButton;
 	m_checkVariable[g_cartNum].MasterStopButton := m_stopButton;
 	m_checkVariable[g_cartNum].m_cartDriverInput[j] := CartControl.m_masterCart.m_cartJoints[j].m_motorInputs;
 	m_checkVariable[g_cartNum].m_cartDriverOutput[j] := CartControl.m_masterCart.m_cartJoints[j].m_motorOutputs;
@@ -200,21 +206,44 @@ FOR i := 1 TO 2 DO
 	//m_checkVariable[i].m_promptLocation[1] := i + 3;
 							
 	//0*1012		
-
+	m_armsRS[i,2](SET:=m_masterStatus.m_armState[i] = MasterArmState_Disable AND m_cartStatus.m_surgonReady, 
+							RESET1:= NOT m_armsRS[i,2].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[2]);
+	m_checkVariable[i].m_promptLocation[2] := i;
 						
 	//0*1013				
-
+	m_armsRS[i,3](SET:=m_masterStatus.m_armState[i] = MasterArmState_Matching AND NOT m_masterStatus.m_IKSuccess[i] AND m_masterStatus.m_timePeriod[i]>0.01, 
+							RESET1:= NOT m_armsRS[i,3].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[3]);
+	m_checkVariable[i].m_promptLocation[3] := i;
 	
-		
-	//0*1033
+	//0*1014	
+	m_armsRS[i,4](SET:=m_masterStatus.m_armState[i] = MasterArmState_Matching AND m_masterStatus.m_IKSuccess[i] AND m_masterStatus.m_timePeriod[i]>10, 
+							RESET1:= NOT m_armsRS[i,4].SET, 
+							Q1=> m_checkVariable[i].m_promptStatus[4]);
+	m_checkVariable[i].m_promptLocation[4] := i;
 
 END_FOR
 
-//0*1027
-//m_cartRS[7](SET:=m_cartStatus.m_cartDumpEnergy <= 30 , 
-//						RESET1:= m_cartStatus.m_cartDumpEnergy>30, 
-//						Q1=> m_checkVariable[g_cartNum].m_promptStatus[7]);
-//m_checkVariable[g_cartNum].m_promptLocation[7] := g_cartNum + 3;
+//0*1015
+m_cartRS[5](SET:=NOT m_masterStatus.m_slaveOnLine, 
+						RESET1:= NOT m_cartRS[5].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[5]);
+m_checkVariable[g_cartNum].m_promptLocation[5] := g_cartNum;
+
+//0*1016
+m_cartRS[6](SET:=NOT m_cartStatus.m_consoleInAdjust AND m_cartStatus.m_surgonReady, 
+						RESET1:= NOT m_cartRS[6].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[6]);
+m_checkVariable[g_cartNum].m_promptLocation[6] := g_cartNum;
+
+//0*1017
+m_cartRS[7](SET:=NOT (m_cartLockSignalLeft OR m_cartLockSignalRight ), 
+						RESET1:= NOT m_cartRS[7].SET, 
+						Q1=> m_checkVariable[g_cartNum].m_promptStatus[7]);
+m_checkVariable[g_cartNum].m_promptLocation[7] := g_cartNum;
+
+
 ]]></ST>
       </Implementation>
     </Method>
@@ -243,8 +272,7 @@ END_FOR
       <LineId Id="167" Count="0" />
       <LineId Id="166" Count="0" />
       <LineId Id="26" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="60" Count="0" />
+      <LineId Id="207" Count="1" />
       <LineId Id="59" Count="0" />
     </LineIds>
     <LineIds Name="SafetyCheck.armSafetyCheckAllowed">
@@ -305,15 +333,25 @@ END_FOR
       <LineId Id="99" Count="0" />
       <LineId Id="63" Count="0" />
       <LineId Id="11" Count="0" />
+      <LineId Id="191" Count="2" />
       <LineId Id="100" Count="0" />
       <LineId Id="64" Count="0" />
       <LineId Id="15" Count="0" />
-      <LineId Id="65" Count="0" />
+      <LineId Id="194" Count="2" />
       <LineId Id="101" Count="0" />
-      <LineId Id="95" Count="1" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="205" Count="2" />
+      <LineId Id="95" Count="0" />
       <LineId Id="111" Count="1" />
-      <LineId Id="155" Count="0" />
-      <LineId Id="113" Count="4" />
+      <LineId Id="198" Count="4" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="208" Count="4" />
+      <LineId Id="203" Count="0" />
+      <LineId Id="171" Count="4" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="176" Count="0" />
       <LineId Id="110" Count="0" />
     </LineIds>
   </POU>

@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <GVL Name="GVL_interactUI" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	Upper_PC_Initial_Finished:BOOL:=FALSE;
+	
+	//true :login；false:logout
+	g_userLogged : BOOL;
+	
+	//master slave scaling : 3:1 , 2:1 , 3:2
+	g_masterSlaveScaling : UINT;
+
+	//arm is disable : arm left 1  and  arm right 2
+	g_armIsDisbale : UINT;	
+	
+	//arm assignment method : 1 auto  , 2 manual
+	g_armAssignMethod : UINT;
+	
+	//master arm  mapping  slave arm
+	g_armDistributionInfo : ST_arm_distribution;  
+	
+	//ergonomic control enable 
+	g_ergonomicCtrl : ST_ergonCtrlEnable; 
+	g_ergonomicCtrlEnableLast : ST_ergonCtrlEnable;
+	
+	//ergonomic control data
+	g_ergonomicCtrlData : ST_ergonomicCtrlData; 
+
+	//ui send reset fault
+	g_uiResetFault : UINT;	
+	
+	//plc send ergonomic current joint position to UI
+	g_ergonomicCurData : ST_ergonomicCtrlData;
+	
+	//head in
+	g_surgonHeadIn : BOOL;
+	
+	//finger clutch on off
+	g_fingerClutchOnOff : BOOL;
+	
+	//error id 
+	g_errIdType3 : UDINT;
+	g_errIdType2 : UDINT;
+	g_errIdType1 : UDINT;
+	g_errIdType0 : UDINT;
+	
+	//master arms and cart self check finshed
+	g_masterSelfCheckFinshed : BOOL; 
+		
+	//PLC version information
+	g_plcVersion : STRING;
+
+	//stop button ui  : 0 master stop 			
+	g_masterStopButton : UINT:=1;
+		
+	g_digitalZoom : UINT;
+	g_hapticZoom : BOOL;
+	g_fineTurnning : LREAL;
+	
+	//arm state machine
+	g_stateMachineArm1 : INT;
+	g_stateMachineArm2 : INT;
+	
+	// index(0 to 4) of slave arm which is tele-linked to master arm
+	g_teleSlaveArm1Idx : INT;
+	g_teleSlaveArm2Idx : INT;
+	
+	//slave check enable  : true start , false end
+	g_slaveCheckEnbale : BOOL;
+
+	//slave check status  :  0 unfinshed ,  1 finshed
+	g_slaveCheckStatus : UINT;
+
+	//arm switch 
+	g_armSwitchEnable : UINT:=0;
+
+	//master hearbeat  : 1s frequency
+	g_heartBeat : INT;
+
+	//screen Lock Enable : true Lock  ,  false  unlock
+	g_screenLockEnable : BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

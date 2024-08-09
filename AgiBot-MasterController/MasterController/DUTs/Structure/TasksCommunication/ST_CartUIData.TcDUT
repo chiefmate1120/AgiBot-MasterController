@@ -3,8 +3,8 @@
   <DUT Name="ST_CartUIData" Id="{a5913571-fedf-4b0c-959b-43a014791c8b}">
     <Declaration><![CDATA[TYPE ST_CartUIData :
 STRUCT
-	m_ergonomicCrl: ST_Ergonomic_control;
-	m_cmdErgonomicCrl : ST_ergonomic_data;
+	m_ergonomicCrl: ST_ergonCtrlEnable;
+	m_cmdErgonomicCrl : ST_ergonomicCtrlData;
 	m_cmdCancelErgonPos :Vec4d;
 	m_cmdJntPos :Vec4d;
 END_STRUCT

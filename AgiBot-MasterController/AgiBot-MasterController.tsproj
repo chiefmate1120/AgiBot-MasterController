@@ -81,10 +81,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{8636B4FC-92C0-4E8B-96BA-8A4532CE57EB}">MSCommu_SlaveStatus</Name>
+			<Name GUID="{C354B900-DF36-4499-B308-2132666DC2E8}">MSCommu_SlaveStatus</Name>
 			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
  Input to safety task and Master controller]]></Comment>
-			<BitSize>6048</BitSize>
+			<BitSize>6056</BitSize>
 			<SubItem>
 				<Name>m_armState</Name>
 				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
@@ -174,6 +174,13 @@
 				<BitSize>64</BitSize>
 				<BitOffs>5984</BitOffs>
 			</SubItem>
+			<SubItem>
+				<Name>m_asepticDeployCompletedFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment TxtId=""><![CDATA[Aseptic deployment complete flag]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>6048</BitOffs>
+			</SubItem>
 			<Hides>
 				<Hide GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}"/>
 				<Hide GUID="{92C8A97B-CBFA-4853-9E09-E15AC9C81340}"/>
@@ -193,6 +200,7 @@
 				<Hide GUID="{0BE9B98B-DABF-4735-8B27-BD8EF03EECE3}"/>
 				<Hide GUID="{CAA492E8-D6B3-4D31-8F6B-AFE8C92E2624}"/>
 				<Hide GUID="{1FED95D9-06F8-4541-803A-A2385D53F4CD}"/>
+				<Hide GUID="{8636B4FC-92C0-4E8B-96BA-8A4532CE57EB}"/>
 			</Hides>
 		</DataType>
 		<DataType>
@@ -704,10 +712,10 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
-			<Name GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}" AutoDeleteType="true">ST_MasterStatus</Name>
+			<Name GUID="{74984E84-9C0C-1323-AEDD-897CCF6839B8}" AutoDeleteType="true">ST_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
-			<BitSize>4992</BitSize>
+			<BitSize>5120</BitSize>
 			<SubItem>
 				<Name>m_motionScale</Name>
 				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
@@ -826,6 +834,35 @@
 				<Comment><![CDATA[grip Hall Sensor]]></Comment>
 				<BitSize>64</BitSize>
 				<BitOffs>4896</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_slaveOnLine</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[slave on line]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>4960</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_IKSuccess</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[msater-slave matching status]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>4968</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_timePeriod</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>2</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[msater-slave matching time]]></Comment>
+				<BitSize>128</BitSize>
+				<BitOffs>4992</BitOffs>
 			</SubItem>
 		</DataType>
 		<DataType>
@@ -956,7 +993,7 @@
 			</SubItem>
 		</DataType>
 		<DataType>
-			<Name GUID="{ED436AA7-81E5-4868-A047-56F17B0BA396}" PersistentType="true">MSCommu_MasterStatus</Name>
+			<Name GUID="{ED436AA7-81E5-4868-A047-56F17B0BA396}">MSCommu_MasterStatus</Name>
 			<Comment><![CDATA[ Output from master arm control task, including arm status and cartesian data
  Input to safety task and Slave controller]]></Comment>
 			<BitSize>2664</BitSize>
@@ -1276,6 +1313,121 @@
 			</ArrayInfo>
 		</DataType>
 		<DataType>
+			<Name GUID="{8636B4FC-92C0-4E8B-96BA-8A4532CE57EB}" AutoDeleteType="true">MSCommu_SlaveStatus</Name>
+			<Comment><![CDATA[ Output from slave arm control task, including arm status and cartesian data
+ Input to safety task and Master controller]]></Comment>
+			<BitSize>6048</BitSize>
+			<SubItem>
+				<Name>m_armState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ state machine]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_instruStauts</Name>
+				<Type GUID="{5C5B5A05-1109-4835-A488-5EC522387A1D}">MSCommu_InstruStatus</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment><![CDATA[ instrument info]]></Comment>
+				<BitSize>512</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopeMounted</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment><![CDATA[ flag if endoscope is mounted]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>576</BitOffs>
+				<Default>
+					<Bool>false</Bool>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_endoscopePose</Name>
+				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
+				<Comment><![CDATA[ endoscope pose in cart coordinate]]></Comment>
+				<BitSize>768</BitSize>
+				<BitOffs>584</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_curArmPose</Name>
+				<Type GUID="{5374C384-4EE8-45D2-A7CD-61C917B2C937}">MSCommu_Frame</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment TxtId=""><![CDATA[current arm pose in endoscope coordinate]]></Comment>
+				<BitSize>3072</BitSize>
+				<BitOffs>1352</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_masterSlavePoseError</Name>
+				<Type GUID="{A1DF1B0B-7855-4654-B782-96323F561C71}">MSCommu_Vec6d</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment TxtId=""><![CDATA[master slave pose error in endoscope coordinate]]></Comment>
+				<BitSize>1536</BitSize>
+				<BitOffs>4424</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_heartBeat</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<Comment TxtId=""><![CDATA[slave controller heart beats]]></Comment>
+				<BitSize>16</BitSize>
+				<BitOffs>5960</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>m_selfCheckPass</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<Comment TxtId=""><![CDATA[slave robots pass self-check]]></Comment>
+				<BitSize>8</BitSize>
+				<BitOffs>5976</BitOffs>
+				<Default>
+					<Value>False</Value>
+				</Default>
+			</SubItem>
+			<SubItem>
+				<Name>m_instruEnergyType</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000006}">INT</Type>
+				<ArrayInfo>
+					<LBound>1</LBound>
+					<Elements>4</Elements>
+				</ArrayInfo>
+				<Comment TxtId=""><![CDATA[instrument energy type]]></Comment>
+				<BitSize>64</BitSize>
+				<BitOffs>5984</BitOffs>
+			</SubItem>
+			<Hides>
+				<Hide GUID="{B24C9140-E922-437E-A49A-F4E80F7FD1DF}"/>
+				<Hide GUID="{92C8A97B-CBFA-4853-9E09-E15AC9C81340}"/>
+				<Hide GUID="{E7F564D2-713A-4B52-82FE-494F16BFCFCE}"/>
+				<Hide GUID="{B0D3E816-FF8F-4BEE-8B1B-781B51786D4F}"/>
+				<Hide GUID="{10B186F8-9910-4DA5-834E-D036343FDDCB}"/>
+				<Hide GUID="{B84D2CC2-A66C-479B-AF98-B768D95AEC7A}"/>
+				<Hide GUID="{8E8B4FAA-B486-42B9-82CF-D1D00680706A}"/>
+				<Hide GUID="{E1D7E458-36AA-43AA-A89B-5C26703964BE}"/>
+				<Hide GUID="{B1D99331-6642-48EB-B511-A60AF6264F93}"/>
+				<Hide GUID="{A2F4360F-FF17-4B3B-938D-040CC429129B}"/>
+				<Hide GUID="{60BA4503-F391-4384-9FAF-C07E04F5C755}"/>
+				<Hide GUID="{4FC03D72-A202-4D6B-B208-AF75B769D0A2}"/>
+				<Hide GUID="{29E87C98-28CA-4A71-8E85-EC634506FCB2}"/>
+				<Hide GUID="{DBAB0725-B1F1-4B21-925A-18089F93A971}"/>
+				<Hide GUID="{9F51AE1F-B57D-4C51-B186-627C128547E4}"/>
+				<Hide GUID="{0BE9B98B-DABF-4735-8B27-BD8EF03EECE3}"/>
+				<Hide GUID="{CAA492E8-D6B3-4D31-8F6B-AFE8C92E2624}"/>
+				<Hide GUID="{1FED95D9-06F8-4541-803A-A2385D53F4CD}"/>
+			</Hides>
+		</DataType>
+		<DataType>
 			<Name GUID="{D0857A03-19BB-4ED9-915E-05D1B2D79B50}" PersistentType="true">E_InstrumentType</Name>
 			<BitSize>16</BitSize>
 			<BaseType GUID="{18071995-0000-0000-0000-000000000006}">INT</BaseType>
@@ -1411,7 +1563,7 @@
 						<Var>
 							<Name>MasterArmControl.m_slaveRobotData</Name>
 							<Comment><![CDATA[ slave robot data, input from slave controller box]]></Comment>
-							<Type GUID="{8636B4FC-92C0-4E8B-96BA-8A4532CE57EB}">MSCommu_SlaveStatus</Type>
+							<Type GUID="{C354B900-DF36-4499-B308-2132666DC2E8}">MSCommu_SlaveStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterInputDataPool.m_safetyData</Name>
@@ -1524,7 +1676,7 @@
 						<Var>
 							<Name>MasterArmControl.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data, output to other tasks]]></Comment>
-							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
+							<Type GUID="{74984E84-9C0C-1323-AEDD-897CCF6839B8}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>MasterArmControl.m_masterJointsData</Name>
@@ -1617,6 +1769,14 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
+							<Name>SafetyCheck.m_cartLockSignalLeft</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartLockSignalRight</Name>
+							<Type>BOOL</Type>
+						</Var>
+						<Var>
 							<Name>CartControl.m_masterCart.m_cartJoints[1].m_motorInputs</Name>
 							<Comment><![CDATA[ motor IO]]></Comment>
 							<Type GUID="{2976164F-36D9-360C-E3C9-0E373EED87DE}">ST_MotorInputs</Type>
@@ -1639,12 +1799,17 @@
 						<Var>
 							<Name>SafetyCheck.m_masterStatus</Name>
 							<Comment><![CDATA[ master robot information, including arm status and cartesian data]]></Comment>
-							<Type GUID="{BA768836-50AE-079D-F0CD-38D623D1B1F2}">ST_MasterStatus</Type>
+							<Type GUID="{74984E84-9C0C-1323-AEDD-897CCF6839B8}">ST_MasterStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_masterJointData</Name>
 							<Comment><![CDATA[ master robot joint data]]></Comment>
 							<Type GUID="{707085F0-503A-17BC-CD9D-11CA7C0249CD}">ST_MasterJointData</Type>
+						</Var>
+						<Var>
+							<Name>SafetyCheck.m_cartStatus</Name>
+							<Comment><![CDATA[cart status]]></Comment>
+							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 						<Var>
 							<Name>SafetyCheck.m_cartJointData</Name>
@@ -1738,23 +1903,10 @@
 							<Type>BOOL</Type>
 						</Var>
 						<Var>
-							<Name>CartControl.m_masterCart.m_cartLockSignalLeft</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
-							<Name>CartControl.m_masterCart.m_cartLockSignalRight</Name>
-							<Type>BOOL</Type>
-						</Var>
-						<Var>
 							<Name>CartControl.m_masterCart.m_cartJointCtrlIO</Name>
 							<Comment><![CDATA[ cart joint motion control IO
 [monitor_up, monitor_down, monitor_cwRotate, monitor_ccwRotate, armset_up, armset_down, pedal_in, pedal_out]]]></Comment>
 							<Type GUID="{71B58F72-0E49-50EB-B8E4-1CCD027538EC}">ARRAY [1..8] OF BOOL</Type>
-						</Var>
-						<Var>
-							<Name>SafetyCheck.m_cartStatus</Name>
-							<Comment><![CDATA[cart status]]></Comment>
-							<Type GUID="{8DC1A638-2EB5-25B2-A0F5-A9CDF8289EDE}">ST_CartStatus</Type>
 						</Var>
 					</Vars>
 					<Vars VarGrpType="2" ContextId="3" AreaNo="49">
@@ -1917,12 +2069,12 @@
 							<SyncMan>001001000000010004000000000000000100001000010000</SyncMan>
 							<Fmmu>0000000000000000001000010100000002000000000000000000000000000000</Fmmu>
 							<Pdo Name="Channel 1" Index="#x1a00" Flags="#x0011" SyncMan="0">
-								<Entry Name="CartControl.m_masterCart.m_stopButton" Index="#x6000" Sub="#x01">
+								<Entry Name="m_stopButton" Index="#x6000" Sub="#x01">
 									<Type>BIT</Type>
 								</Entry>
 							</Pdo>
 							<Pdo Name="Channel 2" Index="#x1a01" Flags="#x0011" SyncMan="0">
-								<Entry Name="CartControl.m_masterCart.m_clutchPedalIO" Index="#x6010" Sub="#x01">
+								<Entry Name="m_clutchPedalIO" Index="#x6010" Sub="#x01">
 									<Type>BIT</Type>
 								</Entry>
 							</Pdo>
@@ -4418,7 +4570,7 @@
 			</Device>
 		</Io>
 		<SymbolWatch>
-			<Variable>TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 21 (EL1008)^Channel 1^CartControl.m_masterCart.m_stopButton</Variable>
+			<Variable>TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 21 (EL1008)^Channel 1^m_stopButton</Variable>
 		</SymbolWatch>
 	</Project>
 	<Mappings>
@@ -4427,11 +4579,12 @@
 		<MappingInfo Identifier="{00000000-2001-0850-0020-5008B0000403}" Id="#x02030080"/>
 		<MappingInfo Identifier="{00000000-2003-0850-0220-500811000403}" Id="#x02030090"/>
 		<MappingInfo Identifier="{00000000-2004-0850-0320-500821000403}" Id="#x02030060"/>
-		<MappingInfo Identifier="{00000000-2004-0850-0320-500832000403}" Id="#x020300a0"/>
+		<MappingInfo Identifier="{00000000-2004-0850-0320-500832000403}" Id="#x020300b0"/>
 		<MappingInfo Identifier="{08502001-2002-0850-0020-500801205008}" Id="#x02030030" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2003-0850-0020-500802205008}" Id="#x02030020" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-2004-0850-0020-500803205008}" Id="#x02030040" Watchdog="10000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502003-2004-0850-0220-500803205008}" Id="#x02030070" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502004-0010-0304-0020-500810000403}" Id="#x020300a0" Watchdog="04000000040000000400000004000000"/>
 		<OwnerA Name="TIPC^MasterController^MasterController Instance">
 			<OwnerB Name="TIID^LeftArm (EtherCAT)^Joint1">
 				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_masterRobot.m_masterArms[1].m_joints[1].m_motorInputs^m_current" VarB="TxPdoMappingCspCsv^Torque actual value"/>
@@ -4515,7 +4668,6 @@
 				<Link VarA="TaskCartControl Outputs^CartControl.m_masterCart.m_elecKnifeCtrlWord" VarB="RxPdoMappingCspCsv^Target velocity"/>
 			</OwnerB>
 			<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 46 (EL6695-0002)">
-				<Link VarA="TaskArmControl Inputs^MasterArmControl.m_slaveRobotData" VarB="IO Inputs^SlaveRobotData"/>
 				<Link VarA="TaskArmControl Outputs^MasterArmControl.m_masterRobotData" VarB="IO Outputs^MasterRobotData"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Joint1">
@@ -4598,22 +4750,22 @@
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 21 (EL1008)">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_armSwitchIO" VarB="Channel 4^armSwitchIO"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_clutchPedalIO" VarB="Channel 2^CartControl.m_masterCart.m_clutchPedalIO"/>
+				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_clutchPedalIO" VarB="Channel 2^m_clutchPedalIO"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCoagulLeft" VarB="Channel 7^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCoagulRight" VarB="Channel 8^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutLeft" VarB="Channel 5^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutRight" VarB="Channel 6^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_endoScopePedalIO" VarB="Channel 3^endoscopePedaoIO"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_stopButton" VarB="Channel 1^CartControl.m_masterCart.m_stopButton"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_stopButton" VarB="Channel 1^m_stopButton"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 22 (EL1008)">
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartLockSignalLeft" VarB="Channel 7^Input"/>
-				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartLockSignalRight" VarB="Channel 8^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCoagulLeftAllow" VarB="Channel 2^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCoagulRightAllow" VarB="Channel 4^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutLeftAllow" VarB="Channel 1^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_electricCutRightAllow" VarB="Channel 3^Input"/>
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_surgonHeadInIO" VarB="Channel 5^HeadInIO"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartLockSignalLeft" VarB="Channel 7^Input"/>
+				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartLockSignalRight" VarB="Channel 8^Input"/>
 			</OwnerB>
 			<OwnerB Name="TIID^RightArm (EtherCAT)^Term 19 (EK1100)^Term 23 (EL1008)">
 				<Link VarA="TaskCartControl Inputs^CartControl.m_masterCart.m_cartJointCtrlIO[1]" VarB="Channel 1^monitorUp"/>
@@ -4673,7 +4825,6 @@
 				<Link VarA="TaskDynamic Inputs^RobotDynamics.m_masterJointsData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_cartJointData" VarB="TaskCartControl Outputs^CartControl.m_cartJointData"/>
 				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterJointData" VarB="TaskArmControl Outputs^MasterArmControl.m_masterJointsData"/>
-				<Link VarA="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" VarB="TaskArmControl Outputs^MasterArmControl.m_masterStatus"/>
 			</OwnerB>
 		</OwnerA>
 	</Mappings>

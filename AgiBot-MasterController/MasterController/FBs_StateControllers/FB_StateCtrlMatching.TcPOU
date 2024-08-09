@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlMatching" Id="{886a3c3b-c6fb-4a12-8c63-bddb11202d66}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Orientation Matching
 FUNCTION_BLOCK PUBLIC FB_StateCtrlMatching EXTENDS FB_MasterArmCtrlBase
@@ -242,6 +242,17 @@ calcJnt4Rotation[2,3]:= -s23*s1;
 calcJnt4Rotation[3,3]:=-c23;]]></ST>
       </Implementation>
     </Method>
+    <Property Name="IKSuccess" Id="{472fdaf7-37fe-4950-9971-249f506f982b}">
+      <Declaration><![CDATA[PROPERTY IKSuccess : BOOL]]></Declaration>
+      <Get Name="Get" Id="{ee890eed-eea0-42af-913f-a01a7cf1da04}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[IKSuccess := m_IKSuccess;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <Method Name="init" Id="{af3225b4-51f5-49e0-8b94-24f1ab0678fd}">
       <Declaration><![CDATA[METHOD PUBLIC init : BOOL
 VAR_IN_OUT CONSTANT
@@ -676,6 +687,9 @@ wristIK:=true;
       <LineId Id="58" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="59" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.IKSuccess.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.init">
       <LineId Id="67" Count="4" />

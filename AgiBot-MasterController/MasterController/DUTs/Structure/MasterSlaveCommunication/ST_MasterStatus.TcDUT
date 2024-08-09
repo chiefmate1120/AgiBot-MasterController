@@ -34,6 +34,15 @@ STRUCT
 	
 	//grip Hall Sensor
 	m_gripHallSensor : ARRAY [1..g_mArmNum] OF UDINT;
+	
+	//slave on line
+	m_slaveOnLine : BOOL;
+	
+	//msater-slave matching status
+	m_IKSuccess :ARRAY [1..g_mArmNum] OF BOOL;
+	
+	//msater-slave matching time
+	m_timePeriod :ARRAY [1..g_mArmNum] OF LREAL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

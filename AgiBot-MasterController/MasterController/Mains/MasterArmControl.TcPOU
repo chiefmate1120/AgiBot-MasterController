@@ -143,6 +143,7 @@ slaveStatus.m_slaveHeartBeat := slaveInputData.m_heartBeat;
 slaveStatus.m_endoscopeMounted :=slaveInputData.m_endoscopeMounted;
 slaveStatus.m_endoscopePose.m_pos :=slaveInputData.m_endoscopePose.m_pos;
 slaveStatus.m_endoscopePose.m_rot :=slaveInputData.m_endoscopePose.m_rot;
+slaveStatus.m_asepticDeployCompleteFlag := slaveInputData.m_asepticDeployCompletedFlag;
 FOR i:= 1 TO g_sArmNum DO
 	slaveStatus.m_armState[i] := slaveInputData.m_armState[i];
 	slaveStatus.m_instruStauts[i].m_fingerAngle := slaveInputData.m_instruStauts[i].m_fingerAngle;
@@ -168,25 +169,25 @@ END_VAR
       <Implementation>
         <ST><![CDATA[
 // master-slave control scale
-IF 2 = GVL_com_upper_PC.master_slave_scaling THEN
+IF 2 = GVL_interactUI.g_masterSlaveScaling THEN
 	m_masterInputDataPool.m_UIData.m_motionScale := 2;
-ELSIF 3 = GVL_com_upper_PC.master_slave_scaling THEN
+ELSIF 3 = GVL_interactUI.g_masterSlaveScaling THEN
 	m_masterInputDataPool.m_UIData.m_motionScale := 3;
 ELSE
 	m_masterInputDataPool.m_UIData.m_motionScale := 1.5;
 END_IF
 
 // self-check
-m_masterInputDataPool.m_UIData.m_selfCheckFlag := GVL_com_upper_PC.slaver_systemcheck_enable;
+m_masterInputDataPool.m_UIData.m_selfCheckFlag := GVL_interactUI.g_slaveCheckEnbale;
 
 // hand clutch
-m_masterInputDataPool.m_UIData.m_enableHandClutch := GVL_com_upper_PC.finger_clutch;
+m_masterInputDataPool.m_UIData.m_enableHandClutch := GVL_interactUI.g_fingerClutchOnOff;
 
 // arm disable
 m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[1]:=FALSE;
 m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[2]:=FALSE;
-IF 1=GVL_com_upper_PC.arm_disable OR 2=GVL_com_upper_PC.arm_disable THEN
-	m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[GVL_com_upper_PC.arm_disable] := TRUE;
+IF 1=GVL_interactUI.g_armIsDisbale OR 2=GVL_interactUI.g_armIsDisbale THEN
+	m_masterInputDataPool.m_UIData.m_masterArmDisableFlag[GVL_interactUI.g_armIsDisbale] := TRUE;
 END_IF
 
 
@@ -200,15 +201,15 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//TODO
-GVL_com_upper_PC.slaver_systemcheck_ok := BOOL_TO_UINT(m_masterInputDataPool.m_slaveStatus.m_selfCheckPass);
+GVL_interactUI.g_slaveCheckStatus := BOOL_TO_UINT(m_masterInputDataPool.m_slaveStatus.m_selfCheckPass);
 
-GVL_com_upper_PC.arm1_state_machine := m_masterStatus.m_armState[1];
-GVL_com_upper_PC.arm2_state_machine := m_masterStatus.m_armState[2];
-GVL_com_upper_PC.Master_Arm_Mapping_arm1 := m_masterStatus.m_teleSlaveArmIdx[1];
-GVL_com_upper_PC.Master_Arm_Mapping_arm2 := m_masterStatus.m_teleSlaveArmIdx[2];
-GVL_com_upper_PC.screen_lock_enable := (MasterArmState_MasterSlave <= m_masterStatus.m_armState[1]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[1]) OR (MasterArmState_MasterSlave <= m_masterStatus.m_armState[2]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[2]);
+GVL_interactUI.g_stateMachineArm1 := m_masterStatus.m_armState[1];
+GVL_interactUI.g_stateMachineArm2 := m_masterStatus.m_armState[2];
+GVL_interactUI.g_teleSlaveArm1Idx := m_masterStatus.m_teleSlaveArmIdx[1];
+GVL_interactUI.g_teleSlaveArm2Idx := m_masterStatus.m_teleSlaveArmIdx[2];
+GVL_interactUI.g_screenLockEnable := (MasterArmState_MasterSlave <= m_masterStatus.m_armState[1]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[1]) OR (MasterArmState_MasterSlave <= m_masterStatus.m_armState[2]  AND MasterArmState_Endoscope >= m_masterStatus.m_armState[2]);
 
-GVL_com_upper_PC.version := '1(1.0.0.1)';]]></ST>
+GVL_interactUI.g_plcVersion := '1(1.0.0.1)';]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="MasterArmControl">
@@ -275,6 +276,7 @@ GVL_com_upper_PC.version := '1(1.0.0.1)';]]></ST>
       <LineId Id="34" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="35" Count="0" />
+      <LineId Id="102" Count="0" />
       <LineId Id="23" Count="0" />
       <LineId Id="26" Count="1" />
       <LineId Id="36" Count="1" />

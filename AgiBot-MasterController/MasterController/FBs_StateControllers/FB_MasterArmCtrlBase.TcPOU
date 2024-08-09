@@ -192,6 +192,17 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
 ]]></ST>
       </Implementation>
     </Method>
+    <Property Name="timePeriod" Id="{44038474-1ba7-4c9c-8c84-72a6505c50bc}">
+      <Declaration><![CDATA[PROPERTY timePeriod : Lreal]]></Declaration>
+      <Get Name="Get" Id="{a96f8ba3-aad3-45c7-b8fb-41d2e22f00f8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[timePeriod := m_timePeriod;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
     <LineIds Name="FB_MasterArmCtrlBase">
       <LineId Id="9" Count="0" />
     </LineIds>
@@ -251,6 +262,9 @@ m_timePeriod := m_timePeriod+g_armCtrlCycleTime;
       <LineId Id="61" Count="0" />
       <LineId Id="84" Count="1" />
       <LineId Id="10" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterArmCtrlBase.timePeriod.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>
