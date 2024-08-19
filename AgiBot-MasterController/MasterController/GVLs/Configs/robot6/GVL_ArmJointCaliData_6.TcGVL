@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_ArmJointCaliData" Id="{6d6bcaaa-12f7-4e31-b8f9-9d76d4301a73}">
+  <GVL Name="GVL_ArmJointCaliData_6" Id="{a44aa39d-2380-4c53-832e-42f3f9069890}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot6 Data
 VAR_GLOBAL CONSTANT

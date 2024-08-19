@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_CartJointCaliData" Id="{344f6d3a-be2e-4b70-ac7c-a73bf2cf7f80}">
+  <GVL Name="GVL_CartJointCaliData_6" Id="{bd3edc3f-c214-41bd-884d-bc19b98011e2}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 // Robot6 Data
 VAR_GLOBAL CONSTANT

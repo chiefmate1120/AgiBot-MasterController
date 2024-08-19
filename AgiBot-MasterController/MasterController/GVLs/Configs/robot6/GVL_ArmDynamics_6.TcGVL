@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <GVL Name="GVL_ArmDynamics" Id="{2517be2e-df76-424a-a94b-13845e217f88}">
+  <GVL Name="GVL_ArmDynamics_6" Id="{c3a8c3f7-19d2-4c2c-ad5a-7cb4aadc72bf}">
     <Declaration><![CDATA[{attribute 'global_init_slot' := '49992'}
 {attribute 'qualified_only'}
 // Robot5 Data
