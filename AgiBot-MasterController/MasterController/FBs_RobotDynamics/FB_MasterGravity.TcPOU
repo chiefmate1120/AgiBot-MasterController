@@ -23,6 +23,9 @@ VAR
 	m_spring3Param :ARRAY[1..6] OF LREAL;
 	// spring5 [L0, s1, L1, r0, beta]
 	m_spring5Param :ARRAY[1..5] OF LREAL;
+	
+	// gravity deviation
+	m_gravityDeviation :Vec7d;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -129,7 +132,11 @@ FOR i:=1 TO 5 DO
 	m_spring3Param[i]:=GVL_ArmDynamics.g_spring3Param[i];
 	m_spring5Param[i]:=GVL_ArmDynamics.g_spring5Param[i];
 END_FOR
-m_spring3Param[6]:=GVL_ArmDynamics.g_spring3Param[6];]]></ST>
+m_spring3Param[6]:=GVL_ArmDynamics.g_spring3Param[6];
+
+FOR i:=1 TO 7 DO
+	m_gravityDeviation[i]:=GVL_ArmDynamics.g_gravityDeviaion[m_armIdx, i];
+END_FOR]]></ST>
       </Implementation>
     </Method>
     <Method Name="run" Id="{469433a3-9614-4c99-9efb-b9558878df36}">
@@ -156,6 +163,9 @@ FOR i:=2 TO 6 DO
 	FOR j:=1 TO 16 DO
 		r_gravity[i]:=r_gravity[i]+regMat[i-1,j]*m_gravityParam[j];
 	END_FOR
+	
+	// add bias torque
+	r_gravity[i]:= r_gravity[i] + m_gravityDeviation[i];
 END_FOR]]></ST>
       </Implementation>
     </Method>
@@ -349,6 +359,8 @@ END_IF
       <LineId Id="12" Count="4" />
       <LineId Id="11" Count="0" />
       <LineId Id="17" Count="0" />
+      <LineId Id="27" Count="2" />
+      <LineId Id="26" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterGravity.run">
       <LineId Id="55" Count="0" />
@@ -356,6 +368,7 @@ END_IF
       <LineId Id="82" Count="0" />
       <LineId Id="59" Count="1" />
       <LineId Id="62" Count="0" />
+      <LineId Id="120" Count="2" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterGravity.spring2RegMat">

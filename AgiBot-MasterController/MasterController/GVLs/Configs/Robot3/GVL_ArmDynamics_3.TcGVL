@@ -17,7 +17,12 @@ VAR_GLOBAL CONSTANT
 		  7.7845, 3195.0, 13.693383, 2735.5621, 1.2226446, 503.69683,
 		  5.2488015, -0.0002385075, 4.5811527, 1.3001393, -0.033798161, 0.0199221, 0.0000125, 0.0000117, -0.00001, -0.013625485, 
 		  15.213282, 2516.3251, 12.947769, 3053.2154, 1.5316464, 419.59403];
-		  
+			
+	// gravity deviation
+	g_gravityDeviaion :ARRAY[1..2, 1..7] OF REAL :=
+	[ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 
+	 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+	  
 	// arm friction parameters [a1,b1,...a7,b7];
 	// friction = a * gravity + b; only joint 5 and 6 is identified
 	g_jntFrictionParam :ARRAY[1..2, 1..4] OF LREAL :=

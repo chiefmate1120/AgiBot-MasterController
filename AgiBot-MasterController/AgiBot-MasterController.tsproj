@@ -1385,7 +1385,7 @@
 		</System>
 		<Plc>
 			<Project GUID="{0C182974-8910-4DEE-A0B7-B414028AF699}" Name="MasterController" PrjFilePath="MasterController\MasterController.plcproj" TmcFilePath="MasterController\MasterController.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
-				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{A1C3AD47-A469-5E89-9C39-607FDF8C1524}">
+				<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcPath="MasterController\MasterController.tmc" TmcHash="{A92C560E-4FA4-E017-06CA-5509AAD61687}">
 					<Name>MasterController Instance</Name>
 					<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 					<Vars VarGrpType="1">
@@ -1803,13 +1803,6 @@
 						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
 							<OwnerB Name="TIID^MSCommunication (EtherCAT)^Box 45 (AX58200_MotorControl)">
 								<Link VarA="CartControl.m_masterCart.m_eleKnifeCrlWord" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="RxPdoMappingCspCsv^Target velocity" RestoreInfo="ANotFound"/>
-							</OwnerB>
-						</OwnerA>
-					</UnrestoredVarLinks>
-					<UnrestoredVarLinks ImportTime="2024-08-01T21:14:24">
-						<OwnerA Name="OutputSrc" Prefix="TIPC^MasterController^MasterController Instance" Type="2">
-							<OwnerB Name="TIPC^MasterController^MasterController Instance">
-								<Link VarA="MasterArmControl.m_masterStatus" TypeA="ST_MasterStatus" InOutA="1" GuidA="{9B17944E-48BB-C38F-EDAD-CAD02CBC2B8B}" VarB="TaskSafetyCheck Inputs^SafetyCheck.m_masterStatus" RestoreInfo="TypeChanged" IdA="2386"/>
 							</OwnerB>
 						</OwnerA>
 					</UnrestoredVarLinks>
