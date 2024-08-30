@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="FB_TON" Id="{d9b24656-a6fe-4da8-8438-32b9299dfd31}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_TON
+VAR_INPUT
+	IN : BOOL;
+	PT : TIME;
+END_VAR
+VAR_OUTPUT
+	Q : BOOL;
+	ET : TIME;
+END_VAR
+VAR
+	runTime : TIME;
+	ctrlTime : TIME := T#1MS;
+	zeroTime : TIME := T#0MS;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Q := FALSE;
+IF IN THEN
+	runTime := runTime + ctrlTime;
+	IF runTime >= PT THEN
+		Q := TRUE;
+		runTime := PT;
+	END_IF
+ELSE
+	runTime := zeroTime;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="FB_TON">
+      <LineId Id="67" Count="0" />
+      <LineId Id="59" Count="7" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

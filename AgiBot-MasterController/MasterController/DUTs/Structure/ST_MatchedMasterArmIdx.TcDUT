@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_MatchedMasterArmIdx" Id="{876b76d4-882f-4cfb-824a-8631dcfc117c}">
+    <Declaration><![CDATA[TYPE ST_MatchedMasterArmIdx :
+STRUCT
+	left1ArmIdx : UINT :=1;
+	left2ArmIdx : UINT :=2;
+	right1ArmIdx : UINT :=3;
+	right2ArmIdx : UINT :=4;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

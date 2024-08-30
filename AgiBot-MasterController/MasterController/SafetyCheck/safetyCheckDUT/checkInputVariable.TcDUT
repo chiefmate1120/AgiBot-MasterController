@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="checkInputVariable" Id="{f641bcc5-1597-4d0c-903e-ba4da9cf7cc3}">
+    <Declaration><![CDATA[TYPE checkInputVariable :
+STRUCT
+	EmergencyStop:BOOL;
+	m_cartDriverInput :ARRAY[1..g_maxCartJoint] OF ST_MotorInputs; 
+	m_cartDriverOutput :ARRAY[1..g_maxCartJoint] OF ST_MotorOutputs;
+	m_masterDriverInput :ARRAY[1..g_mJntNum] OF ST_MotorInputs; 
+	m_masterDriverOutput :ARRAY[1..g_mJntNum] OF ST_MotorOutputs;
+	m_motorCurrentIntegral : vec7d;
+	m_motorEncSaltaValue : ARRAY[1..g_mJntNum] OF DINT;
+	m_EtherCATState:ARRAY [1..g_maxArmJoint] OF ST_EtherCATState;		
+	m_spacePoseErr: vec6d;
+	m_promptStatus:ARRAY [1..20] OF BOOL;
+	m_promptLocation:ARRAY [1..20] OF UDINT;
+	m_selfCheckFail : BOOL;
+	
+	SlaveStopButton:BOOL;
+	PCStopButton :UINT;
+	MasterStopButton :BOOL;
+	
+	m_cartEtherCATState:ARRAY [1..g_maxCartJoint] OF ST_EtherCATState;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

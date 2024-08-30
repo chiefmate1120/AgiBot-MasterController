@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="T_Buffer" Id="{0e762b99-9064-4ae2-8b42-8d9eaa9c18ca}">
+    <Declaration><![CDATA[TYPE T_Buffer: ARRAY[ 0..MAX_CSV_ROWS ] OF ARRAY [0..MAX_CSV_COLUMNS] OF STRING(MAX_CSV_FIELD_LENGTH); (* [] (* TODESC *) *)
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

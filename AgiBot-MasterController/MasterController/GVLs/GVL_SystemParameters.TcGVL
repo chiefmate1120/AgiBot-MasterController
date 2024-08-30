@@ -21,7 +21,7 @@
 	
 	// wait time before robot init  for ethercat to stablize 
 	g_robotInitWaitTime : LREAL := 1.0;
-
+	g_robotSafetyCheckWaitTime : LREAL :=3.0;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

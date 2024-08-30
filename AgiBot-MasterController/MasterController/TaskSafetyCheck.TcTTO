@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <Task Name="TaskSafetyCheck" Id="{0c9a0316-7cae-491e-9666-847c5c98f280}">
     <!--CycleTime in micro seconds.-->
     <CycleTime>1000</CycleTime>
-    <Priority>3</Priority>
+    <Priority>5</Priority>
     <PouCall>
       <Name>SafetyCheck</Name>
     </PouCall>

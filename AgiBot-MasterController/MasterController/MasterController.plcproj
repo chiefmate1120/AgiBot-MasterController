@@ -145,7 +145,13 @@
     <Compile Include="DUTs\Structure\MasterSlaveCommunication\ST_SlaveStatus.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Structure\ST_EtherCATState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Structure\ST_InstruStatus.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Structure\ST_MatchedMasterArmIdx.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\TasksCommunication\ST_CartUIData.TcDUT">
@@ -187,16 +193,10 @@
     <Compile Include="DUTs\Structure\UICommunication\ST_arm_distribution.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_DH.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_ergonCtrlEnable.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_energy_data.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_Ergonomic_control.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DUTs\Structure\UICommunication\ST_ergonomic_data.TcDUT">
+    <Compile Include="DUTs\Structure\UICommunication\ST_ergonomicCtrlData.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Structure\UICommunication\ST_instrument_info.TcDUT">
@@ -247,6 +247,9 @@
     <Compile Include="DUTs\Type\Vec4b.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\Type\Vec7di.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Type\Vec8d.TcDUT">
       <SubType>Code</SubType>
     </Compile>
@@ -269,6 +272,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_Auxiliary\FB_slaveConnectionCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FBs_Auxiliary\FB_TON.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FB_boundaryForceFeedback.TcPOU">
@@ -412,7 +418,6 @@
     </Compile>
     <Compile Include="GVLs\Arms\GVL_ArmJointCaliData.TcGVL">
       <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\Arms\GVL_ArmKinematic.TcGVL">
       <SubType>Code</SubType>
@@ -428,7 +433,6 @@
     </Compile>
     <Compile Include="GVLs\Cart\GVL_CartJointCaliData.TcGVL">
       <SubType>Code</SubType>
-      <LinkAlways>true</LinkAlways>
     </Compile>
     <Compile Include="GVLs\Cart\GVL_CartJointParameters.TcGVL">
       <SubType>Code</SubType>
@@ -480,7 +484,7 @@
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
-    <Compile Include="GVLs\GVL_com_upper_PC.TcGVL">
+    <Compile Include="GVLs\GVL_interactUI.TcGVL">
       <SubType>Code</SubType>
       <LinkAlways>true</LinkAlways>
     </Compile>
@@ -529,10 +533,40 @@
     <Compile Include="SafetyCheck\ASSERT.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\FB_CartCheck.TcPOU">
+    <Compile Include="SafetyCheck\Fb_dataRecord.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="SafetyCheck\FB_MasterArmCheck.TcPOU">
+    <Compile Include="SafetyCheck\FB_EtherCATCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\Fb_SafetyCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\FB_Writer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkDelay.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkDelayTime.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkInputVariable.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\checkPermit.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\ST_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SafetyCheck\safetyCheckDUT\T_Buffer.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_CartCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_MasterArmCheck.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox\FB_RedunJntControl_bak.TcPOU">
@@ -585,12 +619,17 @@
     <Folder Include="GVLs\Configs\Robot3" />
     <Folder Include="GVLs\Configs\Robot4" />
     <Folder Include="GVLs\Configs\Robot5" />
+    <Folder Include="SafetyCheck\safetyCheckDUT" />
     <Folder Include="Sandbox" />
     <Folder Include="SafetyCheck" />
     <Folder Include="VISUs" />
     <Folder Include="Mains" />
   </ItemGroup>
   <ItemGroup>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Math">
       <DefaultResolution>Tc2_Math, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_Math</Namespace>

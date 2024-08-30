@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="checkDelay" Id="{84d26a64-d129-4323-bf30-7619f11566ce}">
+    <Declaration><![CDATA[TYPE checkDelay  :
+STRUCT
+	T_armJntEncErr:ARRAY [1..7] OF FB_TON;
+	T_driveErr:ARRAY [1..7] OF FB_TON;
+	T_linkEncErr:ARRAY [1..7] OF FB_TON;
+	T_jntStatusErr:ARRAY [1..7] OF FB_TON;
+	T_currentIsNotUpdate:ARRAY [1..7] OF FB_TON;
+	T_outOfLimit:ARRAY [1..7] OF TON;
+	T_armJntFollowErr:ARRAY [1..7] OF FB_TON;
+	T_jntVelErr:ARRAY [1..7] OF FB_TON;
+	T_jntCurrentErr:ARRAY [1..7] OF FB_TON;
+	T_spacePoseErr:ARRAY [1..7] OF FB_TON;
+	
+	T_cartJntEncErr:ARRAY [1..4] OF FB_TON;
+	T_cartDriveErr:ARRAY [1..4] OF FB_TON;
+	T_cartLinkEncErr:ARRAY [1..4] OF FB_TON;
+	T_cartJntStatusErr:ARRAY [1..4] OF FB_TON;
+	T_cartCurrentIsNotUpdate:ARRAY [1..4] OF FB_TON;
+	T_cartOutOfLimit:ARRAY [1..4] OF FB_TON;
+	T_cartJntFollowErr:ARRAY [1..4] OF FB_TON;
+	T_cartJntVelErr:ARRAY [1..4] OF FB_TON;
+	T_cartJntCurrentErr:ARRAY [1..4] OF FB_TON;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

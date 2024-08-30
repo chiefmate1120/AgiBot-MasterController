@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <POU Name="FB_Writer" Id="{7e284d95-314d-481b-b23c-9be043469d6e}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_Writer
+VAR_INPUT
+	bWrite		: BOOL;		(* Rising edge starts program execution*)
+	sNetId		: T_AmsNetId := '';	(* TwinCAT system network address *)
+	sFileName	: T_MaxString;		(*  := 'HardDisk\TextModeGen.csv' CSV destination file path and name*) 
+	pBuffer		: POINTER TO T_Buffer;
+	Index		:UDINT;
+END_VAR
+VAR_OUTPUT
+	bBusy: BOOL; 
+	bError			: BOOL;
+	nErrId			: UDINT;
+END_VAR
+VAR  
+	fbFileOpen	: FB_FileOpen;(* Opens file *)
+	fbFileClose	: FB_FileClose;(* Closes file *)
+	fbAdsRdWrt	: FW_AdsRdWrt := ( nPort := AMSPORT_R3_SYSSERV, nIdxGrp := SYSTEMSERVICE_FPUTS, cbReadLen := 0, pReadBuff := 0 );	(* Writes one record (line) *)
+
+ 	_hFile			: UINT		:= 0;(* File handle of the source file *)
+	_iStep			: DWORD 	:= 0;
+
+	_iLen1: UDINT;
+	_iLen2: UDINT;
+	
+	_iRow: UDINT;
+	_iLastRow: UDINT;
+	
+	_iCol: UDINT;
+	_iLastCol: UDINT;
+	
+	_iOffset: UDINT;
+	
+	_iCpy: UDINT;
+	_pBuffer: PVOID;
+	FristWriteFlag:BOOL;
+	_sBuffer: STRING(MAX_BEFFER_SIZE);
+END_VAR
+ 
+VAR CONSTANT
+	cs_Seperator: STRING[1]:= ';'; (*CSV字段分隔符*)
+	cs_CarriageReturn: STRING[2]:= '$N'; (*换行符*)
+	
+	MAX_BEFFER_SIZE:UINT := 8192;(*每条ADS写命令写下去的内存大小*)
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE _iStep OF
+	0:	(* Wait for rising edge at bWrite variable *)
+		IF bWrite THEN
+			bWrite 		:= FALSE;
+			bBusy 		:= TRUE;
+			bError		:= FALSE;
+			nErrId		:= 0;
+			_hFile		:= 0; 
+			_iStep 		:= 1;
+			_iLastRow 	:= 0;
+			_iLastCol   := 0;
+		END_IF
+
+	1:	(* Open source file *)
+		fbFileOpen(  bExecute := FALSE  );
+		fbFileOpen( 	sNetId := sNetId, sPathName := sFileName, nMode := FOPEN_MODEWRITE OR FOPEN_MODETEXT,(* Open file in TEXT mode! *)
+						ePath := PATH_GENERIC, bExecute := TRUE );
+		_iStep := 2;
+
+	2:(* Wait until open not busy *)
+		fbFileOpen( bExecute := FALSE, bError => bError, nErrID => nErrID, hFile => _hFile );
+		IF NOT fbFileOpen.bBusy THEN
+			IF NOT fbFileOpen.bError THEN
+				_iStep := 3;
+			ELSE(* Error: file not found? *)
+				_iStep := 100;
+			END_IF
+		END_IF
+
+	3:(* Convert one PLC record to CSV format *) 
+		MEMSET(ADR(_sBuffer),0,MAX_BEFFER_SIZE);
+		_iOffset := 0;
+		_iCpy := 0;
+		_pBuffer := ADR(_sBuffer);
+		FOR _iRow := _iLastRow TO MAX_CSV_ROWS BY 1 DO
+			FOR _iCol := _iLastCol TO MAX_CSV_COLUMNS BY 1 DO 
+				_iLen1 := LEN(pBuffer^[  _iRow][_iCol]);
+				_iLen2 := LEN(cs_Seperator); 
+				IF (_iOffset + _iLen1 + _iLen2 + 1) < MAX_BEFFER_SIZE THEN 
+					_iCpy := FW_MemCpy(_pBuffer + _iOffset, ADR(pBuffer^[  _iRow][_iCol]), _iLen1);
+					_iOffset := _iOffset + _iCpy;
+					IF  _iCol < MAX_CSV_COLUMNS THEN
+						_iCpy := FW_MemCpy(_pBuffer + _iOffset, ADR(cs_Seperator), _iLen2);
+						_iOffset := _iOffset + _iCpy;
+					END_IF
+				ELSE
+					_iLastRow := _iRow;
+					_iLastCol := _iCol;
+					_iStep := 4;(* Write record to the file *)
+					RETURN;	
+				END_IF
+			END_FOR 
+			_iLen2 := LEN(cs_CarriageReturn); 
+			_iCpy:= FW_MemCpy(_pBuffer + _iOffset, ADR(cs_CarriageReturn), _iLen2);
+			_iOffset := _iOffset + _iCpy;
+			_iLastCol := 0;
+		END_FOR 
+		_iStep := 4;(* Write record to the file *) 
+	4:	(* Write single text line *) 
+		fbAdsRdWrt( bExecute := FALSE ); 
+		fbAdsRdWrt( sNetId := sNetId, nIdxOffs := _hFile, cbWriteLen := _iOffset + 1(*inclusive terminating NULL*), pWriteBuff := ADR(_sBuffer),
+			bExecute := TRUE, tTimeout := DEFAULT_ADS_TIMEOUT, bBusy=>bBusy, bError=>bError, nErrID=>nErrID );
+		_iStep := 5;
+
+	5:(* Wait until write not busy *)
+		fbAdsRdWrt( bExecute := FALSE, bError => bError, nErrID => nErrID );
+		IF NOT fbAdsRdWrt.bBusy THEN
+			IF NOT fbAdsRdWrt.bError THEN 
+				_iStep := 3;(* Write next record *)
+				IF _iRow >= MAX_CSV_ROWS THEN
+					_iStep := 10;
+				END_IF
+			ELSE(* Error *)
+				_iStep := 100;
+			END_IF
+		END_IF
+
+	10:	(* Close source file *)
+		fbFileClose( bExecute := FALSE );
+		fbFileClose( sNetId := sNetId, hFile := _hFile, bExecute := TRUE );
+		_iStep := 11;
+
+	11:(* Wait until close not busy *)
+		fbFileClose( bExecute := FALSE, bError => bError, nErrID => nErrID );
+		IF ( NOT fbFileClose.bBusy ) THEN
+			_hFile := 0;
+			_iStep := 100;
+		END_IF
+
+	100: (* Error or ready step => cleanup *)
+		IF ( _hFile <> 0 ) THEN
+			_iStep := 10; (* Close the source file *)
+		ELSE
+			bBusy := FALSE;
+			_iStep := 0;	(* Ready *) 
+		END_IF
+
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="FB_Writer">
+      <LineId Id="282" Count="96" />
+      <LineId Id="9" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

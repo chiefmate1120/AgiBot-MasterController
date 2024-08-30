@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="ST_instrument_info" Id="{e1d458ab-2cab-48c4-8ed5-45f0abc97eae}">
     <Declaration><![CDATA[TYPE ST_instrument_info :
 STRUCT
@@ -26,7 +26,6 @@ STRUCT
 	torque_max:ARRAY[1..5] OF REAL;
 	ratio:ARRAY[1..5] OF REAL;
 
-	DH:ST_DH;
 	name:STRING;
 	type_1:STRING;
 	serial_number:STRING;

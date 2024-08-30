@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
@@ -23,7 +23,8 @@ VAR
 	
 	m_workHeartTon0 : TON;
 	m_workHeartTon1 : TON;
-	
+	m_ergonInfoHeightF : F_TRIG;
+	m_ergonInfoHeight : BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -57,50 +58,56 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//init cart joint postion
-IF (gvl_com_upper_PC.Upper_PC_Initial_Finished=FALSE) THEN
-	gvl_com_upper_PC.Upper_PC_Initial_Finished:=TRUE;
-	//当前位置保存
+IF (GVL_interactUI.Upper_PC_Initial_Finished=FALSE) THEN
+	GVL_interactUI.Upper_PC_Initial_Finished:=TRUE;
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
-	GVL_com_upper_PC.ergonomic_control.ergonomic_info_modify:=TRUE;//初始化时将台车现在的位置赋值给UI；
+	GVL_interactUI.g_ergonomicCtrl.m_ergonInfoModify:=TRUE;
 END_IF
 
-IF  GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics AND NOT GVL_com_upper_PC.ergonomic_control_last.recovery_Ergonomics THEN
-	GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished:=FALSE;
+//recover the ergonomic button and cancel recover ergonomic button
+m_cartUIData.m_ergonomicCrl.m_recovErgonEnable := GVL_interactUI.g_ergonomicCtrl.m_recovErgonEnable;
+m_cartUIData.m_ergonomicCrl.m_cancelRecovErgonEnable := GVL_interactUI.g_ergonomicCtrl.m_cancelRecovErgonEnable;
+
+//recover the ergonomic update commend position
+IF  GVL_interactUI.g_ergonomicCtrl.m_recovErgonEnable AND NOT GVL_interactUI.g_ergonomicCtrlEnableLast.m_recovErgonEnable THEN
+	GVL_interactUI.g_ergonomicCtrl.m_recovErgonFinshed:=FALSE;
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
-	m_cartUIData.m_cmdJntPos[1] := GVL_com_upper_PC.command_ergonomic_data.head_height;
-	m_cartUIData.m_cmdJntPos[2] := GVL_com_upper_PC.command_ergonomic_data.head_angle;
-	m_cartUIData.m_cmdJntPos[3] := GVL_com_upper_PC.command_ergonomic_data.arm_height;
-	m_cartUIData.m_cmdJntPos[4] := GVL_com_upper_PC.command_ergonomic_data.foot_distance;
-	
+	m_cartUIData.m_cmdJntPos[1] := GVL_interactUI.g_ergonomicCtrlData.m_monitorHeight;
+	m_cartUIData.m_cmdJntPos[2] := GVL_interactUI.g_ergonomicCtrlData.m_headAngle;
+	m_cartUIData.m_cmdJntPos[3] := GVL_interactUI.g_ergonomicCtrlData.m_handrailHeight;
+	m_cartUIData.m_cmdJntPos[4] := GVL_interactUI.g_ergonomicCtrlData.m_footDistance;
 END_IF
-	m_cartUIData.m_ergonomicCrl.recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics;
-	
-IF (GVL_com_upper_PC.ergonomic_control_last.cancel_recovery_Ergonomics=FALSE) AND (GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics=TRUE) THEN
-	GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished:=FALSE;
+
+//cancel recover the ergonomic update commend position
+IF (GVL_interactUI.g_ergonomicCtrlEnableLast.m_cancelRecovErgonEnable=FALSE) AND (GVL_interactUI.g_ergonomicCtrl.m_cancelRecovErgonEnable=TRUE) THEN
+	GVL_interactUI.g_ergonomicCtrl.m_cancelRecovErgonFinshed:=FALSE;
 	m_cartUIData.m_cmdJntPos := m_cartUIData.m_cmdCancelErgonPos;
 END_IF
-m_cartUIData.m_ergonomicCrl.cancel_recovery_Ergonomics := GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics;
+GVL_interactUI.g_ergonomicCtrlEnableLast:=GVL_interactUI.g_ergonomicCtrl;
 
-GVL_com_upper_PC.ergonomic_control_last:=GVL_com_upper_PC.ergonomic_control;
-GVL_com_upper_PC.ergonomic_control.cancel_recovery_Ergonomics_finished := m_cartStatus.m_cancelErgonAdjustArrival;
-GVL_com_upper_PC.ergonomic_control.recovery_Ergonomics_finished := m_cartStatus.m_ergonAdjustArrival;
+GVL_interactUI.g_ergonomicCtrl.m_cancelRecovErgonFinshed := m_cartStatus.m_cancelErgonAdjustArrival;
+GVL_interactUI.g_ergonomicCtrl.m_recovErgonFinshed := m_cartStatus.m_ergonAdjustArrival;
+GVL_interactUI.g_surgonHeadIn:=m_cartStatus.m_surgonReady;
 
-GVL_com_upper_PC.head_in:=m_cartStatus.m_surgonReady;
-
-GVL_com_upper_PC.actual_ergonomic_data.head_height := m_cartJointData.m_curJntPos[1];
-GVL_com_upper_PC.actual_ergonomic_data.head_angle := m_cartJointData.m_curJntPos[2];
-GVL_com_upper_PC.actual_ergonomic_data.arm_height := m_cartJointData.m_curJntPos[3];
-GVL_com_upper_PC.actual_ergonomic_data.foot_distance:= m_cartJointData.m_curJntPos[4];
-
+//cart adjustment complete , update ui information
+m_ergonInfoHeightF(CLK:= m_cartStatus.m_consoleInAdjust, Q=>m_ergonInfoHeight);
+IF m_ergonInfoHeight THEN
+	GVL_interactUI.g_ergonomicCtrl.m_ergonInfoModify := TRUE;
+END_IF
+GVL_interactUI.g_ergonomicCurData.m_monitorHeight := m_cartJointData.m_curJntPos[1];
+GVL_interactUI.g_ergonomicCurData.m_headAngle := m_cartJointData.m_curJntPos[2];
+GVL_interactUI.g_ergonomicCurData.m_handrailHeight := m_cartJointData.m_curJntPos[3];
+GVL_interactUI.g_ergonomicCurData.m_footDistance:= m_cartJointData.m_curJntPos[4];
+GVL_interactUI.g_cartInMotion := m_cartStatus.m_consoleInManualAdjust;
 
 
 //work heart
-m_workHeartTon0(IN:= GVL_com_upper_PC.work_heart = 1, PT:= T#1S, Q=> , ET=> );
-m_workHeartTon1(IN:= GVL_com_upper_PC.work_heart = 0, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon0(IN:= GVL_interactUI.g_heartBeat = 1, PT:= T#1S, Q=> , ET=> );
+m_workHeartTon1(IN:= GVL_interactUI.g_heartBeat = 0, PT:= T#1S, Q=> , ET=> );
 IF m_workHeartTon0.Q THEN
-	GVL_com_upper_PC.work_heart :=0 ;
+	GVL_interactUI.g_heartBeat :=0 ;
 ELSIF m_workHeartTon1.Q THEN
-	GVL_com_upper_PC.work_heart  :=1 ;
+	GVL_interactUI.g_heartBeat  :=1 ;
 END_IF
 ]]></ST>
       </Implementation>
@@ -117,38 +124,7 @@ END_IF
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
-      <LineId Id="33" Count="0" />
-      <LineId Id="37" Count="4" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="47" Count="1" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="49" Count="1" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="53" Count="1" />
-      <LineId Id="57" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="84" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="61" Count="0" />
-      <LineId Id="63" Count="1" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="65" Count="0" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="55" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="71" Count="0" />
-      <LineId Id="73" Count="6" />
-      <LineId Id="72" Count="0" />
+      <LineId Id="95" Count="51" />
       <LineId Id="66" Count="0" />
     </LineIds>
   </POU>

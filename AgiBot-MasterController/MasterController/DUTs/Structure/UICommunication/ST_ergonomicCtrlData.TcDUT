@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+  <DUT Name="ST_ergonomicCtrlData" Id="{476619f7-fa03-4b2e-ad16-ef2a94d0f41f}">
+    <Declaration><![CDATA[TYPE ST_ergonomicCtrlData :
+STRUCT
+	m_monitorHeight : REAL;
+	m_headAngle : REAL;
+	m_handrailHeight : REAL;
+	m_footDistance : REAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

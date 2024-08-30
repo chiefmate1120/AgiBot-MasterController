@@ -29,6 +29,23 @@ STRUCT
 	// current arm twist[linear velocity; angular veloicty] in shoulder coordinate
 	m_curArmTwist:ARRAY[1..g_mArmNum] OF Vec6d;
 	
+	//self check status
+	m_selfCheckStatus : ARRAY [1..g_mArmNum] OF BOOL;
+	
+	//grip Hall Sensor
+	m_gripHallSensor : ARRAY [1..g_mArmNum] OF UDINT;
+	
+	//slave on line
+	m_slaveOnLine : BOOL;
+	
+	//msater-slave matching status
+	m_IKSuccess :ARRAY [1..g_mArmNum] OF BOOL;
+	
+	//msater-slave matching time
+	m_timePeriod :ARRAY [1..g_mArmNum] OF LREAL;
+	
+	//master arms mapping slave arms
+	m_matchedMasterArmIdx : ST_MatchedMasterArmIdx;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

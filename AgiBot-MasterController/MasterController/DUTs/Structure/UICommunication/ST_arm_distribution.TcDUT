@@ -1,12 +1,22 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <DUT Name="ST_arm_distribution" Id="{5f994ae5-4ed7-4190-a7e9-a522ecf18c01}">
     <Declaration><![CDATA[TYPE ST_arm_distribution :
 STRUCT
-	arm1_left_or_right:UINT;  //从臂1匹配主端左臂or右臂
-	arm2_left_or_right:UINT;  //从臂2匹配主端左臂or右臂
-	arm3_left_or_right:UINT;  //从臂3匹配主端左臂or右臂
-	arm4_left_or_right:UINT;  //从臂4匹配主端左臂or右臂
+	//slave arm 1 mapping left arm or right arm
+	m_arm1InLeftOrRight : UINT;
+	
+	//slave arm 2 mapping left arm or right arm
+	m_arm2InLeftOrRight : UINT;
+	
+	//slave arm 3 mapping left arm or right arm
+	m_arm3InLeftOrRight : UINT;
+	
+	//slave arm 4 mapping left arm or right arm
+	m_arm4InLeftOrRight : UINT;
+	
+	m_leftMappingSlaveArm : ARRAY [1..2] OF UINT:=[1,2];
+	m_rightMappingSlaveArm : ARRAY [1..2] OF UINT:=[3,4];
 END_STRUCT
 END_TYPE
 ]]></Declaration>
