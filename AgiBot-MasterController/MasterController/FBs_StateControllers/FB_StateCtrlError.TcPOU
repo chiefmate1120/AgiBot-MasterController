@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_StateCtrlError" Id="{78b2e60d-537e-446e-8b3b-6db63d5ab02c}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Error Hold
 FUNCTION_BLOCK PUBLIC FB_StateCtrlError EXTENDS FB_MasterArmCtrlBase
@@ -28,7 +28,18 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
-]]></ST>
+
+//disable joints which is error
+FOR i := 1 TO g_mJntNum DO
+	IF SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_masterArm.armIdx, i, 2] OR SafetyCheck.m_SafetyCheck.m_jntErrFlag[i_masterArm.armIdx, i, 3] THEN
+		m_jntEnableFlag[i] := 0;
+	ELSE
+		m_jntEnableFlag[i] := 1;
+	END_IF
+END_FOR
+
+// update commands to arm
+copyCmds(r_masterArmCtrlCmd);]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlError">
@@ -36,6 +47,8 @@ END_VAR
     </LineIds>
     <LineIds Name="FB_StateCtrlError.init">
       <LineId Id="67" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="79" Count="9" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

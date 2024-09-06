@@ -3,7 +3,7 @@
   <GVL Name="GVL_interactUI" Id="{b6fc928c-802a-4bca-a5ad-5de470837f32}">
     <Declaration><![CDATA[{attribute 'qualified_only'}
 VAR_GLOBAL
-	Upper_PC_Initial_Finished:BOOL:=FALSE;
+	g_uiParaReload:BOOL:=TRUE;
 	
 	//true :login；false:logout
 	g_userLogged : BOOL;

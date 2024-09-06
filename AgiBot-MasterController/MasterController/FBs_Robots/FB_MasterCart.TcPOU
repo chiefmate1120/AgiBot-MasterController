@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
@@ -65,7 +65,7 @@ VAR
 	//cart ergonomic adjust data
 	m_UIData : ST_CartUIData;
 	m_carInMotion : INT; // 0:  no mition, 1: mamual adjust, 2: ergonomic adjust
-	m_jntSoftwareLimit :ARRAY [1..4] OF LREAL := [0.002, 2*g_deg2Rad, 0.002, 0.005];
+	m_jntSoftwareLimit :ARRAY [1..4] OF LREAL := [0.001, 1*g_deg2Rad, 0.001, 0.001];
 	m_cmdArrival : Vec4b;
 	
 	// cart joint status data
@@ -332,7 +332,7 @@ END_VAR
 
 // joint error check
 FOR i:=1 TO 4 DO 
-	m_cmdArrival[i] :=  ABS(err[i]) < m_jntSoftwareLimit[i];
+	m_cmdArrival[i] :=  ABS(err[i]) < m_jntSoftwareLimit[i]/2;
 END_FOR
 	]]></ST>
       </Implementation>
@@ -358,7 +358,8 @@ updateCmds();
 // send command to joint driver
 FOR i:=1 TO 4 DO
 	// joint enable
-	IF m_jntEnableFlag[i] AND NOT(SafetyCheck.m_safetyCheckData.m_cartErrFlag[i]) THEN
+	IF m_jntEnableFlag[i] AND NOT(SafetyCheck.m_safetyCheckData.m_cartErrFlag[i]) AND MasterArmControl.m_masterStatus.m_armState[1] <> MasterArmState_MasterSlave 
+								AND MasterArmControl.m_masterStatus.m_armState[2] <> MasterArmState_MasterSlave THEN
 		m_cartJoints[i].enable();
 	ELSE
 		m_cartJoints[i].disable();
@@ -400,14 +401,18 @@ END_IF
 reachUITargetCheck();
 IF m_cmdArrival[1] AND m_cmdArrival[2] AND m_cmdArrival[3] AND m_cmdArrival[4] THEN
 	IF m_UIData.m_ergonomicCrl.m_recovErgonEnable THEN
+		m_cartStatus.m_cancelErgonAdjustArrival := FALSE;
 		m_cartStatus.m_ergonAdjustArrival := TRUE;
 	END_IF
 	IF m_UIData.m_ergonomicCrl.m_cancelRecovErgonEnable THEN
+		m_cartStatus.m_ergonAdjustArrival := FALSE;
 		m_cartStatus.m_cancelErgonAdjustArrival := TRUE;
 	END_IF
 ELSE
 	m_cartStatus.m_ergonAdjustArrival := FALSE;
-	m_cartStatus.m_cancelErgonAdjustArrival := FALSE;
+	IF m_UIData.m_ergonomicCrl.m_recovErgonEnable THEN
+		m_cartStatus.m_cancelErgonAdjustArrival := FALSE;
+	END_IF
 END_IF]]></ST>
       </Implementation>
     </Method>
@@ -434,17 +439,17 @@ m_elecKnifeCtrlWord := eleKnifeCtrl(MasterArmControl.m_masterStatus.m_armState ,
 //updata pedal hover and pedal trigger
 m_cartStatus. m_pedalHover[1] := m_electricCutLeftAllow OR m_electricCoagulLeftAllow;
 m_cartStatus. m_pedalHover[2] := m_electricCutRightAllow OR m_electricCoagulRightAllow;
-IF m_electricCutLeftOn THEN
+IF m_electricCutLeftOn AND m_eleCtrlState = 1 THEN
 	m_cartStatus.m_electricKnifePedalTrigger[1] := 1;
-ELSIF m_electricCoagulLeftOn THEN
+ELSIF m_electricCoagulLeftOn AND m_eleCtrlState = 1 THEN
 	m_cartStatus.m_electricKnifePedalTrigger[1] := 2;
 ELSE
 	m_cartStatus.m_electricKnifePedalTrigger[1] := 0;
 END_IF
 
-IF m_electricCutRightOn THEN
+IF m_electricCutRightOn AND m_eleCtrlState = 1 THEN
 	m_cartStatus.m_electricKnifePedalTrigger[2] := 1;
-ELSIF m_electricCoagulRightOn THEN
+ELSIF m_electricCoagulRightOn AND m_eleCtrlState = 1 THEN
 	m_cartStatus.m_electricKnifePedalTrigger[2] := 2;
 ELSE
 	m_cartStatus.m_electricKnifePedalTrigger[2] := 0;
@@ -633,14 +638,22 @@ END_FOR]]></ST>
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.run">
-      <LineId Id="42" Count="19" />
+      <LineId Id="42" Count="12" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="55" Count="6" />
       <LineId Id="19" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.status.Get">
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.updateCmds">
-      <LineId Id="139" Count="18" />
+      <LineId Id="139" Count="10" />
+      <LineId Id="167" Count="0" />
+      <LineId Id="150" Count="2" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="153" Count="2" />
+      <LineId Id="169" Count="2" />
+      <LineId Id="156" Count="0" />
       <LineId Id="119" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterCart.updateIO">

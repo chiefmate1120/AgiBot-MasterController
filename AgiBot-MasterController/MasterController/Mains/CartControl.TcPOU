@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
   <POU Name="CartControl" Id="{c247957a-c15a-480d-acbc-bde71223345b}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM CartControl
 VAR
@@ -24,6 +24,7 @@ VAR
 	m_workHeartTon0 : TON;
 	m_workHeartTon1 : TON;
 	m_ergonInfoHeightF : F_TRIG;
+	m_userLoggedR : R_TRIG;
 	m_ergonInfoHeight : BOOL;
 END_VAR
 ]]></Declaration>
@@ -58,9 +59,10 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[//init cart joint postion
-IF (GVL_interactUI.Upper_PC_Initial_Finished=FALSE) THEN
-	GVL_interactUI.Upper_PC_Initial_Finished:=TRUE;
+IF (GVL_interactUI.g_uiParaReload=TRUE) THEN
+	GVL_interactUI.g_uiParaReload:=FALSE;
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
+	m_cartUIData.m_cmdJntPos:= g_zeroVec4d;
 	GVL_interactUI.g_ergonomicCtrl.m_ergonInfoModify:=TRUE;
 END_IF
 
@@ -69,7 +71,11 @@ m_cartUIData.m_ergonomicCrl.m_recovErgonEnable := GVL_interactUI.g_ergonomicCtrl
 m_cartUIData.m_ergonomicCrl.m_cancelRecovErgonEnable := GVL_interactUI.g_ergonomicCtrl.m_cancelRecovErgonEnable;
 
 //recover the ergonomic update commend position
-IF  GVL_interactUI.g_ergonomicCtrl.m_recovErgonEnable AND NOT GVL_interactUI.g_ergonomicCtrlEnableLast.m_recovErgonEnable THEN
+m_userLoggedR(CLK:= GVL_interactUI.g_userLogged, Q=> );
+IF m_userLoggedR.Q THEN
+	m_cartUIData.m_cmdJntPos:= g_zeroVec4d;
+END_IF
+IF ((GVL_interactUI.g_ergonomicCtrl.m_recovErgonEnable AND NOT GVL_interactUI.g_ergonomicCtrlEnableLast.m_recovErgonEnable))  THEN
 	GVL_interactUI.g_ergonomicCtrl.m_recovErgonFinshed:=FALSE;
 	m_cartUIData.m_cmdCancelErgonPos := m_cartJointData.m_curJntPos;
 	m_cartUIData.m_cmdJntPos[1] := GVL_interactUI.g_ergonomicCtrlData.m_monitorHeight;
@@ -124,7 +130,12 @@ END_IF
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="CartControl.UIInputProcess">
-      <LineId Id="95" Count="51" />
+      <LineId Id="95" Count="3" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="99" Count="7" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="157" Count="2" />
+      <LineId Id="107" Count="39" />
       <LineId Id="66" Count="0" />
     </LineIds>
   </POU>
