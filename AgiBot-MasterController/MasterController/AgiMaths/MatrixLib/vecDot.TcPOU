@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
+  <POU Name="vecDot" Id="{dd510cc3-aa03-4332-b7d2-fe1b23cb1742}" SpecialFunc="None">
+    <Declaration><![CDATA[// vecB=VecA*num
+FUNCTION vecDot : LREAL
+VAR_IN_OUT CONSTANT
+	vecA :ARRAY[*] OF LREAL;
+	vecB :ARRAY[*] OF LREAL;
+END_VAR
+
+VAR
+	m :DINT;
+	i :DINT;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[m:=UPPER_BOUND(vecA,1);
+ASSERT(UPPER_BOUND(VecB,1)=m);
+
+vecDot :=0;
+FOR i:=1 TO m DO
+	vecDot := vecDot + vecA[i]*vecB[i];
+END_FOR]]></ST>
+    </Implementation>
+    <LineIds Name="vecDot">
+      <LineId Id="53" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="26" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

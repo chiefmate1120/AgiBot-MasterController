@@ -9,8 +9,10 @@ END_VAR
 
 VAR
 	// force control parameters in local tip coordinate
-	m_oriKp :Vec3d :=[1, 1, 0.5];
-	m_oriKd :Vec3d :=[0.04,0.04, 0.01];
+//	m_oriKp :Vec3d :=[1, 1, 0.5];
+//	m_oriKd :Vec3d :=[0.04,0.04, 0.01];
+	m_oriKp :Vec3d :=[0.2, 0.2, 0.1];
+	m_oriKd :Vec3d :=[0.02,0.02, 0.005];
 	
 	m_oriCartTrq,m_oriCartTrqLocal :Vec3d;
 	
@@ -34,6 +36,7 @@ VAR
 	posErr, oriErr:Vec3d;
 	posErrLocal, oriErrLocal :Vec3d;
 	vel, velLocal, wVel,wVelLocal :Vec3d;
+	oriErrAxis, wVelProj :Vec3d;
 	rotInv :Mat3d;
 	oriJaco, oriJacoT :Mat3d;
 	errAngle :LREAL;
@@ -69,9 +72,14 @@ matMultiVec(rotInv, oriErr, oriErrLocal);
 matMultiVec(rotInv, vel, velLocal);
 matMultiVec(rotInv, wVel, wVelLocal);
 
+// compute velocity in error direction
+oriErrAxis := oriErrLocal;
+normalize(oriErrAxis);
+vecMultiNum(oriErrAxis, vecDot(wVelLocal, oriErrLocal), wVelProj);
+
 // compute local cartesion torque
 FOR i:=1 TO 3 DO
-	m_oriCartTrqLocal[i]:= m_oriKp[i] * oriErrLocal[i]-m_oriKd[i]*wVelLocal[i];
+	m_oriCartTrqLocal[i]:= m_oriKp[i] * oriErrLocal[i]-m_oriKd[i]*wVelProj[i];
 END_FOR
 
 // project torque back to shoulder coordinate
@@ -118,6 +126,10 @@ run[7]:=oriJntTrq[3];]]></ST>
       <LineId Id="95" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="110" Count="1" />
+      <LineId Id="170" Count="0" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="207" Count="1" />
+      <LineId Id="210" Count="0" />
       <LineId Id="105" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="30" Count="0" />
