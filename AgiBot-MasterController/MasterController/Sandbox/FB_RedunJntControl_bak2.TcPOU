@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
-  <POU Name="FB_RedunJntControlNew" Id="{4f86ed46-4f20-4735-b7f7-0bc8643b352f}" SpecialFunc="None">
+  <POU Name="FB_RedunJntControl_bak2" Id="{4f86ed46-4f20-4735-b7f7-0bc8643b352f}" SpecialFunc="None">
     <Declaration><![CDATA[// Author: Feijian Ni
 // Date: 2023.11.22
-FUNCTION_BLOCK FB_RedunJntControlNew
+FUNCTION_BLOCK FB_RedunJntControl_bak2
 VAR_INPUT
 END_VAR
 VAR_OUTPUT
@@ -212,10 +212,10 @@ ELSE
 END_IF]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="FB_RedunJntControlNew">
+    <LineIds Name="FB_RedunJntControl_bak2">
       <LineId Id="9" Count="0" />
     </LineIds>
-    <LineIds Name="FB_RedunJntControlNew.calcRedunPos">
+    <LineIds Name="FB_RedunJntControl_bak2.calcRedunPos">
       <LineId Id="41" Count="0" />
       <LineId Id="66" Count="0" />
       <LineId Id="92" Count="0" />
@@ -231,7 +231,7 @@ END_IF]]></ST>
       <LineId Id="77" Count="1" />
       <LineId Id="90" Count="0" />
     </LineIds>
-    <LineIds Name="FB_RedunJntControlNew.init">
+    <LineIds Name="FB_RedunJntControl_bak2.init">
       <LineId Id="51" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="22" Count="0" />
@@ -246,7 +246,7 @@ END_IF]]></ST>
       <LineId Id="36" Count="0" />
       <LineId Id="35" Count="0" />
     </LineIds>
-    <LineIds Name="FB_RedunJntControlNew.run">
+    <LineIds Name="FB_RedunJntControl_bak2.run">
       <LineId Id="459" Count="18" />
       <LineId Id="494" Count="6" />
       <LineId Id="478" Count="1" />
@@ -255,7 +255,7 @@ END_IF]]></ST>
       <LineId Id="481" Count="7" />
       <LineId Id="125" Count="0" />
     </LineIds>
-    <LineIds Name="FB_RedunJntControlNew.startTrack">
+    <LineIds Name="FB_RedunJntControl_bak2.startTrack">
       <LineId Id="95" Count="0" />
       <LineId Id="97" Count="3" />
       <LineId Id="92" Count="0" />

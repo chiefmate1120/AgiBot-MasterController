@@ -103,6 +103,9 @@
     <Compile Include="AgiMaths\MatrixLib\vecAdd.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="AgiMaths\MatrixLib\vecDot.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AgiMaths\MatrixLib\vecMultiNum.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -308,9 +311,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Type\Vec7i.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="FBs_BasicControllers\FB_RedunJntControlNew.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="FBs_BasicControllers\FB_RedunJntControl.TcPOU">
@@ -567,6 +567,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox\FB_MasterArmCheck.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sandbox\FB_RedunJntControl_bak2.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Sandbox\FB_RedunJntControl_bak.TcPOU">
