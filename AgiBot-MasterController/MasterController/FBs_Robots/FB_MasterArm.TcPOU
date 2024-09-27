@@ -854,7 +854,6 @@ m_cmdJntVel :=i_armCtrlCmd.m_cmdJntVel;
 m_cmdCartTwist := i_armCtrlCmd.m_cmdCartTwist;
 m_cmdCartPose :=i_armCtrlCmd.m_cmdCartPose;
 m_simJntPos:=i_armCtrlCmd.m_cmdJntPos;
-m_simJntPos:=i_armCtrlCmd.m_cmdJntPos;
 
 // update simulated master arm
 updateSimStatus();
@@ -1118,33 +1117,8 @@ matMultiVec(m_linkJaco,m_curLinkVel,m_curCartLinkTwist);
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateCmds">
-      <LineId Id="86" Count="4" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="75" Count="1" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="53" Count="0" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="19" Count="0" />
-      <LineId Id="13" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="20" Count="0" />
-      <LineId Id="17" Count="0" />
-      <LineId Id="64" Count="0" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="9" Count="1" />
+      <LineId Id="109" Count="30" />
+      <LineId Id="10" Count="0" />
     </LineIds>
     <LineIds Name="FB_MasterArm.updateDyna">
       <LineId Id="5" Count="0" />

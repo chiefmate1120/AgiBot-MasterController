@@ -26,8 +26,8 @@ VAR_GLOBAL CONSTANT
 		 1, 1, 1, 1, 1, 0, 1];
 		 
 	// limit value of gripper hall sensor
-	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[2687067,2883677];
-	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[38142472,44696204];
+	g_minHallSensorValue :ARRAY[1..2] OF DINT:=[2687067,3145824];
+	g_maxHallSensorValue :ARRAY[1..2] OF DINT  :=[34800091,36635182];
 		 
  	//################ DO NOT modify parameters below ###########################	
 	// abolute encoder expanded limit buffer in case there is calibrtion error at limit position

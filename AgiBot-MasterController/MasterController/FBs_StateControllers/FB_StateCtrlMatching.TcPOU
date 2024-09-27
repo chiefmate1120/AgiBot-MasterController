@@ -72,7 +72,7 @@ END_VAR]]></Declaration>
 	matTranspose(i_masterArm.curCartPose.m_rot, invRot);
 	matMultiply(invRot, m_cmdCartPose.m_rot, rotErr);
 	rot2AngAxis(rotErr, angle=>m_rotErrAng,axis=>);
-	m_isFinished := m_timePeriod > m_matchTrajPlanner.duration AND  norm(cmdJntErr)<g_jntCtrlAngTolHigh AND  ABS(m_rotErrAng) < m_matchAngleThres;
+	m_isFinished := m_timePeriod > m_matchTrajPlanner.duration AND  norm(cmdJntErr)<g_jntCtrlAngTolHigh;
 	
 	RETURN;
 END_IF
@@ -142,10 +142,16 @@ IF m_IKSuccess THEN
 	
 	// roll flip handle
 	i_masterArm.flipGripper(rollFlipHandle(i_masterArm.armIdx,i_masterArm.curJntPos[7], q7, o_cmdJntPos7 =>m_targetJntPos[7]));
+	
+	// no match for rotate joint if instrument is ultrasonic knife
+	IF MasterArmControl.m_masterRobot.m_USKnifeRotClutch[i_slaveIdx] THEN
+		m_targetJntPos[7] := i_masterArm.curJntPos[7];
+	END_IF
 
 	m_matchTrajPlanner.init(m_cmdJntPos,m_targetJntPos,m_maxMatchJntVel,m_maxMatchJntAcc,m_maxMatchJntJerk);
 	m_timePeriod :=0;
 END_IF
+
 
 ]]></ST>
       </Implementation>
@@ -604,62 +610,7 @@ wristIK:=true;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.calcCmdJntPos">
-      <LineId Id="305" Count="0" />
-      <LineId Id="308" Count="1" />
-      <LineId Id="311" Count="4" />
-      <LineId Id="487" Count="1" />
-      <LineId Id="316" Count="0" />
-      <LineId Id="320" Count="2" />
-      <LineId Id="319" Count="0" />
-      <LineId Id="328" Count="1" />
-      <LineId Id="307" Count="0" />
-      <LineId Id="291" Count="0" />
-      <LineId Id="233" Count="5" />
-      <LineId Id="325" Count="0" />
-      <LineId Id="239" Count="2" />
-      <LineId Id="245" Count="1" />
-      <LineId Id="346" Count="0" />
-      <LineId Id="351" Count="0" />
-      <LineId Id="350" Count="0" />
-      <LineId Id="352" Count="0" />
-      <LineId Id="348" Count="0" />
-      <LineId Id="264" Count="0" />
-      <LineId Id="261" Count="0" />
-      <LineId Id="260" Count="0" />
-      <LineId Id="266" Count="0" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="271" Count="2" />
-      <LineId Id="270" Count="0" />
-      <LineId Id="263" Count="0" />
-      <LineId Id="275" Count="2" />
-      <LineId Id="371" Count="0" />
-      <LineId Id="283" Count="4" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="440" Count="0" />
-      <LineId Id="439" Count="0" />
-      <LineId Id="441" Count="1" />
-      <LineId Id="449" Count="0" />
-      <LineId Id="448" Count="0" />
-      <LineId Id="446" Count="0" />
-      <LineId Id="452" Count="0" />
-      <LineId Id="454" Count="2" />
-      <LineId Id="453" Count="0" />
-      <LineId Id="457" Count="0" />
-      <LineId Id="459" Count="2" />
-      <LineId Id="458" Count="0" />
-      <LineId Id="443" Count="0" />
-      <LineId Id="417" Count="0" />
-      <LineId Id="251" Count="0" />
-      <LineId Id="288" Count="0" />
-      <LineId Id="252" Count="0" />
-      <LineId Id="256" Count="2" />
-      <LineId Id="420" Count="0" />
-      <LineId Id="418" Count="1" />
-      <LineId Id="255" Count="0" />
-      <LineId Id="249" Count="0" />
-      <LineId Id="327" Count="0" />
-      <LineId Id="289" Count="0" />
-      <LineId Id="242" Count="0" />
+      <LineId Id="545" Count="94" />
       <LineId Id="131" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.calcJnt3Rotation">
@@ -687,6 +638,9 @@ wristIK:=true;
       <LineId Id="58" Count="0" />
       <LineId Id="57" Count="0" />
       <LineId Id="59" Count="1" />
+    </LineIds>
+    <LineIds Name="FB_StateCtrlMatching.IKSuccess.Get">
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.init">
       <LineId Id="67" Count="4" />

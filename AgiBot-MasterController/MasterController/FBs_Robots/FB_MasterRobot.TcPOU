@@ -61,6 +61,9 @@ VAR
 	// arm controller interface
 	m_armCtrl :ARRAY[1..g_mArmNum] OF I_MasterArmCtrl;
 	m_armCtrlCmds :ARRAY[1..g_mArmNum] OF ST_ArmCtrlCmds;
+	
+	// ultrasonic knife rotation clutch flag
+	m_USKnifeRotClutch :ARRAY[1..g_sArmNum] OF BOOL := [4(FALSE)];
 
 END_VAR
 ]]></Declaration>
@@ -361,6 +364,9 @@ updateShoulderPose();
 // check tele-operated slave arms index
 checkTeleSlaveArmIdx(i_masterInputDataPool);
 
+// check if to trig ultrasonic knife ratotation clutch
+USKnifeClutchCheck(i_masterInputDataPool);
+
 // update arm status
 FOR i:=1 TO g_mArmNum DO
 	// update dynamic data
@@ -627,6 +633,30 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
 ]]></ST>
       </Implementation>
     </Method>
+    <Method Name="USKnifeClutchCheck" Id="{99618810-c3d1-4d48-8924-a195c5080579}">
+      <Declaration><![CDATA[METHOD USKnifeClutchCheck : BOOL
+VAR_IN_OUT CONSTANT
+	i_masterInputDataPool:ST_MasterInputDataPool;
+END_VAR
+
+VAR
+	i:INT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[FOR i:=1 TO g_sArmNum DO
+	IF NOT(i_masterInputDataPool.m_slaveStatus.m_instruStauts[i].m_ready) THEN
+		m_USKnifeRotClutch[i] := FALSE;
+	END_IF
+END_FOR
+
+FOR i:=1 TO g_mArmNum DO
+	IF (i_masterInputDataPool.m_slaveStatus.m_instruStauts[m_teleSlaveArmIdx[i]].m_type = InstruType_UltrasoundKnifeS OR i_masterInputDataPool.m_slaveStatus.m_instruStauts[m_teleSlaveArmIdx[i]].m_type = InstruType_UltrasoundKnifeU)
+		AND  m_masterArmState[i] = MasterArmState_Clutch AND m_masterArms[i].handClutchSwitch THEN
+		m_USKnifeRotClutch[m_teleSlaveArmIdx[i]] := TRUE;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Method>
     <LineIds Name="FB_MasterRobot">
       <LineId Id="60" Count="0" />
       <LineId Id="9" Count="0" />
@@ -697,6 +727,9 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="111" Count="0" />
       <LineId Id="79" Count="0" />
       <LineId Id="112" Count="0" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="200" Count="0" />
+      <LineId Id="202" Count="0" />
       <LineId Id="171" Count="0" />
       <LineId Id="113" Count="0" />
       <LineId Id="173" Count="5" />
@@ -738,6 +771,18 @@ m_shoulderPoseInMonitor[2].m_rot:=m_shoulderPoseInMonitor[1].m_rot;
       <LineId Id="13" Count="0" />
       <LineId Id="17" Count="1" />
       <LineId Id="16" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_MasterRobot.USKnifeClutchCheck">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="14" Count="1" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="20" Count="1" />
+      <LineId Id="19" Count="0" />
     </LineIds>
   </POU>
 </TcPlcObject>

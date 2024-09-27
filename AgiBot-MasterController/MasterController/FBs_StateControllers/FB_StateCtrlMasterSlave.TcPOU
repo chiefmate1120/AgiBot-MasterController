@@ -92,8 +92,8 @@ VAR
 	invRot :Mat3d;
 	cmdRotInView:Mat3d;
 	rotT,rotErr :Mat3d;
-	errAngle:LREAL;
-	localAxis,errAxis:Vec3d;
+	angle:LREAL;
+	axis:Vec3d;
 	
 	oriJaco:Mat34;
 	oriJt:Mat43;
@@ -105,6 +105,7 @@ VAR
 	eye4d :Mat4d := g_eye4d;
 	redunCtrlVel :Vec4d;
 	jnt4TrackVel :LREAL;
+	cmdZAxis, curZAxis :Vec3d;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[m_jntOPMode[1] := DriverOPMode_Trq;
@@ -131,17 +132,16 @@ m_cmdJntPos[7]:=i_masterArm.curJntPos[7];
 m_cmdJntVel[7]:=i_masterArm.curJntVel[7];
 
 // compute cartesian tracking velocity
-matTranspose(i_masterArm.simCartPose.m_rot, rotT);
-matMultiply(rotT, m_cmdCartPose.m_rot, rotErr);
-rot2AngAxis(rotErr, angle=>errAngle,axis=>localAxis);
-localAxis[3] := 0;
-matMultiVec(i_masterArm.simCartPose.m_rot, localAxis, errAxis);
-IF ABS(errAngle)< m_trackAngThres THEN
-	errAngle := 0.0;
-ELSE
-	errAngle:= errAngle - sign(errAngle)*m_trackAngThres;
+FOR i:=1 TO 3 DO
+	cmdZAxis[i] :=  m_cmdCartPose.m_rot[i,3];
+	curZAxis[i] := i_masterArm.simCartPose.m_rot[i,3];
+END_FOR
+angle := ACOS(LIMIT(-1,vecDot(cmdZAxis,curZAxis),1));
+axis := cross(curZAxis, cmdZAxis);
+IF ABS(angle)> g_smallAng AND ABS(angle-pi)> g_smallAng THEN
+	normalize(axis);
 END_IF
-vecMultiNum(errAxis, LIMIT(-m_maxTrackVel, errAngle*m_rotTrackKp, m_maxTrackVel), cartTrackVel);
+vecMultiNum(axis, LIMIT(-m_maxTrackVel, angle*m_rotTrackKp, m_maxTrackVel), cartTrackVel);
 
 // compute pinv of orientation jacobian
 FOR i:=1 TO 3 DO
@@ -363,52 +363,7 @@ copyCmds(r_masterArmCtrlCmd);
       <LineId Id="111" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMasterSlave.calcCmdJntPos_USKnife">
-      <LineId Id="246" Count="5" />
-      <LineId Id="244" Count="1" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="217" Count="0" />
-      <LineId Id="220" Count="1" />
-      <LineId Id="215" Count="0" />
-      <LineId Id="114" Count="0" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="103" Count="1" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="253" Count="0" />
-      <LineId Id="252" Count="0" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="96" Count="0" />
-      <LineId Id="107" Count="0" />
-      <LineId Id="115" Count="1" />
-      <LineId Id="302" Count="0" />
-      <LineId Id="200" Count="0" />
-      <LineId Id="297" Count="1" />
-      <LineId Id="300" Count="1" />
-      <LineId Id="299" Count="0" />
-      <LineId Id="122" Count="0" />
-      <LineId Id="121" Count="0" />
-      <LineId Id="109" Count="0" />
-      <LineId Id="126" Count="1" />
-      <LineId Id="129" Count="1" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="136" Count="1" />
-      <LineId Id="140" Count="0" />
-      <LineId Id="142" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="145" Count="0" />
-      <LineId Id="150" Count="1" />
-      <LineId Id="153" Count="0" />
-      <LineId Id="144" Count="0" />
-      <LineId Id="146" Count="0" />
-      <LineId Id="156" Count="3" />
-      <LineId Id="161" Count="0" />
-      <LineId Id="160" Count="0" />
-      <LineId Id="162" Count="0" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="165" Count="0" />
-      <LineId Id="164" Count="0" />
+      <LineId Id="382" Count="62" />
       <LineId Id="131" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMasterSlave.calcCmdJntTrq">
