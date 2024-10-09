@@ -15,7 +15,7 @@ VAR
 	// redundant control parameters
 	m_jnt4AdjustKp : LREAL :=10;
 	m_jnt4MaxVel :LREAL :=pi/3 ;
-	m_linearVelLb :LREAL := 0.02;
+	m_linearVelLb :LREAL := 0.01;
 	m_linearVelUb :LREAL :=0.1;	
 	
 	m_initJntPos :Vec7d;

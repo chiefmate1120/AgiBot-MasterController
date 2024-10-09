@@ -27,6 +27,8 @@ VAR
 	m_maxTrackVel :LREAL := PI;
 	m_jnt4AdjustKp : LREAL :=10;
 	m_jnt4MaxVel :LREAL :=pi/3 ;
+	m_linearVelLb :LREAL := 0.01;
+	m_linearVelUb :LREAL :=0.1;	
 	m_cartTrackVel :Vec3d;
 	
 	// master pose in monitor
@@ -221,6 +223,8 @@ END_VAR
 
 VAR 
 	j6Bias,j5Bias :LREAL;
+	velScale :LREAL;
+	linearVel :Vec3d;
 	curJntPos : Vec7d;
 	jnt4LinkPos :LREAL;
 END_VAR
@@ -235,9 +239,18 @@ ELSE
 	j6Bias := curJntPos[6]-PI/2;
 END_IF
 
+// scale based on joint5 position
 j5Bias :=  LIMIT (0, ABS(curJntPos[5] -pi), pi/2);
 j6Bias := j6Bias * ABS(COS(j5Bias));
-calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp ,m_jnt4MaxVel);
+
+// scale based on linear velocity
+linearVel[1]:=i_masterArm.curCartTwist[1];
+linearVel[2]:=i_masterArm.curCartTwist[2];
+linearVel[3]:=i_masterArm.curCartTwist[3];
+velScale :=LIMIT(0, (norm(linearVel)-m_linearVelLb)/(m_linearVelUb-m_linearVelLb),1.0);
+
+
+calcRedunVel := LIMIT(-m_jnt4MaxVel, -j6Bias * m_jnt4AdjustKp * velScale ,m_jnt4MaxVel);
 
 // joint limit
 IF (calcRedunVel > 0 AND jnt4LinkPos+calcRedunVel * g_armCtrlCycleTime > GVL_ArmJointParameters.g_maxJntPos[i_masterArm.armIdx,4])
@@ -468,12 +481,8 @@ m_wheelRadius :=norm(tipDis)/2.0;
       <LineId Id="13" Count="0" />
     </LineIds>
     <LineIds Name="FB_EndoscopeController.calcRedunVel">
-      <LineId Id="77" Count="1" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="79" Count="8" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="97" Count="0" />
-      <LineId Id="99" Count="3" />
+      <LineId Id="124" Count="25" />
+      <LineId Id="102" Count="0" />
     </LineIds>
     <LineIds Name="FB_EndoscopeController.init">
       <LineId Id="49" Count="0" />

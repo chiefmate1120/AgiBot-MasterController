@@ -85,6 +85,11 @@ matTranspose(i_shoulderPose.m_rot, invRot);
 matMultiply(invRot, m_cmdRotInMonitor, m_cmdCartPose.m_rot);
 m_cmdCartPose.m_pos:= i_masterArm.curCartPose.m_pos;
 
+// calculate current orientation error
+matTranspose(i_masterArm.curCartPose.m_rot, invRot);
+matMultiply(invRot, m_cmdCartPose.m_rot, rotErr);
+rot2AngAxis(rotErr, angle=>m_rotErrAng,axis=>);
+
 // try IK with optimized posture
 rot:=calcJnt3Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3]);
 matTranspose(rot, invRot);
@@ -115,11 +120,19 @@ IF NOT m_IKSuccess THEN
 	m_IKSuccess := wristIK(wristRotInJnt4,i_masterArm, q5=>q5, q6=>q6, q7=>q7);
 END_IF
 
-// try to minimize joint4 move angle based on current posture
+// minimize joint4 move angle
 IF m_IKSuccess THEN
+	
+	// minimize based on join5 posture
 	jnt4MoveRange :=  i_masterArm.jnt4LinkToMotor(m_targetJntPos[2],m_targetJntPos[3],q4)-i_masterArm.curJntPos[4];
 	jnt5Bias :=  LIMIT (0, ABS(q5-pi), pi/2);
 	jnt4MoveRange := jnt4MoveRange * ABS(COS(jnt5Bias));
+	
+	// minimize based on cartesian error
+	IF ABS(m_rotErrAng)< 5.0 * g_deg2Rad THEN
+		jnt4MoveRange := 0.0;
+	END_IF
+	
 	mq4:=  i_masterArm.jnt4MotorToLink(m_targetJntPos[2],m_targetJntPos[3],i_masterArm.curJntPos[4] + jnt4MoveRange) ;
 	
 	rot:=calcJnt4Rotation(m_cmdJntPos[1],m_cmdJntPos[2],m_cmdJntPos[3],mq4);
@@ -282,6 +295,7 @@ m_jntOPMode[6]:=DriverOPMode_PosTrq;
 m_jntOPMode[7]:=DriverOPMode_PosTrq;
 *)
 m_IKSuccess:=FALSE;
+m_targetJntPos:=m_cmdJntPos;
 
 // update commands to arm
 copyCmds(r_masterArmCtrlCmd);
@@ -610,7 +624,16 @@ wristIK:=true;
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.calcCmdJntPos">
-      <LineId Id="545" Count="94" />
+      <LineId Id="545" Count="25" />
+      <LineId Id="669" Count="0" />
+      <LineId Id="666" Count="2" />
+      <LineId Id="665" Count="0" />
+      <LineId Id="571" Count="32" />
+      <LineId Id="670" Count="1" />
+      <LineId Id="604" Count="2" />
+      <LineId Id="672" Count="4" />
+      <LineId Id="679" Count="0" />
+      <LineId Id="607" Count="32" />
       <LineId Id="131" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.calcJnt3Rotation">
@@ -643,14 +666,7 @@ wristIK:=true;
       <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.init">
-      <LineId Id="67" Count="4" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="90" Count="0" />
-      <LineId Id="92" Count="2" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="80" Count="0" />
-      <LineId Id="104" Count="1" />
-      <LineId Id="103" Count="0" />
+      <LineId Id="114" Count="15" />
       <LineId Id="12" Count="0" />
     </LineIds>
     <LineIds Name="FB_StateCtrlMatching.leftWristOptIK">
