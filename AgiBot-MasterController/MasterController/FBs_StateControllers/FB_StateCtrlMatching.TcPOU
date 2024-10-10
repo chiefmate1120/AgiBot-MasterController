@@ -288,12 +288,12 @@ m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
 
 // init
 SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
-(*
+
 m_jntOPMode[4]:=DriverOPMode_PosTrq;
 m_jntOPMode[5]:=DriverOPMode_PosTrq;
 m_jntOPMode[6]:=DriverOPMode_PosTrq;
 m_jntOPMode[7]:=DriverOPMode_PosTrq;
-*)
+
 m_IKSuccess:=FALSE;
 m_targetJntPos:=m_cmdJntPos;
 

@@ -29,6 +29,11 @@ m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
 
 // init
 SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
+
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;
 ]]></ST>
       </Implementation>
     </Method>
@@ -37,6 +42,8 @@ SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
     </LineIds>
     <LineIds Name="FB_StateCtrlStandBy.init">
       <LineId Id="67" Count="4" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="80" Count="0" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>

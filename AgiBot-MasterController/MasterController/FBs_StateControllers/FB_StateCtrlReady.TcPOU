@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_StateCtrlReady" Id="{b4863c0c-c549-4967-ab29-6a1152ef3cd8}" SpecialFunc="None">
     <Declaration><![CDATA[// Brief: Master Arm Ready for Master Slave Control
 FUNCTION_BLOCK PUBLIC FB_StateCtrlReady EXTENDS FB_MasterArmCtrlBase
@@ -36,7 +36,11 @@ m_holdLastCmds := checkToHoldLastCmds(i_masterArm);
 
 // init
 SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
-]]></ST>
+
+m_jntOPMode[4] := DriverOPMode_PosTrq;
+m_jntOPMode[5] := DriverOPMode_PosTrq;
+m_jntOPMode[6] := DriverOPMode_PosTrq;
+m_jntOPMode[7] := DriverOPMode_PosTrq;]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_StateCtrlReady">
@@ -46,6 +50,7 @@ SUPER^.Init(i_masterArm,r_masterArmCtrlCmd);
       <LineId Id="72" Count="1" />
       <LineId Id="93" Count="0" />
       <LineId Id="75" Count="1" />
+      <LineId Id="107" Count="3" />
       <LineId Id="12" Count="0" />
     </LineIds>
   </POU>
