@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.11">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.12">
   <POU Name="FB_MasterCart" Id="{05baaa0e-c853-48bc-a37c-d593cfa5bf2b}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK FB_MasterCart
 VAR
@@ -117,9 +117,9 @@ IF m_eleCtrlState = 1 THEN
 	ELSIF (m_electricCoagulLeftOn AND m_energyType[1] = InstruType_isBipolar) OR (m_electricCoagulRightOn AND  m_energyType[2] = InstruType_isBipolar) THEN
 		eleKnifeCtrl := EnergyCtrlWord_isBipolarCoagul;
 	ELSIF (m_electricCutLeftOn AND m_energyType[1] = InstruType_isUltraKnife) OR (m_electricCutRightOn AND  m_energyType[2] = InstruType_isUltraKnife) THEN
-		eleKnifeCtrl := EnergyCtrlWord_isUltraMax;
-	ELSIF (m_electricCoagulLeftOn AND m_energyType[1] = InstruType_isUltraKnife) OR (m_electricCoagulRightOn AND  m_energyType[2] = InstruType_isUltraKnife) THEN
 		eleKnifeCtrl := EnergyCtrlWord_isUltraMin;
+	ELSIF (m_electricCoagulLeftOn AND m_energyType[1] = InstruType_isUltraKnife) OR (m_electricCoagulRightOn AND  m_energyType[2] = InstruType_isUltraKnife) THEN
+		eleKnifeCtrl := EnergyCtrlWord_isUltraMax;
 		
 	ELSE
 		eleKnifeCtrl := EnergyCtrlWord_NoOutput;

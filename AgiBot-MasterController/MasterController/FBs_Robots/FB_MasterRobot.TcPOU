@@ -336,7 +336,9 @@ END_VAR]]></Declaration>
 	END_IF
 	
 	IF  MatchedSlaveArmIdx_NULL =  m_teleSlaveArmIdx[i] OR   NOT(i_masterInputDataPool.m_cartStatus.m_surgonReady) 
-		OR 	NOT(i_masterInputDataPool.m_slaveStatus.m_instruStauts[m_teleSlaveArmIdx[i]].m_ready) THEN
+		OR 	NOT(i_masterInputDataPool.m_slaveStatus.m_instruStauts[m_teleSlaveArmIdx[i]].m_ready) 
+		OR m_masterArmState[i] = MasterArmState_Error
+		OR  SlaveArmState_Error = m_instruArmState[i] OR SlaveArmState_Disable = m_instruArmState[i]  THEN
 		m_MSCtrlTriggerFlag[i]:=FALSE;
 		m_MSCtrlTriggerCheck[i].reset();
 	END_IF  
@@ -711,7 +713,10 @@ END_FOR]]></ST>
       <LineId Id="8" Count="0" />
       <LineId Id="28" Count="0" />
       <LineId Id="10" Count="3" />
-      <LineId Id="18" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="19" Count="1" />
       <LineId Id="17" Count="0" />
       <LineId Id="9" Count="0" />
     </LineIds>
