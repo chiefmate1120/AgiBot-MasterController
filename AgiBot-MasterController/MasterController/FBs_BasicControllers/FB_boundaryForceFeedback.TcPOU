@@ -13,8 +13,13 @@ VAR
 //	m_oriKd :Vec3d :=[0.04,0.04, 0.01];
 	m_oriKp :Vec3d :=[0.2, 0.2, 0.1];
 	m_oriKd :Vec3d :=[0.02,0.02, 0.005];
-	
+
 	m_oriCartTrq,m_oriCartTrqLocal :Vec3d;
+	
+	m_posKp :LREAL := 200;
+	m_posKd :LREAL := 10;
+	m_posCartForce:Vec3d;
+	
 	
 END_VAR
 ]]></Declaration>
@@ -39,10 +44,14 @@ VAR
 	oriErrAxis, wVelProj :Vec3d;
 	rotInv :Mat3d;
 	oriJaco, oriJacoT :Mat3d;
-	errAngle :LREAL;
 	oriJntTrq :Vec3d;
 	
 	i,j:INT;
+	posErrAxis, velProj :Vec3d;
+	posJaco, posJacoT :Mat3d;
+	posJntTrq :Vec3d;
+	
+	trqScale :LREAL;
 END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[run:=g_zeroVec7d;
@@ -58,53 +67,118 @@ END_FOR
 matTranspose(i_shoulderPose.m_rot, rotInv);
 matMultiVec(rotInv, posErrInScope, posErr);
 matMultiVec(rotInv, oriErrInScope, oriErr);
-
+// ################### 	force  #########################
 // add threshold
-errAngle := norm(oriErr);
-IF errAngle < g_smallNum THEN
-	RETURN;
+IF norm(posErr) > g_smallNum THEN
+	// project error in tip coordinate
+	matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+	matMultiVec(rotInv, posErr, posErrLocal);
+	matMultiVec(rotInv, oriErr, oriErrLocal);
+	matMultiVec(rotInv, vel, velLocal);
+	matMultiVec(rotInv, wVel, wVelLocal);
+	
+	// compute velocity in error direction
+	posErrAxis := posErr;
+	normalize(posErrAxis);
+	vecMultiNum(posErrAxis, vecDot(vel, posErrAxis), velProj);
+	
+	// compute local cartesion torque
+	FOR i:=1 TO 3 DO
+		m_posCartForce[i]:= m_posKp * posErr[i]-m_posKd*velProj[i];
+	END_FOR
+	
+	// compute joint space torque
+	FOR i :=1 TO  3 DO
+		FOR j:=1 TO 3 DO
+			posJaco[i,j]:= i_masterArm.jaco[i,j];
+		END_FOR
+	END_FOR
+	matTranspose(posJaco, posJacoT);
+	matMultiVec(posJacoT, m_posCartForce, posJntTrq);
+	
+	// scale joint troque
+	trqScale := 1;
+	FOR i:=1 TO 3 DO 
+		trqScale:=MAX(trqScale, ABS(posJntTrq[i]/GVL_ArmJointParameters.g_jntMaxTrq[i]));
+	END_FOR
+	
+	run[1]:=posJntTrq[1]/trqScale;
+	run[2]:=posJntTrq[2]/trqScale;
+	run[3]:=posJntTrq[3]/trqScale;
 END_IF
 
-// project error in tip coordinate
-matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
-matMultiVec(rotInv, posErr, posErrLocal);
-matMultiVec(rotInv, oriErr, oriErrLocal);
-matMultiVec(rotInv, vel, velLocal);
-matMultiVec(rotInv, wVel, wVelLocal);
 
-// compute velocity in error direction
-oriErrAxis := oriErrLocal;
-normalize(oriErrAxis);
-vecMultiNum(oriErrAxis, vecDot(wVelLocal, oriErrLocal), wVelProj);
-
-// compute local cartesion torque
-FOR i:=1 TO 3 DO
-	m_oriCartTrqLocal[i]:= m_oriKp[i] * oriErrLocal[i]-m_oriKd[i]*wVelProj[i];
-END_FOR
-
-// project torque back to shoulder coordinate
-matMultiVec(i_masterArm.curCartPose.m_rot, m_oriCartTrqLocal, m_oriCartTrq);
-
-// compute joint space torque
-// for simplicity, we current only use last 3 joint for torque feedback
-FOR i :=1 TO  3 DO
-	FOR j:=1 TO 3 DO
-		oriJaco[i,j]:= i_masterArm.jaco[i+3,j+4];
+// ###################  torque #########################
+// add threshold
+IF norm(oriErr) > g_smallNum THEN
+	// project error in tip coordinate
+	matTranspose(i_masterArm.curCartPose.m_rot, rotInv);
+	matMultiVec(rotInv, posErr, posErrLocal);
+	matMultiVec(rotInv, oriErr, oriErrLocal);
+	matMultiVec(rotInv, vel, velLocal);
+	matMultiVec(rotInv, wVel, wVelLocal);
+	
+	// compute velocity in error direction
+	oriErrAxis := oriErrLocal;
+	normalize(oriErrAxis);
+	vecMultiNum(oriErrAxis, vecDot(wVelLocal, oriErrAxis), wVelProj);
+	
+	// compute local cartesion torque
+	FOR i:=1 TO 3 DO
+		m_oriCartTrqLocal[i]:= m_oriKp[i] * oriErrLocal[i]-m_oriKd[i]*wVelProj[i];
 	END_FOR
-END_FOR
-matTranspose(oriJaco, oriJacoT);
-matMultiVec(oriJacoT, m_oriCartTrq, oriJntTrq);
-
-run[5]:=oriJntTrq[1];
-run[6]:=oriJntTrq[2];
-run[7]:=oriJntTrq[3];]]></ST>
+	
+	// project torque back to shoulder coordinate
+	matMultiVec(i_masterArm.curCartPose.m_rot, m_oriCartTrqLocal, m_oriCartTrq);
+	
+	// compute joint space torque
+	// for simplicity, we current only use last 3 joint for torque feedback
+	FOR i :=1 TO  3 DO
+		FOR j:=1 TO 3 DO
+			oriJaco[i,j]:= i_masterArm.jaco[i+3,j+4];
+		END_FOR
+	END_FOR
+	matTranspose(oriJaco, oriJacoT);
+	matMultiVec(oriJacoT, m_oriCartTrq, oriJntTrq);
+	
+	// scale joint troque
+	trqScale := 1;
+	FOR i:=1 TO 3 DO 
+		trqScale:=MAX(trqScale, ABS(oriJntTrq[i]/GVL_ArmJointParameters.g_jntMaxTrq[i+4]));
+	END_FOR
+	
+	run[5]:=oriJntTrq[1]/trqScale;
+	run[6]:=oriJntTrq[2]/trqScale;
+	run[7]:=oriJntTrq[3]/trqScale;
+END_IF
+]]></ST>
       </Implementation>
     </Method>
     <LineIds Name="FB_boundaryForceFeedback">
       <LineId Id="9" Count="0" />
     </LineIds>
     <LineIds Name="FB_boundaryForceFeedback.run">
-      <LineId Id="156" Count="51" />
+      <LineId Id="156" Count="12" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="302" Count="16" />
+      <LineId Id="322" Count="0" />
+      <LineId Id="324" Count="6" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="339" Count="3" />
+      <LineId Id="338" Count="0" />
+      <LineId Id="331" Count="2" />
+      <LineId Id="234" Count="2" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="169" Count="1" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="270" Count="28" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="347" Count="3" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="299" Count="2" />
+      <LineId Id="173" Count="1" />
       <LineId Id="71" Count="0" />
     </LineIds>
   </POU>
